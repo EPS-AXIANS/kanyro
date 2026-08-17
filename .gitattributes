@@ -1,0 +1,21 @@
+# Normalisation des fins de ligne.
+#
+# Le développement se fait sous Windows (CRLF), le site est servi par un Apache
+# sous Linux. Un .htaccess enregistré en CRLF fait échouer certaines directives
+# sur des configurations Apache anciennes — d'où le forçage en LF pour tout ce
+# qui est interprété côté serveur.
+
+* text=auto eol=lf
+
+.htaccess   text eol=lf
+*.php       text eol=lf
+*.sh        text eol=lf
+
+# Binaires : jamais de conversion.
+*.png       binary
+*.jpg       binary
+*.webp      binary
+*.avif      binary
+*.woff      binary
+*.woff2     binary
+*.mp4       binary
