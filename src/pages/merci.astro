@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  titre="Demande envoyée"
+  description="Votre demande de devis est bien arrivée."
+  noindex={true}
+>
+  <section class="contenu flex min-h-[80vh] flex-col justify-center py-24 text-center">
+    <p class="surtitre">C'est envoyé</p>
+    <h1 class="titre-page mx-auto mt-6 max-w-3xl">
+      Merci, j'ai bien reçu votre demande
+    </h1>
+    <p
+      class="font-inter mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux"
+    >
+      Je vous réponds sous 48 heures, en soirée ou le samedi. Si c'est urgent,
+      répondez directement à l'email que vous allez recevoir.
+    </p>
+
+    <div class="mt-11 flex flex-wrap justify-center gap-4">
+      <a href="/" class="bouton-primaire">Retour à l'accueil</a>
+      <a href="/#offre" class="bouton-secondaire">Revoir l'offre</a>
+    </div>
+  </section>
+</Base>

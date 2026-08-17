@@ -1,0 +1,39 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# En-têtes HTTP réels. La balise <meta> CSP du layout reste en filet si le site
+# est un jour servi par un autre hébergeur, mais c'est bien cet en-tête qui fait
+# foi ici : il couvre aussi les réponses non-HTML.
+#
+# ⚠ Les hôtes tiers ci-dessous (fontes, images, vidéo) sont la contrepartie des
+# médias provisoires repris du template. Une fois les assets rapatriés dans
+# public/, retirer ces hôtes ici ET vider HOTES_MEDIAS dans src/config/medias.js.
+# Cette politique doit rester le miroir de celle générée dans Base.astro.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://images.higgs.ai https://soft-zoom-63098134.figma.site; media-src 'self' https://d8j0ntlcm91z4.cloudfront.net; style-src 'self' https://fonts.googleapis.com https://db.onlinewebfonts.com; font-src 'self' https://fonts.gstatic.com https://db.onlinewebfonts.com; script-src 'self'; connect-src 'self'; upgrade-insecure-requests"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# Les assets Astro portent un hash dans leur nom : ils peuvent être mis en cache
+# indéfiniment sans risque de servir une version périmée.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Le nom du site sera vraisemblablement mal orthographié à l'oral (« Kaniro »).
+# Si kaniro.fr est réservé en défensif, le rediriger ici plutôt que d'en faire un
+# second site à maintenir.
+# [[redirects]]
+#   from = "https://kaniro.fr/*"
+#   to = "https://www.kanyro.fr/:splat"
+#   status = 301
+#   force = true

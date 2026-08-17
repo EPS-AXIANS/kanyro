@@ -1,0 +1,233 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config/site.js';
+import { filAriane } from '../config/schema.js';
+import metiers from '../data/metiers.json';
+
+const jsonLd = filAriane([
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Contact', chemin: '/contact' },
+]);
+
+const champClasses =
+  'font-inter mt-2 w-full rounded-xl border border-trait bg-surface px-4 py-3.5 text-sm text-texte placeholder:text-texte-faible transition-colors focus:border-white/40';
+const labelClasses =
+  'font-inter text-[10px] font-medium tracking-[0.2em] text-texte-faible uppercase';
+---
+
+<Base
+  titre="Demander un devis"
+  description="Décrivez votre activité en quelques lignes. Réponse sous 48 h, avec un avis honnête sur ce qu'un site peut vous apporter."
+  jsonLd={jsonLd}
+>
+  <section class="contenu sous-navbar grid gap-16 pb-24 lg:grid-cols-[1.25fr_1fr]">
+    <div>
+      <p class="surtitre reveal">Contact</p>
+      <h1 class="titre-page reveal mt-6 [animation-delay:80ms]">
+        Parlons de votre activité
+      </h1>
+      <p
+        class="font-inter reveal mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      >
+        Quelques lignes suffisent. Je réponds sous 48 heures, et je vous dis
+        franchement si un site vous rapportera quelque chose.
+      </p>
+
+      <!--
+        POST natif vers public/contact.php — aucun JavaScript nécessaire.
+
+        Netlify Forms a été abandonné : la détection s'y fait au déploiement chez
+        Netlify, donc sur un hébergement mutualisé OVH le formulaire postait dans
+        le vide et aucune demande n'était enregistrée.
+
+        `bot-field` reste le pot de miel : masqué en CSS, un humain ne le voit
+        pas, un robot le remplit et l'envoi est ignoré côté serveur.
+      -->
+      <form
+        name="devis"
+        method="POST"
+        action="/contact.php"
+        class="reveal mt-12 max-w-xl [animation-delay:240ms]"
+      >
+        {/*
+          Affiché par effets.js quand l'URL porte ?erreur=1, c'est-à-dire quand
+          contact.php n'a pas pu envoyer le message. Sans ça, un échec serait
+          totalement silencieux : le visiteur croirait sa demande partie.
+        */}
+        <p
+          id="erreur-envoi"
+          hidden
+          role="alert"
+          class="font-inter mb-8 rounded-xl border border-signal bg-brique p-5 text-sm leading-relaxed"
+        >
+          Votre message n'est pas parti — le problème vient de mon côté, pas du
+          vôtre. Écrivez-moi directement à{' '}
+          <a class="text-signal-vif underline" href={`mailto:${SITE.contact.email}`}>
+            {SITE.contact.email}
+          </a>, je vous réponds aussi vite.
+        </p>
+
+        <p class="hidden">
+          <label>
+            Ne remplissez pas ce champ : <input name="bot-field" tabindex="-1" />
+          </label>
+        </p>
+
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div>
+            <label class={labelClasses} for="nom">Votre nom</label>
+            <input id="nom" name="nom" type="text" required class={champClasses} />
+          </div>
+
+          <div>
+            <label class={labelClasses} for="entreprise">Votre entreprise</label>
+            <input id="entreprise" name="entreprise" type="text" class={champClasses} />
+          </div>
+
+          <div>
+            <label class={labelClasses} for="email">Votre email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autocomplete="email"
+              class={champClasses}
+            />
+          </div>
+
+          <div>
+            <label class={labelClasses} for="telephone">Votre téléphone</label>
+            <input
+              id="telephone"
+              name="telephone"
+              type="tel"
+              autocomplete="tel"
+              class={champClasses}
+            />
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <label class={labelClasses} for="metier">Votre métier</label>
+          <select id="metier" name="metier" class={champClasses}>
+            <option value="">Choisir…</option>
+            {metiers.map((m) => <option value={m.slug}>{m.nom}</option>)}
+            <option value="autre">Autre métier du bâtiment</option>
+          </select>
+        </div>
+
+        {/* Pour ceux qui n'iront pas sur le calendrier — la majorité, sur cette
+            cible. Évite au moins un aller-retour de mails. */}
+        <div class="mt-6">
+          <label class={labelClasses} for="disponibilite">Quand vous joindre</label>
+          <select id="disponibilite" name="disponibilite" class={champClasses}>
+            <option value="">Peu importe, appelez quand vous pouvez</option>
+            <option value="samedi-matin">Samedi matin</option>
+            <option value="samedi-apres-midi">Samedi après-midi</option>
+            <option value="soir-semaine">En soirée, en semaine</option>
+            <option value="chantier">Passez me voir sur le chantier</option>
+          </select>
+        </div>
+
+        <div class="mt-6">
+          <label class={labelClasses} for="message">Où en êtes-vous aujourd'hui ?</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            required
+            placeholder="Pas de site, un vieux site, des clients qui viennent surtout du bouche-à-oreille…"
+            class={champClasses}></textarea>
+        </div>
+
+        <div class="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <button type="submit" class="bouton-primaire w-full sm:w-auto">
+            Envoyer ma demande
+          </button>
+
+          {
+            /* Chemin secondaire, hors du <form> logiquement mais placé à côté du
+               bouton parce que c'est là qu'on hésite. Lien sortant : aucun
+               script tiers, aucun cookie, CSP inchangée. */
+            SITE.rendezVous.url && (
+              <a
+                href={SITE.rendezVous.url}
+                target="_blank"
+                rel="noopener"
+                class="bouton-secondaire w-full text-center sm:w-auto"
+              >
+                {SITE.rendezVous.libelle}
+              </a>
+            )
+          }
+        </div>
+
+        {
+          SITE.rendezVous.url && (
+            <p class="font-inter mt-4 text-xs text-texte-faible">
+              Le calendrier n'affiche que des créneaux réellement ouverts —{' '}
+              {SITE.rendezVous.duree}, par téléphone ou sur votre chantier.
+            </p>
+          )
+        }
+
+        <p class="font-inter mt-5 text-xs text-texte-faible">
+          Vos coordonnées servent uniquement à vous répondre. Elles ne sont ni
+          revendues, ni utilisées pour de la prospection.
+        </p>
+      </form>
+    </div>
+
+    <aside class="reveal lg:pt-32">
+      <div class="carte bg-brique p-8">
+        <h2 class="font-arsenica text-2xl tracking-wide">Écrire directement</h2>
+        <p class="mt-4">
+          <a
+            href={`mailto:${SITE.contact.email}`}
+            class="font-inter text-sm break-all text-signal-vif hover:text-texte"
+          >
+            {SITE.contact.email}
+          </a>
+        </p>
+
+        {
+          SITE.contact.telephoneAffiche && (
+            <p class="mt-4">
+              <a
+                href={`tel:${SITE.contact.telephone}`}
+                class="font-inter text-sm text-signal-vif hover:text-texte"
+              >
+                {SITE.contact.telephoneAffiche}
+              </a>
+            </p>
+          )
+        }
+
+        <hr class="my-8 border-white/15" />
+
+        <h2 class="font-arsenica text-2xl tracking-wide">Quand je suis joignable</h2>
+        <p class="font-inter mt-4 text-xs leading-relaxed text-white/60">
+          Le samedi matin, à coup sûr. Et certains soirs en semaine, mais pas tous :
+          je suis en alternance, donc je termine à 16 h une semaine et à 22 h la
+          suivante.
+        </p>
+        <p class="font-inter mt-3 text-xs leading-relaxed text-white/60">
+          {
+            SITE.rendezVous.url
+              ? 'Plutôt que de vous faire deviner, le calendrier n’affiche que les créneaux réellement ouverts.'
+              : 'Dites-moi simplement quand vous joindre dans le formulaire, je m’adapte.'
+          }
+        </p>
+
+        <hr class="my-8 border-white/15" />
+
+        <h2 class="font-arsenica text-2xl tracking-wide">Le secteur</h2>
+        <p class="font-inter mt-4 text-xs leading-relaxed text-white/60">
+          L'Arrageois, le bassin minier et la métropole lilloise. Je me déplace sur
+          vos chantiers — c'est là que se prennent les photos qui font signer.
+        </p>
+      </div>
+    </aside>
+  </section>
+</Base>

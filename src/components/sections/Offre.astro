@@ -1,0 +1,169 @@
+---
+import { offre, tarifReference } from '../../data/offres.js';
+import metiers from '../../data/metiers.json';
+import communes from '../../data/communes.json';
+
+const delais = [
+  '[animation-delay:80ms]',
+  '[animation-delay:160ms]',
+  '[animation-delay:240ms]',
+  '[animation-delay:320ms]',
+];
+
+/*
+ * Communes regroupées par secteur, dans l'ordre du fichier de données —
+ * Arrageois, bassin minier, métropole lilloise. L'ordre compte : il annonce la
+ * priorité commerciale, du plus accessible au plus concurrentiel.
+ */
+const secteurs = [
+  ...communes.reduce((acc, c) => {
+    acc.set(c.secteur, [...(acc.get(c.secteur) ?? []), c]);
+    return acc;
+  }, new Map()),
+];
+---
+
+<section id="offre" class="bg-brique px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
+  <div class="mx-auto max-w-5xl">
+    <p class="surtitre reveal text-center text-white/40">L'offre</p>
+    <h2
+      class="font-arsenica reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+    >
+      {offre.nom}
+    </h2>
+    <p
+      class="font-inter reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-white/70 [animation-delay:120ms] sm:text-base"
+    >
+      {offre.promesse}
+    </p>
+
+    {/* Prix et délai côte à côte : ce sont les deux questions posées en premier. */}
+    <div class="reveal mt-12 flex flex-col items-center gap-8 sm:flex-row sm:justify-center sm:gap-16">
+      <div class="text-center">
+        <p class="font-inter text-[10px] tracking-[0.25em] text-white/40 uppercase">
+          Le prix
+        </p>
+        <p class="font-inter mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {offre.prix}
+        </p>
+        <p class="font-inter mt-2 text-xs text-white/50">{offre.mention}</p>
+      </div>
+
+      <div class="hidden h-16 w-px bg-white/15 sm:block" aria-hidden="true"></div>
+
+      <div class="text-center">
+        <p class="font-inter text-[10px] tracking-[0.25em] text-white/40 uppercase">
+          Le délai
+        </p>
+        <p class="font-inter mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {offre.delai}
+        </p>
+        <p class="font-inter mt-2 text-xs text-white/50">annoncé, et tenu</p>
+      </div>
+    </div>
+
+    <ul class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2">
+      {
+        offre.contenu.map((bloc, i) => (
+          <li class:list={['reveal bg-brique p-8', delais[i]]}>
+            <h3 class="font-arsenica text-2xl tracking-wide">{bloc.titre}</h3>
+            <p class="font-inter mt-3 text-xs leading-relaxed text-white/60">
+              {bloc.detail}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="mt-16 grid gap-12 md:grid-cols-2">
+      <div>
+        <h3 class="font-arsenica reveal text-2xl tracking-wide">C'est pour vous si</h3>
+        <ul class="mt-5 space-y-3">
+          {
+            offre.pour.map((p) => (
+              <li class="font-inter reveal flex gap-3 text-sm text-white/70">
+                <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
+                <span>{p}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="font-arsenica reveal text-2xl tracking-wide">Ce que je ne fais pas</h3>
+        <ul class="mt-5 space-y-3">
+          {
+            offre.horsPerimetre.map((h) => (
+              <li class="font-inter reveal flex gap-3 text-sm text-white/50">
+                <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
+                <span>{h}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    {/* Les métiers et les communes en texte, sans lien : la cible se reconnaît
+        sans qu'on génère des pages qu'il est trop tôt pour tenir à jour.
+        Groupé par secteur — douze noms à la file ne se lisent pas. */}
+    <div class="reveal mt-16 text-center">
+      <p class="font-inter text-xs leading-relaxed text-white/45">
+        Pensé pour les {metiers.map((m) => m.nom.toLowerCase()).join(', ')}.
+      </p>
+
+      <dl class="mt-8 grid gap-6 sm:grid-cols-3">
+        {
+          secteurs.map(([secteur, villes]) => (
+            <div>
+              <dt class="font-inter text-[10px] tracking-[0.25em] text-white/40 uppercase">
+                {secteur}
+              </dt>
+              <dd class="font-inter mt-2 text-xs leading-relaxed text-white/60">
+                {villes.map((v) => v.nom).join(' · ')}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="reveal mt-12 text-center">
+      <a href="/contact" class="bouton-primaire">Demander un devis</a>
+    </div>
+  </div>
+</section>
+
+{
+  tarifReference.actif && (
+    <section id="preuve" class="px-4 py-24 sm:px-8 md:px-16 lg:px-28">
+      <div class="carte reveal mx-auto max-w-3xl p-10 text-center">
+        <p class="surtitre">La preuve, parlons-en</p>
+        <h2 class="font-arsenica mt-6 text-3xl tracking-wide sm:text-4xl">
+          Je démarre, et ça se voit
+        </h2>
+        <p class="font-inter mx-auto mt-6 max-w-xl text-sm leading-relaxed text-texte-doux">
+          Je n'ai pas encore de chantier livré à vous montrer. Plutôt que de
+          remplir cette page de maquettes présentées comme des clients, je préfère
+          le dire : vous seriez parmi les premiers.
+        </p>
+        <p class="font-inter mx-auto mt-4 max-w-xl text-sm leading-relaxed text-texte-doux">
+          Ça se paie dans le prix, pas dans la qualité du travail.
+        </p>
+
+        <p class="font-inter mt-8 text-[10px] tracking-[0.25em] text-texte-faible uppercase">
+          Tarif de lancement
+        </p>
+        <p class="font-inter mt-2 text-4xl font-semibold tracking-tight text-signal-vif">
+          {tarifReference.prix}
+        </p>
+        <p class="font-inter mx-auto mt-5 max-w-lg text-xs leading-relaxed text-texte-faible">
+          {tarifReference.contrepartie}
+        </p>
+
+        <a href="/contact" class="bouton-secondaire mt-9">En parler</a>
+      </div>
+    </section>
+  )
+}

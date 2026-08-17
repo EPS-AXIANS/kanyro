@@ -1,0 +1,307 @@
+@import 'tailwindcss';
+
+/*
+ * Direction visuelle : sombre, cinématographique, éditoriale.
+ *
+ * ⚠ FONTE ET MÉDIAS PROVISOIRES — voir la section « À remplacer avant la mise en
+ * ligne » du README. « Arsenica Trial » est une version d'essai non licenciée
+ * pour la production, servie par un redistributeur tiers.
+ */
+@theme {
+  /*
+   * Palette, nommée par rôle et non par teinte : `fond`, `surface`, `texte`.
+   * Le thème est passé du clair au sombre ; des noms comme « craie » ou
+   * « encre » auraient gardé un sens inversé, et un `bg-encre text-craie` sur
+   * une page déjà noire donne un bouton invisible. Le rôle survit au thème.
+   */
+  --color-fond: #080706;
+  --color-surface: #14110f;
+  --color-surface-haute: #1e1a17;
+  --color-texte: #ffffff;
+  --color-texte-doux: rgba(255, 255, 255, 0.62);
+  --color-texte-faible: rgba(255, 255, 255, 0.38);
+  --color-brique: #410c01;
+  --color-brique-haute: #4d1002;
+  --color-signal: #d94f04;
+  --color-signal-vif: #f26a1b;
+  --color-trait: rgba(255, 255, 255, 0.14);
+
+  /* Typographie */
+  --font-arsenica: 'Arsenica Trial Light', 'Times New Roman', serif;
+  --font-inter:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Échelle fluide */
+  --text-affiche: clamp(3rem, 1.2rem + 7.5vw, 7rem);
+  --text-titre: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
+  --text-sous-titre: clamp(1.25rem, 1rem + 1.1vw, 2.25rem);
+
+  --ease-rideau: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  --font-serif: 'Arsenica Trial Light', serif;
+  --font-sans: 'Inter', sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--color-fond);
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-texte);
+    line-height: 1.65;
+    text-wrap: pretty;
+    /* Aucune couleur de fond ici : chaque section fournit la sienne. */
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-texte);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-signal);
+    color: var(--color-texte);
+  }
+}
+
+@layer components {
+  .font-arsenica {
+    font-family: var(--font-serif);
+  }
+  .font-inter {
+    font-family: var(--font-sans);
+  }
+
+  .contenu {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .contenu {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* ---- Vocabulaire partagé ----
+     Les pages internes reprennent ces classes plutôt que de recopier des
+     chaînes utilitaires de 200 caractères. Un changement de registre se fait
+     ici, pas dans sept fichiers. */
+
+  .bouton-primaire {
+    display: inline-block;
+    border-radius: 50%;
+    background: var(--color-texte);
+    color: var(--color-fond);
+    padding: 1rem 2.5rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.5s var(--ease-rideau);
+  }
+  .bouton-primaire:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.18);
+  }
+  .bouton-primaire:active {
+    transform: scale(0.98);
+  }
+
+  .bouton-secondaire {
+    display: inline-block;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: var(--color-texte);
+    padding: 1rem 2.5rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.5s var(--ease-rideau);
+  }
+  .bouton-secondaire:hover {
+    transform: scale(1.03);
+    border-color: var(--color-texte);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  @media (min-width: 640px) {
+    .bouton-primaire,
+    .bouton-secondaire {
+      padding: 1.15rem 3rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  .titre-page {
+    font-family: var(--font-serif);
+    font-size: var(--text-titre);
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+  }
+
+  .surtitre {
+    font-family: var(--font-sans);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-texte-faible);
+  }
+
+  .carte {
+    border: 1px solid var(--color-trait);
+    border-radius: 1rem;
+    background: var(--color-surface);
+  }
+
+  /* Décale le contenu sous la barre de navigation flottante. */
+  .sous-navbar {
+    padding-top: 8rem;
+  }
+  @media (min-width: 640px) {
+    .sous-navbar {
+      padding-top: 10rem;
+    }
+  }
+
+  /* ---- Liquid glass ---- */
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.15) 20%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0.15) 80%,
+      rgba(255, 255, 255, 0.45) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* ---- Animations ---- */
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hero-fade-up {
+  animation: hero-fade-up 0.9s var(--ease-rideau) both;
+}
+
+.reveal.revealed {
+  animation: reveal-up 0.8s var(--ease-rideau) forwards;
+}
+
+.reveal-scale.revealed {
+  animation: reveal-scale 1s var(--ease-rideau) forwards;
+}
+
+/*
+ * Point important : `.reveal { opacity: 0 }` n'est appliqué QUE si le navigateur
+ * peut exécuter du script. Sans ce garde-fou, un visiteur sans JavaScript — ou un
+ * robot d'indexation qui n'exécute pas le script — verrait une page entièrement
+ * vide. Le contenu prime toujours sur l'effet.
+ */
+@media (scripting: enabled) {
+  .reveal,
+  .reveal-scale {
+    opacity: 0;
+  }
+}
+
+/* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal,
+  .reveal-scale,
+  .hero-fade-up {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

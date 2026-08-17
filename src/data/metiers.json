@@ -1,0 +1,118 @@
+[
+  {
+    "slug": "couvreur",
+    "nom": "Couvreur",
+    "pluriel": "couvreurs",
+    "article": "un",
+    "accroche": "La toiture, on ne la choisit pas sur un coup de tête.",
+    "contexte": "Une réfection de toiture se décide rarement en urgence, sauf après une tempête. Le particulier compare, demande trois devis, et regarde qui inspire confiance. C'est là que le site se joue : photos de chantiers finis, assurance décennale visible, avis clients.",
+    "prestations": [
+      "Galerie de chantiers avant / après, par type de couverture",
+      "Page dédiée aux interventions d'urgence après tempête",
+      "Formulaire de demande de devis avec photo du toit",
+      "Mise en avant de la décennale et des qualifications"
+    ],
+    "recherches": ["couvreur", "réfection toiture", "démoussage toiture", "urgence toiture"],
+    "panierMoyen": "8 000 à 25 000 €"
+  },
+  {
+    "slug": "macon",
+    "nom": "Maçon",
+    "pluriel": "maçons",
+    "article": "un",
+    "accroche": "Extension, muret, terrasse : le client cherche du concret.",
+    "contexte": "La maçonnerie couvre des chantiers très différents, du muret de clôture à l'extension complète. Le site doit trier lui-même : un visiteur qui cherche une extension ne doit pas atterrir sur une page de ravalement.",
+    "prestations": [
+      "Une page par type de chantier plutôt qu'une page fourre-tout",
+      "Chiffrage indicatif au m² pour filtrer les demandes",
+      "Galerie classée par nature de travaux",
+      "Zone d'intervention affichée clairement"
+    ],
+    "recherches": ["maçon", "extension maison", "muret clôture", "terrasse béton"],
+    "panierMoyen": "5 000 à 40 000 €"
+  },
+  {
+    "slug": "plombier-chauffagiste",
+    "nom": "Plombier-chauffagiste",
+    "pluriel": "plombiers-chauffagistes",
+    "article": "un",
+    "accroche": "Deux métiers, deux urgences, deux façons de chercher.",
+    "contexte": "La fuite se cherche à 22 h sur un téléphone, la pompe à chaleur se compare pendant trois semaines. Un seul site doit répondre aux deux, sans que l'un noie l'autre.",
+    "prestations": [
+      "Bloc dépannage visible dès la première seconde, numéro cliquable",
+      "Pages séparées pour la rénovation énergétique et le dépannage",
+      "Explication des aides (MaPrimeRénov', CEE) en langage clair",
+      "Mention RGE mise en avant — sans elle, pas d'aides pour le client"
+    ],
+    "recherches": [
+      "plombier urgence",
+      "installation pompe à chaleur",
+      "remplacement chaudière",
+      "dépannage fuite"
+    ],
+    "panierMoyen": "150 € (dépannage) à 15 000 € (PAC)"
+  },
+  {
+    "slug": "electricien",
+    "nom": "Électricien",
+    "pluriel": "électriciens",
+    "article": "un",
+    "accroche": "La mise aux normes se vend par la tranquillité, pas par le tableau.",
+    "contexte": "Rénovation électrique, borne de recharge, domotique : le client ne connaît pas le vocabulaire. Le site doit traduire le besoin ressenti — « mon installation est vieille » — en prestation nommée.",
+    "prestations": [
+      "Page mise aux normes NF C 15-100 expliquée simplement",
+      "Page borne de recharge véhicule électrique, en forte demande",
+      "Diagnostic gratuit en accroche de conversion",
+      "Qualifications Qualifelec / IRVE mises en avant"
+    ],
+    "recherches": [
+      "électricien",
+      "mise aux normes électrique",
+      "borne de recharge",
+      "rénovation électrique"
+    ],
+    "panierMoyen": "1 500 à 12 000 €"
+  },
+  {
+    "slug": "menuisier",
+    "nom": "Menuisier",
+    "pluriel": "menuisiers",
+    "article": "un",
+    "accroche": "Ici, ce sont les photos qui signent le devis.",
+    "contexte": "Menuiserie sur mesure ou pose de fenêtres : dans les deux cas, la décision est visuelle. Un site avec dix belles photos convertit mieux qu'un site avec trois pages de texte.",
+    "prestations": [
+      "Galerie soignée, photos en grand format, chargement optimisé",
+      "Séparation nette entre sur-mesure et pose de menuiseries standard",
+      "Page isolation et changement de fenêtres, aides comprises",
+      "Demande de devis avec dépôt de photos et de mesures"
+    ],
+    "recherches": [
+      "menuisier",
+      "menuiserie sur mesure",
+      "changement fenêtres",
+      "pose de véranda"
+    ],
+    "panierMoyen": "3 000 à 20 000 €"
+  },
+  {
+    "slug": "platrier-plaquiste",
+    "nom": "Plâtrier-plaquiste",
+    "pluriel": "plâtriers-plaquistes",
+    "article": "un",
+    "accroche": "Un métier qui vit d'abord de la recommandation — le site la prolonge.",
+    "contexte": "Le plaquiste travaille beaucoup en sous-traitance et par bouche-à-oreille. Le site sert autant à rassurer un particulier qu'à être trouvé par un maître d'œuvre qui cherche une équipe disponible.",
+    "prestations": [
+      "Page dédiée aux professionnels et à la sous-traitance",
+      "Mise en avant des délais et de la disponibilité d'équipe",
+      "Galerie combles aménagés et cloisons",
+      "Page isolation intérieure, avec le volet aides"
+    ],
+    "recherches": [
+      "plaquiste",
+      "aménagement combles",
+      "cloison placo",
+      "isolation intérieure"
+    ],
+    "panierMoyen": "2 000 à 18 000 €"
+  }
+]

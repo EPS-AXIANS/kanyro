@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  titre="Page introuvable"
+  description="Cette page n'existe pas ou a été déplacée."
+  noindex={true}
+>
+  <section class="contenu flex min-h-[80vh] flex-col justify-center py-24 text-center">
+    <p class="surtitre">Erreur 404</p>
+    <h1 class="titre-page mx-auto mt-6 max-w-3xl">Cette page n'existe pas</h1>
+    <p
+      class="font-inter mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux"
+    >
+      Le lien est peut-être ancien, ou l'adresse comporte une faute de frappe.
+    </p>
+
+    <div class="mt-11 flex flex-wrap justify-center gap-4">
+      <a href="/" class="bouton-primaire">Retour à l'accueil</a>
+      <a href="/contact" class="bouton-secondaire">Demander un devis</a>
+    </div>
+  </section>
+</Base>

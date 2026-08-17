@@ -1,0 +1,113 @@
+---
+import { MEDIAS } from '../../config/medias.js';
+
+/*
+ * Les questions sont celles qui reviennent réellement en rendez-vous. Les
+ * réponses assument les limites de l'agence — délai de quatre à six semaines,
+ * activité menée en parallèle d'une alternance, refus de garantir une position
+ * Google. Un prospect qui découvre ça après signature devient un litige.
+ */
+const colonneGauche = [
+  {
+    q: 'Pourquoi une fourchette de prix et pas un tarif fixe ?',
+    r: "Parce qu'un site de cinq pages avec vos photos existantes ne demande pas le même travail qu'un site où il faut tout écrire et venir photographier trois chantiers. Le devis, lui, est ferme : une fois signé, le prix ne bouge plus, quel que soit le temps que ça me prend.",
+  },
+  {
+    q: 'Combien de temps avant la mise en ligne ?',
+    r: "Quatre à six semaines. Je monte cette activité en parallèle d'une alternance, donc je travaille le soir et le week-end. D'autres annoncent quinze jours ; je préfère un délai que je tiens à une promesse que je rate.",
+  },
+  {
+    q: 'Le site m’appartient vraiment ?',
+    r: "Oui. Le nom de domaine et le contenu sont à votre nom dès le premier jour, pas au mien. Si on arrête de travailler ensemble, vous partez avec, sans négociation et sans frais de sortie.",
+  },
+];
+
+const colonneDroite = [
+  {
+    q: 'Vous garantissez la première place sur Google ?',
+    r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Je garantis un site techniquement propre, des pages qui visent les recherches que vos clients tapent vraiment, et un suivi chiffré de vos positions mois par mois.",
+  },
+  {
+    q: 'L’abonnement mensuel est obligatoire ?',
+    r: "Non. Sans lui, il faut prévoir l'hébergement de votre côté et le site n'évoluera plus. Beaucoup le prennent parce qu'ils ne veulent pas y penser, mais ça reste votre choix et il se résilie.",
+  },
+  {
+    q: 'Et si un site ne me sert à rien ?',
+    r: "Ça arrive. Si votre carnet est plein pour dix-huit mois et que vous refusez déjà du travail, je vous le dirai au premier rendez-vous plutôt que de vous vendre quelque chose. Je préfère un artisan qui revient dans deux ans à une facture que je n'aurais pas dû envoyer.",
+  },
+];
+
+/*
+ * Décalages en cascade, continus d'une colonne à l'autre pour que les six
+ * entrées ne montent pas par paires.
+ *
+ * Ce sont des littéraux et pas des chaînes construites : Tailwind analyse les
+ * fichiers source comme du texte, une classe assemblée à l'exécution ne serait
+ * jamais générée.
+ */
+const delais = [
+  '[animation-delay:120ms]',
+  '[animation-delay:240ms]',
+  '[animation-delay:360ms]',
+  '[animation-delay:480ms]',
+  '[animation-delay:600ms]',
+  '[animation-delay:720ms]',
+];
+---
+
+<section
+  id="questions"
+  class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[50vh] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
+>
+  <h2
+    class="reveal font-arsenica flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
+  >
+    <span>Q</span>
+    <span class="text-xl italic text-white/80 sm:text-2xl md:text-3xl lg:text-4xl">
+      &amp;
+    </span>
+    <span>R</span>
+  </h2>
+
+  <div class="relative z-20 mx-auto mt-16 grid max-w-6xl gap-10 md:grid-cols-2 md:gap-16 lg:gap-20">
+    <div class="space-y-10 lg:space-y-14">
+      {
+        colonneGauche.map((item, i) => (
+          <article class:list={['reveal', delais[i]]}>
+            <h3 class="font-arsenica text-xs tracking-wide uppercase sm:text-sm md:text-base">
+              {item.q}
+            </h3>
+            <p class="font-inter mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
+              {item.r}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="space-y-10 md:mt-24 lg:space-y-14">
+      {
+        colonneDroite.map((item, i) => (
+          <article class:list={['reveal', delais[i + 3]]}>
+            <h3 class="font-arsenica text-xs tracking-wide uppercase sm:text-sm md:text-base">
+              {item.q}
+            </h3>
+            <p class="font-inter mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
+              {item.r}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  {/* Nuage en parallaxe : monte lentement à mesure que la section défile. */}
+  <img
+    src={MEDIAS.nuageTransition}
+    alt=""
+    aria-hidden="true"
+    data-parallaxe="30"
+    data-parallaxe-depart="60"
+    class="pointer-events-none absolute bottom-0 left-0 z-10 w-full will-change-transform select-none"
+  />
+</section>

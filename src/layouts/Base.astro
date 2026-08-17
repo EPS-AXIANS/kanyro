@@ -1,0 +1,166 @@
+---
+/**
+ * Socle de toutes les pages.
+ *
+ * Porte le SEO (canonical, JSON-LD, OpenGraph), la CSP, les fontes, et le
+ * script unique de révélation au scroll.
+ */
+import { SITE, urlAbsolue } from '../config/site.js';
+import { HOTES_MEDIAS } from '../config/medias.js';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+const {
+  titre,
+  description,
+  image,
+  jsonLd,
+  noindex = false,
+  /** 'cinema' : barre de pied fixe, sans bloc de liens (page d'accueil).
+   *  'standard' : pied de page complet en fin de flux (pages internes). */
+  variante = 'standard',
+} = Astro.props;
+
+const canonical = urlAbsolue(Astro.url.pathname);
+const titreComplet = `${titre} · ${SITE.nom}`;
+const imageAbsolue = image ? urlAbsolue(image) : null;
+
+/*
+ * CSP. Elle est plus large qu'elle ne devrait l'être : les hôtes tiers listés
+ * dans medias.js sont la contrepartie directe des médias provisoires du
+ * template. Une fois les assets rapatriés, `HOTES_MEDIAS` se vide et la
+ * politique se resserre d'elle-même, sans toucher à ce fichier.
+ *
+ * Aucun style inline n'est utilisé dans le site (les délais d'animation passent
+ * par des classes utilitaires, les fonds par des <img>), ce qui permet de garder
+ * style-src sans 'unsafe-inline' malgré la richesse visuelle.
+ */
+const csp = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  `img-src 'self' data: ${HOTES_MEDIAS.images.join(' ')}`,
+  `media-src 'self' ${HOTES_MEDIAS.video.join(' ')}`,
+  `style-src 'self' ${HOTES_MEDIAS.styles.join(' ')}`,
+  `font-src 'self' ${HOTES_MEDIAS.fontes.join(' ')}`,
+  "script-src 'self'",
+  "connect-src 'self'",
+  /*
+   * ⚠ PAS de `upgrade-insecure-requests` ici, volontairement.
+   *
+   * Cette directive réécrit toutes les requêtes HTTP en HTTPS. Sur un site
+   * réellement servi en HTTPS elle est inoffensive et utile — mais dans une
+   * balise <meta>, elle part avec le HTML partout où il est déployé, y compris
+   * là où HTTPS n'est pas encore actif : hébergement dont le certificat n'est
+   * pas provisionné, préproduction en HTTP, ou simple test depuis une IP du
+   * réseau local.
+   *
+   * Dans ces cas, le navigateur va chercher `https://.../_astro/style.css` sur
+   * un serveur qui ne parle pas HTTPS. La feuille de styles et le script
+   * échouent, et la page s'affiche en HTML brut — alors que tout fonctionne sur
+   * localhost, que la spec exempte les adresses de bouclage. Symptôme
+   * déroutant, cause invisible.
+   *
+   * Elle est donc portée par l'en-tête HTTP (public/.htaccess et netlify.toml),
+   * où elle n'est envoyée que par un serveur qui sert effectivement en HTTPS.
+   */
+].join('; ');
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {
+      /* Émise en production seulement : le serveur de développement d'Astro
+         injecte ses styles en inline, que style-src 'self' bloquerait. En ligne,
+         c'est l'en-tête HTTP de netlify.toml qui fait autorité. */
+    }
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={csp} />}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#080706" />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <title>{titreComplet}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* ⚠ Fonte d'essai servie par un tiers — voir README avant mise en ligne. */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://db.onlinewebfonts.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://db.onlinewebfonts.com/c/cbb3cb559d2e4387e139cfb1656e31f5?family=Arsenica+Trial+Light"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={SITE.nom} />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta
+      name="twitter:card"
+      content={imageAbsolue ? 'summary_large_image' : 'summary'}
+    />
+    <meta name="twitter:title" content={titreComplet} />
+    <meta name="twitter:description" content={description} />
+    {imageAbsolue && <meta property="og:image" content={imageAbsolue} />}
+    {imageAbsolue && <meta name="twitter:image" content={imageAbsolue} />}
+
+    {
+      jsonLd && (
+        <script
+          type="application/ld+json"
+          set:html={JSON.stringify(jsonLd)}
+          is:inline
+        />
+      )
+    }
+  </head>
+
+  <body class:list={['bg-fond', variante === 'cinema' && 'pb-14']}>
+    <a
+      href="#contenu-principal"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-texte focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-fond"
+    >
+      Aller au contenu
+    </a>
+
+    <Header />
+
+    <main id="contenu-principal">
+      <slot />
+    </main>
+
+    <Footer variante={variante} />
+
+    {/*
+      Servi depuis public/ et chargé par `src`, volontairement.
+
+      Astro inline les petits scripts dans le HTML, et un script inline est
+      bloqué par `script-src 'self'` : en production le script ne s'exécuterait
+      pas, les éléments `.reveal` resteraient à opacity 0, et les pages
+      s'afficheraient vides. Le mode développement ne le montre pas, puisque la
+      CSP n'y est pas émise.
+
+      `is:inline` empêche Astro de reprendre le fichier à son compte. Le coût est
+      l'absence de minification sur ~2 Ko ; le bénéfice est un comportement qui
+      ne dépend pas d'une heuristique de taille.
+    */}
+    <script type="module" src="/js/effets.js" is:inline></script>
+  </body>
+</html>

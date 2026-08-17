@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "arras",
+    "nom": "Arras",
+    "codePostal": "62000",
+    "secteur": "Arrageois",
+    "repere": "places à arcades classées",
+    "contexte": "Secteur sauvegardé en cœur de ville : les travaux visibles depuis la rue passent par l'Architecte des Bâtiments de France, ce qui allonge les délais et fait monter le budget. Le client cherche autant un artisan capable de monter le dossier qu'un artisan capable de faire les travaux."
+  },
+  {
+    "slug": "saint-laurent-blangy",
+    "nom": "Saint-Laurent-Blangy",
+    "codePostal": "62223",
+    "secteur": "Arrageois",
+    "repere": "limitrophe d'Arras, reconstruite après 1918",
+    "contexte": "Commune reconstruite après la Première Guerre, avec un tissu pavillonnaire d'entre-deux-guerres puis des lotissements des années 1970. Beaucoup de propriétaires occupants qui rénovent par tranches, chantier après chantier, plutôt qu'en une opération lourde."
+  },
+  {
+    "slug": "achicourt",
+    "nom": "Achicourt",
+    "codePostal": "62217",
+    "secteur": "Arrageois",
+    "repere": "banlieue sud d'Arras",
+    "contexte": "Pavillonnaire dense des années 1950 à 1970, souvent en limite de performance thermique. Les demandes tournent beaucoup autour de l'isolation, du remplacement des menuiseries et de la réfection des toitures d'origine."
+  },
+  {
+    "slug": "bapaume",
+    "nom": "Bapaume",
+    "codePostal": "62450",
+    "secteur": "Arrageois",
+    "repere": "reconstruite en brique dans les années 1920",
+    "contexte": "Petite ville reconstruite après 1918, bâti homogène en brique avec des contraintes de façade sur les axes principaux. Zone rurale autour, donc des chantiers plus dispersés mais moins concurrencés."
+  },
+  {
+    "slug": "lens",
+    "nom": "Lens",
+    "codePostal": "62300",
+    "secteur": "Bassin minier",
+    "repere": "bassin minier inscrit au patrimoine mondial",
+    "contexte": "Corons et cités minières, souvent en brique et mal isolés. La rénovation énergétique y est massive et fréquemment aidée : le client arrive avec une question d'aides autant qu'une question de travaux, et l'artisan RGE part avec une longueur d'avance."
+  },
+  {
+    "slug": "lievin",
+    "nom": "Liévin",
+    "codePostal": "62800",
+    "secteur": "Bassin minier",
+    "repere": "cités minières contiguës à Lens",
+    "contexte": "Même parc que Lens : cités ouvrières en bande, toitures et menuiseries d'origine sur une partie du bâti. Beaucoup de bailleurs sociaux, donc aussi un marché professionnel à côté du marché des particuliers."
+  },
+  {
+    "slug": "henin-beaumont",
+    "nom": "Hénin-Beaumont",
+    "codePostal": "62110",
+    "secteur": "Bassin minier",
+    "repere": "cités minières et lotissements récents",
+    "contexte": "Mélange de cités minières réhabilitées et de lotissements récents en périphérie. Deux marchés très différents dans la même commune : rénovation lourde d'un côté, aménagement et extension de l'autre."
+  },
+  {
+    "slug": "bruay-la-buissiere",
+    "nom": "Bruay-la-Buissière",
+    "codePostal": "62700",
+    "secteur": "Bassin minier",
+    "repere": "cité des Électriciens, classée",
+    "contexte": "Patrimoine minier protégé sur une partie de la commune, ce qui impose des contraintes d'aspect sur les façades et les toitures. Ailleurs, un parc pavillonnaire ordinaire où la demande porte surtout sur l'isolation et le chauffage."
+  },
+  {
+    "slug": "bethune",
+    "nom": "Béthune",
+    "codePostal": "62400",
+    "secteur": "Bassin minier",
+    "repere": "beffroi classé au patrimoine mondial",
+    "contexte": "Cœur de ville reconstruit dans les années 1920 avec un fort caractère architectural, et une couronne de corons et de cités en rénovation lourde — isolation, toiture, mise aux normes électriques."
+  },
+  {
+    "slug": "lille",
+    "nom": "Lille",
+    "codePostal": "59000",
+    "secteur": "Métropole lilloise",
+    "repere": "maisons de ville en brique et courées",
+    "contexte": "Maisons de ville étroites et mitoyennes, souvent sur trois niveaux, avec des accès compliqués et peu de place pour stocker les matériaux. Les chantiers y coûtent plus cher en logistique qu'en Artois, et le client s'attend à ce que ce soit expliqué dans le devis."
+  },
+  {
+    "slug": "roubaix",
+    "nom": "Roubaix",
+    "codePostal": "59100",
+    "secteur": "Métropole lilloise",
+    "repere": "anciennes maisons ouvrières du textile",
+    "contexte": "Parc ancien issu de l'époque textile, avec beaucoup de maisons ouvrières en bande achetées à bas prix et rénovées intégralement. Chantiers lourds, propriétaires souvent jeunes, qui comparent en ligne avant d'appeler."
+  },
+  {
+    "slug": "villeneuve-dascq",
+    "nom": "Villeneuve-d'Ascq",
+    "codePostal": "59650",
+    "secteur": "Métropole lilloise",
+    "repere": "ville nouvelle des années 1970",
+    "contexte": "Bâti récent à l'échelle du Nord, mais qui atteint aujourd'hui l'âge des premières grosses rénovations : toitures d'origine, menuiseries des années 1970, chaufferies à remplacer. Pavillonnaire avec terrain, donc des chantiers plus faciles à mener qu'en centre-ville."
+  }
+]

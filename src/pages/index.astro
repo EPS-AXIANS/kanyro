@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/sections/Hero.astro';
+import Showcase from '../components/sections/Showcase.astro';
+import Offre from '../components/sections/Offre.astro';
+import QandA from '../components/sections/QandA.astro';
+import QuoteBanner from '../components/sections/QuoteBanner.astro';
+import { agenceJsonLd } from '../config/schema.js';
+import communes from '../data/communes.json';
+
+/*
+ * Vitrine volontairement courte : une seule page porte l'offre, le prix, la
+ * preuve et l'appel à l'action. Tout ce qui viendrait s'ajouter avant le premier
+ * client repousserait le moment de vendre.
+ */
+const jsonLd = agenceJsonLd(communes);
+---
+
+<Base
+  titre="Sites internet pour artisans du bâtiment"
+  description="Un site pensé pour recevoir des demandes de devis, et une visibilité sur votre métier et vos communes. Pour les artisans du bâtiment de l'Arrageois, du bassin minier et de la métropole lilloise."
+  jsonLd={jsonLd}
+  variante="cinema"
+>
+  <Hero />
+  <Showcase />
+  <Offre />
+  <QandA />
+  <QuoteBanner />
+</Base>

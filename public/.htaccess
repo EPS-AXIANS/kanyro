@@ -1,0 +1,79 @@
+# Configuration Apache pour hébergement mutualisé OVH.
+#
+# Ce fichier remplace ce que netlify.toml fournissait : en-têtes de sécurité,
+# cache des assets, et URL propres. Il est dans public/ donc copié tel quel à la
+# racine de dist/ à chaque build.
+#
+# ⚠ La politique CSP ci-dessous doit rester le miroir de celle générée dans
+# src/layouts/Base.astro, avec en plus `upgrade-insecure-requests`. Si vous
+# ajoutez ou retirez un hôte dans src/config/medias.js, répercutez-le ici.
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # ── 1. Forcer HTTPS ─────────────────────────────────────────────────────
+  # Doit passer avant tout le reste. Les deux conditions couvrent les deux
+  # façons dont OVH signale une connexion sécurisée selon la configuration.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # ── 2. URL sans slash final ─────────────────────────────────────────────
+  # Astro génère /contact/index.html et déclare le canonical /contact, sans
+  # slash. Sans cette règle, mod_dir redirigerait /contact vers /contact/ : le
+  # visiteur arriverait sur une adresse différente de celle annoncée à Google.
+  # DirectorySlash Off désactive cette redirection, la règle sert le fichier.
+  DirectorySlash Off
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
+  RewriteRule ^(.*[^/])$ $1/index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # ── En-têtes de sécurité ─────────────────────────────────────────────────
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://images.higgs.ai https://soft-zoom-63098134.figma.site; media-src 'self' https://d8j0ntlcm91z4.cloudfront.net; style-src 'self' https://fonts.googleapis.com https://db.onlinewebfonts.com; font-src 'self' https://fonts.gstatic.com https://db.onlinewebfonts.com; script-src 'self'; connect-src 'self'; upgrade-insecure-requests"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+  # HSTS : à n'activer qu'une fois le certificat vérifié et le site accessible
+  # en HTTPS sans erreur. Une fois envoyé, le navigateur refusera le HTTP
+  # pendant un an, y compris si vous faites machine arrière.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Les fichiers de /_astro/ portent un hash dans leur nom : ils peuvent être
+  # mis en cache indéfiniment sans risque de servir une version périmée.
+  <FilesMatch "\.(css|js)$">
+    ExpiresDefault "access plus 1 year"
+    Header append Cache-Control "immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(webp|avif|png|jpe?g|svg|woff2?)$">
+    ExpiresDefault "access plus 6 months"
+  </FilesMatch>
+
+  # Le HTML, lui, doit toujours être revalidé : c'est lui qui référence les
+  # noms hashés des assets.
+  <FilesMatch "\.html$">
+    ExpiresDefault "access plus 0 seconds"
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml application/xml
+</IfModule>
+
+AddDefaultCharset UTF-8
+# Astro traite la page 404 à part : elle sort en /404.html à la racine, et non
+# en /404/index.html comme les autres pages.
+ErrorDocument 404 /404.html

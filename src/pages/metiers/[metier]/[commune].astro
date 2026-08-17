@@ -1,0 +1,182 @@
+---
+/**
+ * Page « métier × commune » — le levier de longue traîne du référencement local.
+ *
+ * ⚠ ATTENTION, c'est la page la plus risquée du site.
+ *
+ * Générer N × M pages qui ne diffèrent que par un nom de commune substitué, c'est
+ * la définition exacte de ce que Google appelle une *doorway page*. La sanction
+ * n'est pas théorique et elle frappe le domaine entier, pas seulement les pages
+ * fautives.
+ *
+ * Ce qui protège ici : chaque commune apporte son propre `contexte` (nature du
+ * bâti, contraintes locales réelles) et chaque métier son propre `contexte` et ses
+ * propres `prestations`. Le texte diffère donc substantiellement d'une page à
+ * l'autre, pas seulement par un toponyme.
+ *
+ * RÈGLE À TENIR quand on ajoutera des communes : ne jamais ajouter une entrée
+ * dans communes.json sans écrire un `contexte` spécifique et véridique. Une
+ * commune sans contexte propre ne mérite pas sa page — mieux vaut six bonnes
+ * pages que soixante vides.
+ */
+import Base from '../../../layouts/Base.astro';
+import Cta from '../../../components/Cta.astro';
+import { FONCTIONS } from '../../../config/site.js';
+import { filAriane, serviceJsonLd } from '../../../config/schema.js';
+import metiers from '../../../data/metiers.json';
+import communes from '../../../data/communes.json';
+
+export function getStaticPaths() {
+  // Désactivé tant qu'il n'y a pas de premier client : voir FONCTIONS dans
+  // src/config/site.js. Le code reste, seules les pages ne sont pas générées.
+  if (!FONCTIONS.pagesLocales) return [];
+
+  const chemins = [];
+
+  for (const metier of metiers) {
+    for (const commune of communes) {
+      // Garde-fou : pas de contexte local écrit à la main, pas de page.
+      if (!commune.contexte) continue;
+
+      chemins.push({
+        params: { metier: metier.slug, commune: commune.slug },
+        props: { metier, commune },
+      });
+    }
+  }
+
+  return chemins;
+}
+
+const { metier, commune } = Astro.props;
+
+const chemin = `/metiers/${metier.slug}/${commune.slug}`;
+const titre = `Site internet pour ${metier.nom.toLowerCase()} à ${commune.nom}`;
+const description = `Création de site et référencement local pour ${metier.article} ${metier.nom.toLowerCase()} à ${commune.nom} (${commune.codePostal}). ${commune.contexte.slice(0, 90)}…`;
+
+const jsonLd = [
+  filAriane([
+    { nom: 'Accueil', chemin: '/' },
+    { nom: 'Métiers', chemin: '/metiers' },
+    { nom: metier.nom, chemin: `/metiers/${metier.slug}` },
+    { nom: commune.nom, chemin },
+  ]),
+  serviceJsonLd({
+    metier: metier.nom.toLowerCase(),
+    commune: commune.nom,
+    chemin,
+    description,
+  }),
+];
+
+/** Autres communes du même métier — maillage interne, utile au crawl. */
+const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
+---
+
+<Base titre={titre} description={description} jsonLd={jsonLd}>
+  <nav
+    class="contenu sous-navbar font-inter pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
+    aria-label="Fil d'Ariane"
+  >
+    <a href="/metiers" class="hover:text-texte">Métiers</a>
+    <span class="mx-2" aria-hidden="true">·</span>
+    <a href={`/metiers/${metier.slug}`} class="hover:text-texte">{metier.nom}</a>
+    <span class="mx-2" aria-hidden="true">·</span>
+    <span class="text-texte-doux">{commune.nom}</span>
+  </nav>
+
+  <section class="contenu pb-20">
+    <p class="surtitre reveal">{commune.secteur} · {commune.codePostal}</p>
+    <h1 class="titre-page reveal mt-6 max-w-4xl [animation-delay:80ms]">
+      {metier.nom} à {commune.nom} : être trouvé par vos voisins
+    </h1>
+    <p
+      class="font-inter reveal mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+    >
+      Quand un habitant de {commune.nom} cherche {metier.article}
+      {metier.nom.toLowerCase()}, il tape le métier et le nom de sa commune, puis
+      appelle un des trois premiers. Le reste de la liste n'existe pas.
+    </p>
+    <a href="/contact" class="bouton-primaire reveal mt-10 [animation-delay:240ms]">
+      Demander un devis
+    </a>
+  </section>
+
+  {/* Contenu propre à la commune : c'est lui qui rend la page légitime. */}
+  <section class="bg-brique py-20">
+    <div class="contenu grid gap-14 md:grid-cols-2">
+      <div>
+        <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+          Le bâti à {commune.nom}
+        </h2>
+        <p class="font-inter reveal mt-6 text-sm leading-relaxed text-white/70">
+          {commune.contexte}
+        </p>
+        <p class="font-inter reveal mt-4 text-xs text-white/45">
+          Commune {commune.repere}, dans {commune.secteur.toLowerCase()}.
+        </p>
+        <p class="font-inter reveal mt-8 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
+          Ça compte pour votre site : les gens cherchent avec les mots de leur
+          situation. Une page qui parle du bâti local convertit mieux qu'une page qui
+          récite des généralités.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+          Votre métier ici
+        </h2>
+        <p class="font-inter reveal mt-6 text-sm leading-relaxed text-white/70">
+          {metier.contexte}
+        </p>
+        <ul class="reveal mt-7 flex flex-wrap gap-2.5">
+          {
+            metier.recherches.map((r) => (
+              <li class="rounded-full border border-white/20 px-4 py-2 font-mono text-[11px] text-white/70">
+                {r} {commune.nom.toLowerCase()}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="contenu py-20">
+    <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+      Ce que je mets en place
+    </h2>
+    <ul class="mt-10 grid gap-4 sm:grid-cols-2">
+      {
+        metier.prestations.map((p) => (
+          <li class="carte reveal p-6 font-inter text-sm leading-relaxed text-texte-doux">
+            {p}
+          </li>
+        ))
+      }
+    </ul>
+
+    <h2 class="font-arsenica reveal mt-20 text-3xl tracking-wide sm:text-4xl">
+      Autour de {commune.nom}
+    </h2>
+    <ul class="reveal mt-8 flex flex-wrap gap-3">
+      {
+        voisines.map((c) => (
+          <li>
+            <a
+              href={`/metiers/${metier.slug}/${c.slug}`}
+              class="font-inter inline-flex min-h-11 items-center rounded-full border border-trait px-5 text-xs text-texte-doux no-underline transition-colors duration-500 hover:border-white/40 hover:text-texte"
+            >
+              {metier.nom} à {c.nom}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <Cta
+    titre={`Vous êtes ${metier.article} ${metier.nom.toLowerCase()} à ${commune.nom} ?`}
+    texte="Dites-moi ce que vous faites et d'où viennent vos clients aujourd'hui. Je vous dis franchement ce qu'un site peut changer, et ce qu'il ne changera pas."
+  />
+</Base>

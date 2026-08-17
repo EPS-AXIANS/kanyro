@@ -1,0 +1,49 @@
+---
+const { offre } = Astro.props;
+---
+
+<article
+  class:list={[
+    'reveal flex flex-col rounded-2xl border p-8 transition-colors duration-500',
+    offre.misEnAvant
+      ? 'border-signal bg-surface-haute'
+      : 'border-trait bg-surface hover:border-white/25',
+  ]}
+>
+  {
+    offre.misEnAvant && (
+      <p class="font-inter mb-4 self-start rounded-full bg-signal px-3 py-1 text-[9px] font-semibold tracking-[0.2em] uppercase">
+        Le plus demandé
+      </p>
+    )
+  }
+
+  <h3 class="font-arsenica text-3xl tracking-wide">{offre.nom}</h3>
+  <p class="font-inter mt-2 text-xs text-texte-doux">{offre.resume}</p>
+
+  <p class="mt-7">
+    <span class="font-inter text-3xl font-semibold tracking-tight">{offre.prix}</span>
+    <span class="font-inter ml-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+      {offre.mention}
+    </span>
+  </p>
+
+  <p class="font-inter mt-5 border-l border-signal pl-4 text-xs text-texte-doux italic">
+    {offre.pour}
+  </p>
+
+  <ul class="font-inter mt-7 flex-1 space-y-3 text-xs">
+    {
+      offre.inclus.map((ligne) => (
+        <li class="flex gap-3 text-texte-doux">
+          <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-signal" />
+          <span>{ligne}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <a href="/contact" class:list={[offre.misEnAvant ? 'bouton-primaire' : 'bouton-secondaire', 'mt-9 text-center']}>
+    Demander un devis
+  </a>
+</article>

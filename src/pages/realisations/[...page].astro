@@ -1,0 +1,110 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Cta from '../../components/Cta.astro';
+import { FONCTIONS } from '../../config/site.js';
+import { filAriane } from '../../config/schema.js';
+
+/*
+ * Route attrape-tout : voir l'explication dans metiers/[...page].astro. La
+ * galerie reste hors ligne tant qu'aucun chantier n'est livré — une page
+ * « réalisations » vide fait plus de mal que pas de page du tout.
+ */
+export function getStaticPaths() {
+  if (!FONCTIONS.realisations) return [];
+  return [{ params: { page: undefined } }];
+}
+
+const fiches = (await getCollection('realisations', ({ data }) => !data.brouillon)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const jsonLd = filAriane([
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Réalisations', chemin: '/realisations' },
+]);
+---
+
+<Base
+  titre="Réalisations"
+  description="Les chantiers livrés : point de départ, décisions prises, résultats mesurés."
+  jsonLd={jsonLd}
+>
+  <section class="contenu sous-navbar pb-16 text-center">
+    <p class="surtitre reveal">Réalisations</p>
+    <h1 class="titre-page reveal mt-6 [animation-delay:80ms]">Les chantiers livrés</h1>
+    <p
+      class="font-inter reveal mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+    >
+      Avec les chiffres réels et la date à laquelle ils ont été mesurés.
+    </p>
+  </section>
+
+  {
+    fiches.length === 0 ? (
+      /*
+       * État vide assumé. Tant qu'aucun chantier n'est livré, il n'y a rien à
+       * montrer — et inventer des références serait la pire façon de démarrer une
+       * réputation dans un tissu local où tout le monde se connaît.
+       */
+      <section class="contenu pb-20">
+        <div class="carte reveal mx-auto max-w-2xl bg-brique p-10 text-center">
+          <h2 class="font-arsenica text-3xl tracking-wide sm:text-4xl">
+            C'est nouveau, et ça se voit
+          </h2>
+          <p class="font-inter mt-6 text-sm leading-relaxed text-white/70">
+            Je démarre. Plutôt que de remplir cette page de fausses références ou de
+            maquettes présentées comme des chantiers, je préfère la laisser vide
+            jusqu'au premier client livré.
+          </p>
+          <p class="font-inter mt-4 text-sm leading-relaxed text-white/70">
+            En attendant, ça se traduit par un tarif de démarrage pour les premiers
+            clients : vous prenez un risque sur quelqu'un qui n'a pas encore de
+            références, c'est normal que ça se paie dans le prix.
+          </p>
+          <a href="/contact" class="bouton-primaire mt-9">En profiter</a>
+        </div>
+      </section>
+    ) : (
+      <section class="contenu pb-16">
+        <ul class="grid gap-6 md:grid-cols-2">
+          {fiches.map((f) => (
+            <li class="reveal">
+              <a
+                href={`/realisations/${f.id}`}
+                class="carte flex h-full flex-col p-8 no-underline transition-colors duration-500 hover:border-white/30 hover:bg-surface-haute"
+              >
+                <p class="surtitre">
+                  {f.data.metier} · {f.data.commune}
+                </p>
+                <h2 class="font-arsenica mt-4 text-2xl tracking-wide">
+                  {f.data.titre}
+                </h2>
+                <p class="font-inter mt-3 flex-1 text-sm leading-relaxed text-texte-doux">
+                  {f.data.resume}
+                </p>
+
+                {f.data.resultats.length > 0 && (
+                  <dl class="mt-6 flex flex-wrap gap-8">
+                    {f.data.resultats.map((r) => (
+                      <div>
+                        <dt class="font-inter text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+                          {r.libelle}
+                        </dt>
+                        <dd class="font-arsenica mt-1 text-2xl text-signal-vif">
+                          {r.valeur}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <Cta />
+</Base>

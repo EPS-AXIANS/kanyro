@@ -1,0 +1,71 @@
+---
+import { MEDIAS } from '../../config/medias.js';
+---
+
+<section class="relative h-screen w-full overflow-hidden">
+  {/* ⚠ Vidéo hébergée chez un tiers — à rapatrier avant mise en ligne. */}
+  <video
+    class="absolute inset-0 h-full w-full object-cover"
+    src={MEDIAS.heroVideo}
+    autoplay
+    muted
+    loop
+    playsinline
+    aria-hidden="true"
+    tabindex="-1"></video>
+
+  {/*
+    Voile ajouté par rapport au template : sans lui, le texte blanc passe sur les
+    plans clairs de la vidéo et devient illisible. Le contraste ne peut pas
+    dépendre de l'image du moment.
+  */}
+  <div
+    class="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/65"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div
+    class="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center text-white"
+  >
+    <p
+      class="hero-fade-up text-xs font-medium tracking-[0.35em] text-white/90 uppercase [animation-delay:100ms] sm:text-sm"
+    >
+      Kanyro
+    </p>
+    <p
+      class="hero-fade-up mt-3 text-[10px] font-light tracking-[0.4em] text-white/70 uppercase [animation-delay:100ms] sm:text-xs"
+    >
+      Arrageois · Bassin minier · Lille
+    </p>
+
+    <h1
+      class="hero-fade-up mt-8 leading-[1.05] drop-shadow-[0_2px_24px_rgba(0,0,0,0.25)] [animation-delay:250ms]"
+    >
+      <span
+        class="font-arsenica block text-5xl tracking-wide sm:text-7xl md:text-8xl lg:text-[7rem]"
+      >
+        TROIS
+      </span>
+      <span
+        class="font-inter block text-5xl font-semibold tracking-tight sm:text-7xl md:text-8xl lg:text-[7rem]"
+      >
+        CHANTIERS
+      </span>
+    </h1>
+
+    <p
+      class="hero-fade-up font-arsenica mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [animation-delay:400ms] sm:text-lg md:text-xl"
+    >
+      Trois chantiers signés paient votre site. Le reste, c'est ce qu'il vous
+      rapporte les années suivantes.
+    </p>
+
+    <a
+      href="/contact"
+      class="liquid-glass font-inter hero-fade-up mt-10 inline-block rounded-[50%] px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:550ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
+    >
+      Demander un devis
+    </a>
+  </div>
+</section>

@@ -1,0 +1,93 @@
+---
+import Base from '../../layouts/Base.astro';
+import Cta from '../../components/Cta.astro';
+import { FONCTIONS } from '../../config/site.js';
+import { filAriane } from '../../config/schema.js';
+import metiers from '../../data/metiers.json';
+import communes from '../../data/communes.json';
+
+/*
+ * Route attrape-tout plutôt que `index.astro` : une page statique est générée
+ * quoi qu'il arrive, alors qu'une route dynamique peut ne rien produire. C'est
+ * ce qui permet à cette page d'obéir au même interrupteur que les pages
+ * « métier × commune » qu'elle liste — sinon elle survivrait seule, en pointant
+ * vers des adresses inexistantes.
+ */
+export function getStaticPaths() {
+  if (!FONCTIONS.pagesLocales) return [];
+  return [{ params: { page: undefined } }];
+}
+
+const jsonLd = filAriane([
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Métiers', chemin: '/metiers' },
+]);
+---
+
+<Base
+  titre="Les métiers du bâtiment que j'accompagne"
+  description="Sites internet et référencement local pour couvreurs, maçons, plombiers-chauffagistes, électriciens, menuisiers et plaquistes des Hauts-de-France."
+  jsonLd={jsonLd}
+>
+  <section class="contenu sous-navbar pb-16 text-center">
+    <p class="surtitre reveal">Métiers</p>
+    <h1 class="titre-page reveal mx-auto mt-6 max-w-4xl [animation-delay:80ms]">
+      Chaque métier se cherche différemment
+    </h1>
+    <p
+      class="font-inter reveal mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+    >
+      Une fuite se cherche à 22 h sur un téléphone. Une pompe à chaleur se compare
+      pendant trois semaines. Un site qui ignore cette différence rate la moitié de
+      ses visiteurs.
+    </p>
+  </section>
+
+  <section class="contenu pb-16">
+    <ul class="grid gap-6 md:grid-cols-2">
+      {
+        metiers.map((m) => (
+          <li class="carte reveal p-8">
+            <h2 class="font-arsenica text-3xl tracking-wide">{m.nom}</h2>
+            <p class="font-inter mt-3 text-sm text-signal-vif">{m.accroche}</p>
+            <p class="font-inter mt-5 text-xs leading-relaxed text-texte-doux">
+              {m.contexte}
+            </p>
+
+            <p class="font-inter mt-6 text-xs text-texte-faible">
+              Chantier moyen : <span class="text-texte-doux">{m.panierMoyen}</span>
+            </p>
+
+            <a href={`/metiers/${m.slug}`} class="bouton-secondaire mt-7">
+              Voir la page
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="contenu pb-8 text-center">
+    <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+      Où j'interviens
+    </h2>
+    <p
+      class="font-inter reveal mx-auto mt-5 max-w-xl text-xs leading-relaxed text-texte-doux"
+    >
+      Je me déplace sur vos chantiers. Au-delà de ce périmètre on peut travailler à
+      distance, mais autant être honnête : je fais de meilleures photos quand je suis
+      sur place.
+    </p>
+    <ul class="reveal mt-8 flex flex-wrap justify-center gap-2.5">
+      {
+        communes.map((c) => (
+          <li class="font-inter rounded-full border border-trait px-4 py-2 text-[11px] text-texte-doux">
+            {c.nom} <span class="text-texte-faible">{c.codePostal}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <Cta />
+</Base>
