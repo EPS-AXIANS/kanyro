@@ -7,10 +7,18 @@ Tout ce qu'il faut sur un poste neuf pour reprendre le site, et rien d'autre.
 ```bash
 git clone https://github.com/EPS-AXIANS/kanyro.git
 cd kanyro
-nvm install && nvm use     # lit .nvmrc → Node 24
+nvm install && nvm use     # Linux / macOS / WSL — lit .nvmrc
 npm ci                     # installe les dépendances du projet
 npm run verifier           # contrôle que tout est en place
 npm run dev                # http://localhost:4321
+```
+
+Sous **Windows hors WSL**, les deux premières lignes changent — voir
+[Node.js](#nodejs-24--obligatoire) plus bas :
+
+```bat
+nvm install 24
+nvm use 24
 ```
 
 `npm run verifier` liste ce qui manque **et la commande qui le corrige**. C'est
@@ -35,7 +43,7 @@ cd kanyro
 Puis, **dans les deux cas** :
 
 ```bash
-nvm install && nvm use   # au cas où .nvmrc aurait changé
+nvm install && nvm use   # au cas où .nvmrc aurait changé (Windows : nvm use 24)
 npm ci
 npm run verifier
 ```
@@ -80,12 +88,35 @@ C'est la partie qu'on cherche habituellement à tâtons.
 Astro 7 exige Node ≥ 22.12. La version est fixée dans deux fichiers, qui doivent
 rester d'accord : `.nvmrc` (`24`) et le champ `engines` de `package.json`.
 
-```bash
-nvm install && nvm use     # dans le dossier du projet, lit .nvmrc
+**Il existe deux nvm, et ils ne s'utilisent pas pareil.** C'est la source de
+confusion la plus fréquente : les commandes trouvées en ligne sont presque
+toujours celles du premier.
+
+| | Linux · macOS · WSL | Windows natif |
+|---|---|---|
+| Outil | [nvm-sh](https://github.com/nvm-sh/nvm) | [nvm-windows](https://github.com/coreybutler/nvm-windows) |
+| Lit `.nvmrc` | oui | **non** |
+| Installer | `nvm install` | `nvm install 24` |
+| Activer | `nvm use` | `nvm use 24` |
+
+Sous nvm-windows, `nvm install` sans argument échoue sur :
+
+```
+error installing : A version argument is required but missing
 ```
 
-- nvm absent : <https://github.com/nvm-sh/nvm>
-- Windows sans WSL : <https://github.com/coreybutler/nvm-windows>
+Ce n'est pas une panne, c'est la version pour Windows qui attend un numéro
+explicite. Deux points à connaître :
+
+- **`nvm use` exige un terminal ouvert en Administrateur** — il déplace un lien
+  symbolique dans `C:\Program Files\nodejs`. Sans ça, la commande semble
+  réussir mais `node -v` continue d'afficher l'ancienne version.
+- Si `nvm install 24` est refusé, donnez le numéro complet : `nvm install
+  24.18.0`. Les versions courtes ne sont résolues que par nvm-windows récent.
+
+> Le plus simple sur un poste Windows reste de travailler **dans WSL** : on
+> retrouve nvm-sh, `.nvmrc` est lu, et l'environnement est identique à celui du
+> serveur. Mais les deux fonctionnent.
 
 > **Le piège à connaître.** Sous une version de Node trop ancienne, `npm install`
 > ne refuse pas de s'exécuter : il récupère les mauvais binaires natifs, et le

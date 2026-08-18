@@ -89,13 +89,28 @@ const controles = [];
     requis: true,
     ok: comparerVersions(version, nodeMini) >= 0,
     detail: `${version} ${gris(`(minimum ${nodeMini})`)}`,
-    reparer: [
-      nvmrc
-        ? `nvm install && nvm use        ${gris(`# lit .nvmrc, installe Node ${nvmrc}`)}`
-        : `nvm install ${nodeMini}`,
-      gris('nvm absent ? https://github.com/nvm-sh/nvm'),
-      gris('Windows sans WSL : https://github.com/coreybutler/nvm-windows'),
-    ],
+    /*
+     * Deux nvm existent, et ils ne s'utilisent pas pareil. nvm-windows
+     * (coreybutler) ne lit PAS .nvmrc : `nvm install` sans argument échoue sur
+     * « A version argument is required but missing ». Afficher la commande de
+     * nvm-sh à quelqu'un sous Windows, c'est l'envoyer droit dans le mur.
+     */
+    reparer:
+      process.platform === 'win32'
+        ? [
+            `nvm install ${nvmrc || nodeMini}`,
+            `nvm use ${nvmrc || nodeMini}`,
+            gris('⚠ `nvm use` exige un terminal ouvert en Administrateur.'),
+            gris('⚠ nvm-windows ne lit pas .nvmrc. Si la version courte est'),
+            gris('  refusée, donnez le numéro complet (ex. 24.18.0).'),
+            gris('nvm absent ? https://github.com/coreybutler/nvm-windows'),
+          ]
+        : [
+            nvmrc
+              ? `nvm install && nvm use      ${gris(`# lit .nvmrc, installe Node ${nvmrc}`)}`
+              : `nvm install ${nodeMini}`,
+            gris('nvm absent ? https://github.com/nvm-sh/nvm'),
+          ],
   });
 }
 
