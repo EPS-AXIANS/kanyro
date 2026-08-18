@@ -32,6 +32,28 @@ DirectoryIndex index.html
   RewriteRule ^(.*[^/])$ $1/index.html [L]
 </IfModule>
 
+# ── Verrou de bêta ──────────────────────────────────────────────────────────
+# `robots.txt` demande poliment de ne pas explorer ; il n'empêche rien. Un robot
+# qui l'ignore, ou un simple lien partagé vers la bêta, suffit à faire entrer
+# l'adresse dans l'index — et le jour de l'ouverture, kanyro.fr publierait un
+# contenu que Google connaît déjà sur un autre domaine.
+#
+# Un mot de passe, lui, ferme réellement la porte. À activer tant que
+# `BETA.actif` vaut true dans src/config/site.js :
+#
+#   1. Espace client OVH → « Utilisateurs FTP & SSH » ou en SSH :
+#        htpasswd -c ~/.htpasswd kanyro
+#   2. Renseigner le chemin ABSOLU du fichier ci-dessous (OVH le donne dans
+#      l'interface ; il ressemble à /homez.NNN/votrelogin/.htpasswd).
+#   3. Décommenter les cinq lignes.
+#
+# ⚠ Placer .htpasswd HORS de www/, sinon il est téléchargeable.
+#
+# AuthType Basic
+# AuthName "Kanyro — bêta"
+# AuthUserFile /chemin/absolu/vers/.htpasswd
+# Require valid-user
+
 <IfModule mod_headers.c>
   # ── En-têtes de sécurité ─────────────────────────────────────────────────
   Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://images.higgs.ai https://soft-zoom-63098134.figma.site; media-src 'self' https://d8j0ntlcm91z4.cloudfront.net; style-src 'self' https://fonts.googleapis.com https://db.onlinewebfonts.com; font-src 'self' https://fonts.gstatic.com https://db.onlinewebfonts.com; script-src 'self'; connect-src 'self'; upgrade-insecure-requests"

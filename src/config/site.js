@@ -5,16 +5,58 @@
  * en cours). Tout est centralisé ici pour qu'un changement de nom se répercute
  * partout sans chasse au texte en dur.
  */
+/**
+ * Bêta sur le domaine personnel.
+ *
+ * Le site tourne sur elio-pallois.fr le temps des essais. Deux conséquences, et
+ * la seconde est celle qui coûte cher si on l'oublie :
+ *
+ *   1. Le canonical, og:url et le sitemap doivent annoncer l'adresse RÉELLEMENT
+ *      servie. Annoncer www.kanyro.fr depuis un autre domaine, c'est dire à
+ *      Google d'aller indexer une adresse qui ne répond pas.
+ *   2. La bêta doit rester hors de l'index. Sans ça, Google référence le site sur
+ *      elio-pallois.fr, et le jour de l'ouverture kanyro.fr publie un contenu
+ *      déjà connu ailleurs : au mieux la notoriété acquise reste sur le mauvais
+ *      domaine, au pire les deux se font concurrence.
+ *
+ * `actif: false` bascule tout d'un coup — URL, canonical, sitemap, robots.txt et
+ * la balise noindex de chaque page — le jour de l'ouverture commerciale.
+ *
+ * ⚠ `url` doit être un SOUS-DOMAINE, pas un sous-dossier. Le site génère des
+ * chemins absolus (/_astro/…, /contact.php, /merci) et le .htaccess se pose à la
+ * racine : servi depuis elio-pallois.fr/kanyro, rien ne se charge.
+ */
+export const BETA = {
+  actif: true,
+  url: 'https://kanyro.elio-pallois.fr',
+};
+
 export const SITE = {
   nom: 'Kanyro',
   baseline: 'Sites et visibilité pour les artisans du bâtiment',
-  url: 'https://www.kanyro.fr',
+  /** Adresse de production, une fois la bêta terminée. */
+  urlPublique: 'https://www.kanyro.fr',
+  /** Adresse réellement servie aujourd'hui — c'est elle qui fait foi partout. */
+  url: BETA.actif ? BETA.url : 'https://www.kanyro.fr',
   langue: 'fr-FR',
 
+  /*
+   * ⚠ Adresse de bêta, sur le domaine personnel.
+   *
+   * `kanyro@elio-pallois.fr` le temps des tests. À rebasculer sur le domaine de
+   * l'agence à l'ouverture commerciale — et le jour où ça arrive, penser aux
+   * deux endroits que ce fichier ne pilote pas : `$destinataire`/`$expediteur`
+   * en haut de `public/contact.php`, et l'adresse figurant sur les devis déjà
+   * envoyés.
+   *
+   * `telephone` est au format international, seul format que `tel:` compose sans
+   * ambiguïté depuis l'étranger ; `telephoneAffiche` est la forme lisible. Les
+   * deux servent aussi le JSON-LD et les mentions légales.
+   */
   contact: {
-    email: 'bonjour@kanyro.fr',
-    telephone: '',
-    telephoneAffiche: '',
+    email: 'kanyro@elio-pallois.fr',
+    telephone: '+33649072478',
+    telephoneAffiche: '06 49 07 24 78',
   },
 
   /*
@@ -96,11 +138,16 @@ export const FONCTIONS = {
 /**
  * Normalise un chemin en l'URL réellement servie au visiteur.
  *
- * `build.format: 'file'` fait qu'Astro.url.pathname vaut '/metiers/couvreur.html'
- * à la génération, alors que Netlify sert la page à '/metiers/couvreur'. Sans ce
- * nettoyage, le canonical et og:url annoncent une adresse différente de celle du
- * sitemap et de celle que Google visite — de quoi diluer le référencement des
- * pages locales, qui sont justement le cœur du dispositif.
+ * Le site est en `build.format: 'directory'` et `trailingSlash: 'never'` : Astro
+ * génère /contact/index.html, Apache le sert à /contact via DirectoryIndex, et
+ * c'est /contact qui doit être annoncé partout. Selon le contexte,
+ * `Astro.url.pathname` peut arriver ici en '/contact/', en '/contact/index' ou —
+ * si le format repassait un jour à 'file' — en '/contact.html'. Les trois formes
+ * sont ramenées à '/contact'.
+ *
+ * Sans ce nettoyage, le canonical et og:url annonceraient une adresse différente
+ * de celle du sitemap et de celle que Google visite — de quoi diluer le
+ * référencement des pages locales, qui sont justement le cœur du dispositif.
  */
 export function cheminPropre(chemin = '/') {
   let p = chemin.replace(/\.html$/, '');

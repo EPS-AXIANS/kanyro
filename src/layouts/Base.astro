@@ -5,7 +5,7 @@
  * Porte le SEO (canonical, JSON-LD, OpenGraph), la CSP, les fontes, et le
  * script unique de révélation au scroll.
  */
-import { SITE, urlAbsolue } from '../config/site.js';
+import { SITE, BETA, urlAbsolue } from '../config/site.js';
 import { HOTES_MEDIAS } from '../config/medias.js';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -21,6 +21,15 @@ const {
    *  'standard' : pied de page complet en fin de flux (pages internes). */
   variante = 'standard',
 } = Astro.props;
+
+/*
+ * Tant que la bêta tourne sur le domaine personnel, AUCUNE page ne doit entrer
+ * dans l'index — sinon c'est elle qui sera référencée, et le vrai domaine
+ * publiera plus tard un contenu que Google connaît déjà ailleurs. La bascule est
+ * portée par `BETA.actif` dans src/config/site.js, pas par une balise oubliée
+ * dans un coin.
+ */
+const horsIndex = noindex || BETA.actif;
 
 const canonical = urlAbsolue(Astro.url.pathname);
 const titreComplet = `${titre} · ${SITE.nom}`;
@@ -84,7 +93,7 @@ const csp = [
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#080706" />
-    {noindex && <meta name="robots" content="noindex, follow" />}
+    {horsIndex && <meta name="robots" content="noindex, follow" />}
 
     <title>{titreComplet}</title>
     <meta name="description" content={description} />

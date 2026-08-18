@@ -1,8 +1,8 @@
 # Kanyro
 
-Site de l'agence. Astro en sortie statique, Tailwind 4, hébergement Netlify.
-Direction visuelle sombre et cinématographique, reprise d'un template de galerie
-d'art et transposée sur le socle SEO.
+Site de l'agence. Astro en sortie statique, Tailwind 4, hébergement mutualisé
+OVH. Direction visuelle sombre et cinématographique, reprise d'un template de
+galerie d'art et transposée sur le socle SEO.
 
 ```bash
 npm run dev      # développement, http://localhost:4321
@@ -47,13 +47,84 @@ abandonné : sa détection se fait au déploiement chez Netlify, donc sur OVH le
 formulaire postait dans le vide.
 
 **Prérequis :** `mail()` n'est accepté par OVH que si l'expéditeur appartient au
-domaine hébergé. Créez `bonjour@kanyro.fr` dans votre espace client **avant** de
-tester, sinon les messages seront rejetés ou classés en spam. Les deux adresses
-se règlent en haut de `contact.php`.
+domaine hébergé. Pendant la bêta, c'est `elio-pallois.fr` : créez
+`kanyro@elio-pallois.fr` dans votre espace client **avant** de tester, sinon les
+messages seront rejetés ou classés en spam. Les adresses se règlent en haut de
+`contact.php`, et doivent rester cohérentes avec `SITE.contact.email` dans
+`src/config/site.js`.
 
-En cas d'échec d'envoi, le visiteur est renvoyé sur `/contact?erreur=1` et un
-bandeau lui donne l'adresse mail directe — un échec silencieux sur l'unique
-chemin de conversion serait le pire des scénarios.
+En cas d'échec, le visiteur est renvoyé sur `/contact?erreur=<motif>` — `saisie`,
+`limite` ou `envoi` — et `effets.js` dévoile le bandeau correspondant en
+restaurant ce qu'il avait tapé. Un échec silencieux sur l'unique chemin de
+conversion serait le pire des scénarios ; un message qui accuse le serveur alors
+que l'adresse était mal tapée n'est guère mieux.
+
+Le formulaire renvoie aussi un **accusé de réception** au visiteur, ce qui impose
+une **limite de 5 envois par heure et par IP** : sans elle, on soumet l'adresse
+d'un tiers en boucle et c'est le domaine expéditeur qui finit sur les listes
+noires.
+
+### Bêta sur elio-pallois.fr
+
+Le site tourne actuellement sur le domaine personnel. Tout est piloté par un seul
+objet, `BETA` dans `src/config/site.js` :
+
+```js
+export const BETA = {
+  actif: true,
+  url: 'https://kanyro.elio-pallois.fr',
+};
+```
+
+Tant que `actif` vaut `true` :
+
+- `SITE.url` prend l'adresse de bêta — canonical, `og:url` et sitemap annoncent
+  donc l'adresse réellement servie, et non un domaine qui ne répond pas encore ;
+- **toutes** les pages sortent en `noindex`, y compris l'accueil ;
+- `robots.txt` (désormais généré par `src/pages/robots.txt.js`, plus posé en dur
+  dans `public/`) passe en `Disallow: /` et n'annonce plus le sitemap.
+
+L'enjeu n'est pas cosmétique : si Google indexe la bêta, c'est elle qui sort dans
+les résultats, et le jour de l'ouverture `kanyro.fr` publie un contenu déjà connu
+ailleurs. Au mieux la notoriété acquise reste sur le mauvais domaine, au pire les
+deux se font concurrence.
+
+> **`robots.txt` ne ferme rien.** C'est une demande, que les robots sont libres
+> d'ignorer, et un simple lien partagé suffit à faire entrer l'URL dans l'index.
+> La vraie serrure est le mot de passe HTTP : le bloc est prêt et commenté en
+> haut de `public/.htaccess`, il ne manque que le `.htpasswd`.
+
+**⚠ Servir la bêta depuis un sous-dossier ne marchera pas.** Le site génère des
+chemins absolus (`/_astro/…`, `/contact.php`, `/merci`) et le `.htaccess` se pose
+à la racine du domaine. Il faut un sous-domaine.
+
+**Le jour de l'ouverture :** passer `actif` à `false`. L'URL, les canonical, le
+sitemap, les `noindex` et le `robots.txt` rebasculent ensemble. Restent trois
+choses que ce fichier ne pilote pas — les adresses en haut de `contact.php`,
+`SITE.contact.email`, et le mot de passe du `.htaccess` à retirer.
+
+---
+
+### Si vous migrez un jour chez Cloudflare
+
+Cloudflare Pages est une piste envisagée pour plus tard. Trois choses tombent
+le jour où vous basculez, et il vaut mieux le savoir avant :
+
+1. **`.htaccess` est ignoré.** Apache n'y tourne pas. Les en-têtes de sécurité,
+   le cache et la règle d'URL sans slash final se réécrivent dans un fichier
+   `public/_headers` (même syntaxe chez Netlify, si la question se reposait).
+2. **`contact.php` ne s'exécute pas.** Cloudflare Pages ne sert pas de PHP. Le
+   formulaire doit être recâblé sur une Pages Function, et l'envoi de mail passe
+   par un service tiers (Resend, MailChannels) puisqu'il n'y a pas de `mail()`.
+   Prévoir aussi `form-action` et `connect-src` dans la CSP en conséquence.
+3. **Les mentions légales changent.** `SITE.legal.hebergeur` identifie
+   nommément OVH ; l'article 19 de la LCEN impose que ce soit l'hébergeur réel.
+
+Tant que ce n'est pas fait, **ne déployez pas ce dépôt ailleurs que sur OVH** :
+le formulaire tomberait en 404 sans aucun message d'erreur, et l'unique chemin
+de conversion du site serait mort sans que rien ne le signale.
+
+---
 
 ### `upgrade-insecure-requests`
 
@@ -148,10 +219,12 @@ photos de chantiers réels, qui serviront de toute façon mieux le propos.
 Une fois fontes et médias rapatriés dans `public/` :
 
 1. vider les tableaux de `HOTES_MEDIAS` dans `src/config/medias.js` ;
-2. retirer les mêmes hôtes de l'en-tête `Content-Security-Policy` de `netlify.toml`.
+2. retirer les mêmes hôtes de l'en-tête `Content-Security-Policy` de
+   `public/.htaccess`.
 
-La politique se resserre alors d'elle-même. Les deux fichiers doivent rester le
-miroir l'un de l'autre.
+La balise `<meta>` du layout se resserre alors d'elle-même, puisqu'elle est
+construite depuis `HOTES_MEDIAS`. L'en-tête du `.htaccess`, lui, est écrit à la
+main : les deux doivent rester le miroir l'un de l'autre.
 
 ### 4. Le reste
 
@@ -162,11 +235,12 @@ miroir l'un de l'autre.
       Aucune balise n'est émise tant qu'elle n'existe pas, ce qui vaut mieux
       qu'une balise pointant vers un fichier absent.
 - [ ] Favicon définitive une fois le logo dessiné.
-- [ ] Redirection `kaniro.fr` à décommenter dans `netlify.toml` si le domaine
-      défensif est réservé.
-- [ ] **Tester le formulaire de bout en bout après déploiement.** Netlify Forms
-      ne se câble qu'en ligne, la détection se fait au déploiement. Invérifiable
-      en local.
+- [ ] Redirection `kaniro.fr` à ajouter dans `public/.htaccess` si le domaine
+      défensif est réservé — le nom sera mal orthographié à l'oral (« Kaniro »).
+      Mieux vaut une redirection 301 qu'un second site à maintenir.
+- [ ] **Tester le formulaire de bout en bout après déploiement.** `mail()` n'existe
+      pas en local : ni l'envoi, ni l'accusé de réception, ni le passage des
+      filtres anti-spam ne sont vérifiables ailleurs qu'en ligne.
 - [ ] Livrer un chantier de référence avant de pousser le site.
 
 ---

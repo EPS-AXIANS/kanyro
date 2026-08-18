@@ -21,12 +21,84 @@
  */
 const doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ---- Échec d'envoi du formulaire ----
-// contact.php redirige vers /contact?erreur=1 quand le message n'a pas pu
-// partir. Sans ce bloc, l'échec serait invisible et le visiteur croirait sa
-// demande envoyée. Le bandeau existe déjà dans le HTML, masqué par `hidden`.
-if (new URLSearchParams(window.location.search).has('erreur')) {
-  const bandeau = document.getElementById('erreur-envoi');
+// ---- Formulaire de devis : échecs et saisie conservée ----
+//
+// Le site est statique : le serveur ne peut pas réafficher le formulaire
+// pré-rempli après une erreur. contact.php se contente donc de rediriger vers
+// /contact?erreur=<motif>, et c'est ici qu'on restaure ce qui avait été tapé.
+//
+// La saisie transite par sessionStorage plutôt que par l'URL : une adresse email
+// et un message en clair dans une query string finissent dans les journaux du
+// serveur, dans l'historique du navigateur et dans l'en-tête Referer envoyé aux
+// hôtes tiers. sessionStorage reste dans l'onglet et disparaît à sa fermeture.
+const CHAMPS_DEVIS = [
+  'nom',
+  'entreprise',
+  'email',
+  'telephone',
+  'metier',
+  'disponibilite',
+  'message',
+];
+const CLE_DEVIS = 'kanyro:devis';
+
+// Certains navigateurs refusent sessionStorage (navigation privée verrouillée,
+// stockage désactivé). Le formulaire doit continuer à fonctionner sans.
+const stockage = (() => {
+  try {
+    const s = window.sessionStorage;
+    s.setItem('kanyro:test', '1');
+    s.removeItem('kanyro:test');
+    return s;
+  } catch {
+    return null;
+  }
+})();
+
+const formulaireDevis = document.querySelector('form[name="devis"]');
+
+if (formulaireDevis && stockage) {
+  formulaireDevis.addEventListener('submit', () => {
+    const valeurs = {};
+    for (const champ of CHAMPS_DEVIS) {
+      const el = formulaireDevis.elements[champ];
+      if (el) valeurs[champ] = el.value;
+    }
+    try {
+      stockage.setItem(CLE_DEVIS, JSON.stringify(valeurs));
+    } catch {
+      /* Quota plein : on renonce à la restauration, pas à l'envoi. */
+    }
+  });
+}
+
+// La demande est passée : plus aucune raison de garder la saisie sous la main.
+if (stockage && window.location.pathname.replace(/\/$/, '') === '/merci') {
+  stockage.removeItem(CLE_DEVIS);
+}
+
+const motifErreur = new URLSearchParams(window.location.search).get('erreur');
+
+if (formulaireDevis && motifErreur) {
+  // `erreur=1` est l'ancienne forme, encore possible si une page en cache la
+  // porte. Elle retombe sur le message d'échec d'envoi, qui était le seul.
+  const bandeau =
+    document.getElementById(`erreur-${motifErreur}`) ??
+    document.getElementById('erreur-envoi');
+
+  if (stockage) {
+    try {
+      const valeurs = JSON.parse(stockage.getItem(CLE_DEVIS) ?? '{}');
+      for (const [champ, valeur] of Object.entries(valeurs)) {
+        const el = formulaireDevis.elements[champ];
+        if (el && typeof valeur === 'string') el.value = valeur;
+      }
+    } catch {
+      /* Entrée illisible : on laisse le formulaire vide plutôt que de planter. */
+    }
+    stockage.removeItem(CLE_DEVIS);
+  }
+
   if (bandeau) {
     bandeau.hidden = false;
     bandeau.scrollIntoView({ block: 'center', behavior: doux ? 'auto' : 'smooth' });

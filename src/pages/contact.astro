@@ -13,6 +13,8 @@ const champClasses =
   'font-inter mt-2 w-full rounded-xl border border-trait bg-surface px-4 py-3.5 text-sm text-texte placeholder:text-texte-faible transition-colors focus:border-white/40';
 const labelClasses =
   'font-inter text-[10px] font-medium tracking-[0.2em] text-texte-faible uppercase';
+const classesErreur =
+  'font-inter mb-8 rounded-xl border border-signal bg-brique p-5 text-sm leading-relaxed';
 ---
 
 <Base
@@ -34,14 +36,12 @@ const labelClasses =
       </p>
 
       <!--
-        POST natif vers public/contact.php — aucun JavaScript nécessaire.
+        POST natif vers public/contact.php — aucun JavaScript nécessaire pour
+        envoyer. Le script n'ajoute que le confort : restaurer la saisie après une
+        erreur, et afficher le bon bandeau. Sans lui, le formulaire fonctionne.
 
-        Netlify Forms a été abandonné : la détection s'y fait au déploiement chez
-        Netlify, donc sur un hébergement mutualisé OVH le formulaire postait dans
-        le vide et aucune demande n'était enregistrée.
-
-        `bot-field` reste le pot de miel : masqué en CSS, un humain ne le voit
-        pas, un robot le remplit et l'envoi est ignoré côté serveur.
+        `bot-field` est le pot de miel : masqué en CSS, un humain ne le voit pas,
+        un robot le remplit et l'envoi est ignoré côté serveur.
       -->
       <form
         name="devis"
@@ -50,15 +50,41 @@ const labelClasses =
         class="reveal mt-12 max-w-xl [animation-delay:240ms]"
       >
         {/*
-          Affiché par effets.js quand l'URL porte ?erreur=1, c'est-à-dire quand
-          contact.php n'a pas pu envoyer le message. Sans ça, un échec serait
-          totalement silencieux : le visiteur croirait sa demande partie.
+          Trois bandeaux, un par motif d'échec renvoyé par contact.php via
+          ?erreur=. effets.js dévoile celui qui correspond et restaure la saisie.
+
+          Un seul message générique serait plus simple, mais il dirait « le
+          problème vient de mon côté » à quelqu'un qui a juste mal tapé son
+          adresse : il chercherait la panne au lieu de corriger le champ.
         */}
+        <p
+          id="erreur-saisie"
+          hidden
+          role="alert"
+          class={classesErreur}
+        >
+          Il manque quelque chose, ou votre adresse email comporte une erreur.
+          Vérifiez les champs ci-dessous — ce que vous aviez écrit a été conservé.
+        </p>
+
+        <p
+          id="erreur-limite"
+          hidden
+          role="alert"
+          class={classesErreur}
+        >
+          Plusieurs demandes viennent de partir depuis votre connexion. Si ce
+          n'était pas vous, ou si vous êtes pressé, écrivez-moi directement à{' '}
+          <a class="text-signal-vif underline" href={`mailto:${SITE.contact.email}`}>
+            {SITE.contact.email}
+          </a>.
+        </p>
+
         <p
           id="erreur-envoi"
           hidden
           role="alert"
-          class="font-inter mb-8 rounded-xl border border-signal bg-brique p-5 text-sm leading-relaxed"
+          class={classesErreur}
         >
           Votre message n'est pas parti — le problème vient de mon côté, pas du
           vôtre. Écrivez-moi directement à{' '}
