@@ -5,13 +5,27 @@ import { MEDIAS } from '../../config/medias.js';
 {/*
   Marges négatives : elles font chevaucher le nuage de transition, le showcase et
   le hero, pour supprimer toute couture visible entre les sections.
+
+  ⚠ `pointer-events-none` doit être sur ce DIV, pas seulement sur l'image.
+
+  La marge négative remonte ce bloc jusqu'à 384 px par-dessus le bas du hero, et
+  `z-20` le place au-dessus. Un div transparent reste cliquable : le navigateur
+  teste la boîte, pas les pixels peints. Avec la propriété uniquement sur l'img,
+  le div avalait les clics du bouton « Demander un devis » du hero, qui tombe
+  dans cette zone sur la plupart des hauteurs d'écran. Le bouton avait l'air
+  normal, le curseur changeait — mais rien ne se passait.
+
+  La règle vaut pour tout calque décoratif ajouté ici : elle se pose sur
+  l'élément positionné, pas sur son contenu.
 */}
-<div class="relative z-20 -mt-64 sm:-mt-72 md:-mt-80 lg:-mt-96">
+<div
+  class="pointer-events-none relative z-20 -mt-64 sm:-mt-72 md:-mt-80 lg:-mt-96"
+>
   <img
     src={MEDIAS.nuageTransition}
     alt=""
     aria-hidden="true"
-    class="pointer-events-none w-full select-none"
+    class="w-full select-none"
   />
 </div>
 
@@ -23,7 +37,7 @@ import { MEDIAS } from '../../config/medias.js';
       aria-hidden="true"
       class="absolute inset-0 h-full w-full object-cover"
     />
-    <div class="absolute inset-0 bg-black/30" aria-hidden="true"></div>
+    <div class="pointer-events-none absolute inset-0 bg-black/30" aria-hidden="true"></div>
 
     <div
       class="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-32 text-center text-white"
@@ -69,7 +83,7 @@ import { MEDIAS } from '../../config/medias.js';
 
     {/* Fond du dégradé accordé au brun de la section Q&R qui suit. */}
     <div
-      class="absolute bottom-0 left-0 h-48 w-full bg-gradient-to-b from-transparent to-[#410C01]"
+      class="pointer-events-none absolute bottom-0 left-0 h-48 w-full bg-gradient-to-b from-transparent to-[#410C01]"
       aria-hidden="true"
     >
     </div>
