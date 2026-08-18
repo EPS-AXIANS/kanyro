@@ -16,6 +16,38 @@ npm run dev                # http://localhost:4321
 `npm run verifier` liste ce qui manque **et la commande qui le corrige**. C'est
 le premier réflexe quand quelque chose ne marche pas sur une machine.
 
+## Récupérer le travail en cours sur un autre poste
+
+Le développement se fait sur des branches, pas sur `main`. Pour reprendre une
+branche depuis une autre machine :
+
+```bash
+# Le dépôt est déjà cloné sur ce poste
+git fetch origin
+git switch <nom-de-la-branche>   # la 1re fois : crée le suivi de origin
+git pull                         # les fois suivantes
+
+# Poste vierge
+git clone -b <nom-de-la-branche> https://github.com/EPS-AXIANS/kanyro.git
+cd kanyro
+```
+
+Puis, **dans les deux cas** :
+
+```bash
+nvm install && nvm use   # au cas où .nvmrc aurait changé
+npm ci
+npm run verifier
+```
+
+> `npm ci` après chaque `pull` qui touche `package.json` ou
+> `package-lock.json` — sinon on travaille avec les dépendances de la veille.
+> Et toujours **après** `nvm use` : installer sous une version de Node périmée
+> récupère les mauvais binaires natifs (voir plus bas).
+
+`git branch -r` liste les branches disponibles sur GitHub si vous ne vous
+souvenez plus du nom.
+
 ---
 
 ## Ce que npm installe tout seul
