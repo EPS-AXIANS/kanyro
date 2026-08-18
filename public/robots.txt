@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-
-# Page de confirmation après envoi du formulaire : aucune valeur en recherche.
-Disallow: /merci
-
-Sitemap: https://www.kanyro.fr/sitemap-index.xml

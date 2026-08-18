@@ -1,0 +1,394 @@
+# Tasklist — audit externe + vérification dans le code
+
+> Établie le 18/08/2026 à partir d'un audit réalisé par une IA externe **qui n'a
+> lu que le HTML public du site**, puis recoupée point par point avec le code.
+>
+> **Avancement au 18/08/2026 : 9 points sur 42.** Hébergement tranché (OVH),
+> tunnel de conversion durci, bêta sortie de l'index. Restent bloqués sur des
+> données ou un déploiement : 0.1 (SIREN) et 1.1c (test en ligne).
+>
+> Chaque point porte un verdict :
+> - ✅ **Confirmé** — le problème existe bien dans le code.
+> - ⚠️ **À nuancer** — l'observation est juste, la conclusion l'est moins.
+> - ❌ **Faux** — l'audit s'est trompé, rien à corriger (ou l'inverse de ce qu'il croit).
+> - 🔍 **Trouvé en plus** — problème réel que l'audit ne pouvait pas voir.
+
+---
+
+## 0. Bloquants avant toute mise en ligne
+
+- [ ] **0.1 — SIREN et téléphone** ✅ *Confirmé.* `SITE.legal.siren` et
+      `SITE.contact.telephone` sont vides dans `src/config/site.js:23,66`. La page
+      mentions légales affiche donc son encart « À compléter avant la mise en
+      ligne », et le JSON-LD `ProfessionalService` sort sans `telephone`.
+      Sans SIREN : infraction à l'article 19 de la LCEN.
+      → **Téléphone fait le 18/08/2026** (`06 49 07 24 78`, stocké en
+      `+33649072478` pour que `tel:` compose sans ambiguïté). Il apparaît
+      désormais dans le JSON-LD, le pied de page, la page contact et les mentions
+      légales. L'adresse de contact est passée à `kanyro@elio-pallois.fr` le temps
+      de la bêta.
+      → **Reste le SIREN**, seul champ encore vide : l'encart d'avertissement des
+      mentions légales s'est réduit à lui. Une ligne dans `src/config/site.js` le
+      fera disparaître.
+
+- [ ] **0.2 — Fonte « Arsenica Trial » non licenciée** 🔍 *Trouvé en plus.*
+      `src/layouts/Base.astro:97` charge une version d'**essai** depuis
+      `db.onlinewebfonts.com`, un redistributeur tiers. Interdite en usage
+      commercial, et c'est toute l'identité visuelle du site qui repose dessus.
+      → Acheter la licence, ou basculer sur une serif display libre (Fraunces,
+      Instrument Serif, Bodoni Moda), auto-hébergée dans `public/fonts/`.
+
+- [ ] **0.3 — Tous les médias appartiennent à quelqu'un d'autre** 🔍 *Trouvé en plus.*
+      `src/config/medias.js` : vidéo d'accueil, nuages, colombe, fonds de section
+      pointent vers le CloudFront et l'export Figma d'un tiers. Elles peuvent
+      disparaître du jour au lendemain, et rien n'établit le droit de les diffuser
+      sur un site commercial.
+      → Remplacer par des visuels à vous. Idéalement : photos de chantiers réels.
+
+- [ ] **0.4 — Resserrer la CSP après 0.2 et 0.3** 🔍
+      Une fois fontes et médias rapatriés : vider `HOTES_MEDIAS`
+      (`src/config/medias.js`) **et** retirer les mêmes hôtes de `public/.htaccess`.
+      Les deux doivent rester le miroir l'un de l'autre.
+
+- [x] **0.5 — Trancher l'hébergement : OVH ou Netlify** 🔍 *Trouvé en plus, sérieux.*
+      Le repo contient les deux configurations. `netlify.toml` est resté, et le
+      README annonce « hébergement Netlify » en ligne 3 avant de décrire un
+      déploiement OVH en section 2. Or `public/contact.php` **ne s'exécute pas sur
+      Netlify** (pas de PHP) : un déploiement Netlify par erreur ⇒ `/contact.php`
+      renvoie 404 ⇒ zéro demande de devis, sans message d'erreur.
+      → Si OVH : supprimer `netlify.toml` et corriger la ligne 3 du README.
+      → Si Netlify : supprimer `contact.php` + `.htaccess` et recâbler le
+        formulaire (fonction serverless ou service tiers).
+      → **Fait le 18/08/2026 — OVH retenu.** `netlify.toml` supprimé (son contenu
+      était déjà dupliqué dans `.htaccess`), README corrigé, et une section
+      « Si vous migrez un jour chez Cloudflare » ajoutée : elle liste les trois
+      choses qui tombent ce jour-là (`.htaccess` ignoré, `contact.php` non
+      exécuté, hébergeur à changer dans les mentions légales).
+
+- [x] **0.6 — Empêcher l'indexation de la bêta** 🔍 *Trouvé en plus, urgent.*
+      Le site tourne sur `elio-pallois.fr` pendant les essais. Si Google indexe
+      cette adresse, c'est elle qui sort dans les résultats — et le jour de
+      l'ouverture, `kanyro.fr` publie un contenu déjà connu ailleurs : au mieux la
+      notoriété reste sur le mauvais domaine, au pire les deux se concurrencent.
+      → **Fait le 18/08/2026.** Un objet `BETA` dans `src/config/site.js` pilote
+      tout d'un bloc : `SITE.url` (donc canonical, `og:url` et sitemap annoncent
+      l'adresse réellement servie), `noindex` forcé sur **toutes** les pages, et
+      `robots.txt` en `Disallow: /`. Bascule testée dans les deux sens.
+      → ⚠ **Reste à faire par vous :** `robots.txt` est une demande, pas une
+      serrure — un lien partagé suffit à faire entrer l'URL dans l'index. Le bloc
+      d'authentification HTTP est prêt et commenté en haut de `public/.htaccess`,
+      il ne manque que le `.htpasswd` à créer chez OVH.
+      → ⚠ Servir la bêta depuis un **sous-dossier** ne marchera pas (chemins
+      absolus + `.htaccess` à la racine). Il faut un sous-domaine —
+      `https://kanyro.elio-pallois.fr`, confirmé le 18/08/2026.
+
+---
+
+## 1. Tunnel de conversion
+
+### 1.1 — « Le formulaire est en panne » ❌ **Faux**
+
+L'audit a lu, dans le HTML de `/contact`, le texte :
+
+> « Votre message n'est pas parti — le problème vient de mon côté, pas du vôtre. »
+
+C'est un bandeau **`hidden`** (`src/pages/contact.astro:55`), dévoilé uniquement
+par `public/js/effets.js:31` quand l'URL porte `?erreur=1`. Un crawler qui lit le
+HTML brut le voit ; un visiteur, non. Le parcours normal est
+`POST /contact.php` → `/merci`, et `/merci` affiche déjà exactement ce que
+l'audit recommande d'ajouter : « Merci, j'ai bien reçu votre demande. Je vous
+réponds sous 48 heures. »
+
+**Rien à corriger sur ce point.** Mais il a fait remonter trois vrais problèmes :
+
+- [x] **1.1a — `/merci` promet un email qui n'est jamais envoyé** 🔍 *Bug réel.*
+      `src/pages/merci.astro:19` dit « répondez directement à l'email que vous
+      allez recevoir ». Or `public/contact.php` n'envoie qu'**un seul** mail, au
+      gérant. Le visiteur n'en reçoit aucun.
+      → Soit ajouter un accusé de réception au visiteur dans `contact.php`, soit
+        retirer la promesse de `merci.astro`. (Recommandation : l'accusé de
+        réception — il rassure et il ouvre le fil de discussion.)
+      → **Fait.** `contact.php` envoie désormais un accusé de réception au visiteur,
+      avec le rappel de son message et `Auto-Submitted: auto-replied` pour ne pas
+      déclencher le répondeur automatique d'en face. Envoi au mieux : son échec
+      ne fait pas croire au visiteur que sa demande n'est pas partie.
+
+- [x] **1.1b — Une erreur de saisie est présentée comme une panne serveur** 🔍
+      `contact.php:88` renvoie vers `?erreur=1` aussi bien quand `mail()` échoue
+      que quand l'email saisi est invalide. Dans le second cas, le visiteur lit
+      « le problème vient de mon côté » alors qu'il a juste fait une faute de
+      frappe — et **tout ce qu'il avait tapé est perdu**.
+      → Distinguer les deux cas (`?erreur=saisie` / `?erreur=envoi`) et repasser
+        les champs saisis dans la redirection.
+      → **Fait.** Trois motifs distincts (`saisie`, `limite`, `envoi`), un bandeau
+      par motif dans `contact.astro`, et la saisie restaurée depuis sessionStorage
+      — pas depuis l'URL, qui aurait fait fuiter email et message dans les
+      journaux serveur, l'historique et l'en-tête `Referer`.
+
+- [ ] **1.1c — Le formulaire n'a jamais été testé de bout en bout** ✅
+      `mail()` chez OVH exige que `$expediteur` soit une adresse réellement créée
+      sur le domaine. Sans SPF/DKIM corrects, les demandes partent en spam.
+      → Créer `kanyro@elio-pallois.fr` chez OVH (l'expéditeur doit appartenir au
+        domaine **hébergé**, donc au domaine perso pendant la bêta), vérifier
+        SPF + DKIM, puis envoyer un vrai test depuis le site en ligne : réception,
+        accusé de réception côté visiteur, `Reply-To`, accents UTF-8.
+
+- [x] **1.1d — Aucune limite d'envoi sur `contact.php`** 🔍
+      Le pot de miel arrête les robots basiques, rien n'arrête un envoi répété.
+      → Ajouter une limite simple par IP (fichier ou session) avant la mise en
+        ligne, sinon la boîte peut être noyée.
+      → **Fait, et devenu obligatoire.** Un accusé de réception sans limite d'envoi
+      transforme le formulaire en outil de mail-bombing : on soumet l'adresse d'un
+      tiers en boucle, il reçoit le flot, et c'est kanyro.fr qui est signalé comme
+      spammeur. 5 envois/heure/IP, IP hachée, verrou `flock`, et laisse passer si
+      le disque est en lecture seule.
+
+### 1.2 — Mesure des conversions ✅ *Confirmé*
+
+- [ ] **1.2 — Aucun suivi n'est en place.** Les mentions légales affirment (à
+      juste titre aujourd'hui) « aucun cookie, aucun outil de mesure ». Impossible
+      donc de savoir combien de visiteurs cliquent « Demander un devis ».
+      → Installer une mesure **sans cookie** (Plausible, ou Matomo auto-hébergé en
+        mode cookieless) pour garder la promesse RGPD. Impose de : ajouter l'hôte
+        dans `HOTES_MEDIAS`/`.htaccess` (`script-src`, `connect-src`) **et**
+        mettre à jour la section Cookies des mentions légales.
+
+---
+
+## 2. Message et offre
+
+- [ ] **2.1 — Le `h1` de l'accueil ne dit ni le métier, ni la cible, ni le lieu** ✅
+      *Confirmé, et plus grave que ce que dit l'audit.*
+      `src/components/sections/Hero.astro:44` : le `h1` est littéralement
+      « TROIS / CHANTIERS ». Ce n'est pas seulement un problème de compréhension
+      en 5 secondes — c'est **le seul `h1` du site, et il ne contient aucun mot-clé**.
+      Pour un site qui vend du référencement local, c'est une contradiction visible.
+      → Garder l'accroche économique, mais faire porter au `h1` la promesse :
+        « Votre site doit vous apporter des demandes de devis », avec un
+        sous-titre qui pose *artisans du bâtiment* + *Hauts-de-France*.
+        « TROIS CHANTIERS » descend en accroche secondaire — la section
+        `Showcase` (« Le calcul est court ») est déjà exactement à sa place pour ça.
+
+- [ ] **2.2 — 1 200 € et 1 900–2 900 € cohabitent sans règle** ✅ *Confirmé.*
+      `src/data/offres.js:29` affiche `1 900 – 2 900 €`, et `tarifReference:69`
+      affiche `1 200 €` deux sections plus bas. Aucun quota, aucune échéance,
+      aucun « au lieu de ». Un prospect en déduit que le prix se négocie.
+      → Ajouter `quota` et `echeance` à `tarifReference`, afficher
+        « 1 200 € au lieu de 1 900 € — 3 premières entreprises », et retirer
+        l'offre (`actif: false`) une fois les trois signées.
+
+- [ ] **2.3 — La FAQ parle d'un abonnement qui n'existe nulle part** ⚠️ *À nuancer.*
+      L'audit demande d'afficher un prix mensuel. Or `offreMensuelle.actif = false`
+      est une décision documentée et défendable : on ne vend pas un engagement
+      récurrent dont on n'a jamais mesuré le coût réel.
+      **Mais** `QandA.astro:33` répond à « L'abonnement mensuel est obligatoire ? »
+      — donc la page mentionne un produit dont elle ne donne ni le prix ni le
+      contenu. C'est ça, l'incohérence à corriger, pas l'absence de prix.
+      → Court terme : reformuler la réponse pour qu'elle décrive l'après-livraison
+        sans nommer un produit fantôme.
+      → Après le 1er client : activer `offreMensuelle` avec les livrables
+        réellement tenus, et là seulement afficher un prix.
+
+- [ ] **2.4 — Aucune section « Comment ça se passe ? »** ✅ *Confirmé, et facile.*
+      L'accueil enchaîne Hero → Showcase → Offre → Q&R → Citation. Rien n'explique
+      ce qui se passe après le « oui ».
+      → **Le contenu existe déjà** : `docs/processus-livraison.md` décrit les six
+        étapes. Il suffit d'en faire un composant `sections/Processus.astro` et de
+        l'insérer entre `Offre` et `QandA`.
+
+- [ ] **2.5 — Vocabulaire trop « agence » par endroits** ✅ *Confirmé, mineur.*
+      `QandA.astro:29` : « un site techniquement propre », « un suivi chiffré de
+      vos positions mois par mois ».
+      → Remplacer par le résultat : « chaque mois, je vous montre ce qui change :
+        votre visibilité sur Google, les visites, et les demandes reçues. »
+
+- [ ] **2.6 — Ajouter 4–5 objections concrètes à la Q&R** ✅ *Confirmé.*
+      Manquent : « je n'ai pas de belles photos », « j'ai déjà une fiche Google »,
+      « je travaille au bouche-à-oreille », « je n'ai pas le temps de m'en
+      occuper », « vous pouvez reprendre mon ancien site ? ».
+      → ⚠️ Détail technique : `QandA.astro` est câblé en 3 + 3 avec un tableau
+        `delais` de 6 littéraux Tailwind. Ajouter des questions impose d'étendre
+        ce tableau — une classe assemblée à l'exécution ne serait jamais générée
+        par Tailwind.
+
+- [ ] **2.7 — Un seul libellé d'appel à l'action** ✅ *Confirmé, mineur.*
+      Quatre libellés différents aujourd'hui : « Demander un devis » (Hero, Offre),
+      « Voir l'offre » (Showcase), « En parler » (bloc preuve), « Envoyer ma
+      demande » (formulaire).
+      → Garder « Demander un devis » partout où l'action est la même. « En parler »
+        (`Offre.astro:171`) devient « Demander un devis ».
+
+---
+
+## 3. Preuve
+
+- [ ] **3.1 — Il n'y a aucune preuve externe** ✅ *Confirmé.* Le bloc « Je démarre,
+      et ça se voit » est honnête et bien joué, mais il ne répond pas à
+      « pourquoi vous confier 2 000 € ? ».
+      → Construire **une** démonstration complète et étiquetée comme telle
+        (« Exemple de démonstration — pas un client Kanyro ») : accueil, page
+        métier, page métier × commune, formulaire. Le socle technique existe
+        déjà, voir 4.1.
+      → ⚠️ Ne jamais présenter une maquette comme un client. La section actuelle
+        tire toute sa force de ça.
+
+- [ ] **3.2 — Faire des 3 premiers clients un actif marketing** ✅ *Décision commerciale.*
+      Prévoir dès le devis l'autorisation écrite d'exploiter : photos avant/après,
+      nom, métier, commune, et les chiffres à 3 mois (visites, demandes reçues).
+      `docs/devis-modele.md` est l'endroit où l'ajouter.
+
+---
+
+## 4. SEO local
+
+- [ ] **4.1 — « Je ne vois pas de pages métier/ville »** ⚠️ *À moitié faux.*
+      L'audit a raison sur le site public, tort sur le code : les 6 pages métier et
+      les 36 pages « métier × commune » **sont écrites** — `src/pages/metiers/` —
+      avec pour chaque commune un contexte local réel (bâti, contraintes ABF,
+      cités minières…), un JSON-LD `Service`, et un garde-fou explicite contre les
+      *doorway pages*. Elles sont éteintes par `FONCTIONS.pagesLocales = false`.
+      Sa mise en garde contre les pages clonées est donc déjà traitée.
+      **Le vrai problème est ailleurs** : `Offre.astro` promet au client « des pages
+      pensées pour les recherches réelles de vos clients », et le site de Kanyro
+      n'en a aucune. On vend ce qu'on ne montre pas.
+      → **Décision à prendre :** basculer `pagesLocales` à `true` (le contenu est
+        réellement différencié, il tient la route), ou assumer et adoucir la
+        promesse jusqu'au premier client.
+
+- [ ] **4.2 — Aucune image de partage (`og:image`)** ✅ *Confirmé.*
+      Aucune page ne passe la prop `image` au layout (`grep image= src/pages/` →
+      vide), donc aucune balise `og:image` n'est émise. Un lien Kanyro partagé sur
+      WhatsApp ou Facebook — le canal principal chez les artisans — s'affiche en
+      rectangle gris.
+      → Créer une image 1200×630 dans `public/`, la passer via `image` sur
+        l'accueil et le contact.
+
+- [ ] **4.3 — Le reste de la checklist SEO : déjà en place** ❌ *Rien à faire.*
+      Vérifié dans `src/layouts/Base.astro` : `<title>` unique par page, meta
+      description, `h1` unique, canonical propre (`cheminPropre`), Open Graph,
+      Twitter Card, JSON-LD `ProfessionalService` + `BreadcrumbList`,
+      `sitemap-index.xml` généré et filtré des pages `noindex`, `robots.txt`,
+      URL sans slash final, `alt=""` + `aria-hidden` corrects sur les images
+      décoratives. Ce point de l'audit est couvert.
+
+- [ ] **4.4 — Poids et vitesse : le vrai angle mort** 🔍 *Trouvé en plus.*
+      L'audit dit « à vérifier ». Vérifié : c'est mauvais.
+      `Hero.astro:8` charge une **vidéo plein écran en autoplay**, sans `poster`,
+      sans `preload`, depuis un CloudFront tiers — c'est le LCP de la page
+      d'accueil. S'y ajoutent 2 feuilles de style externes bloquantes (Google
+      Fonts + onlinewebfonts) et 4 images distantes sans `width`/`height` (donc
+      décalages de mise en page).
+      → Après 0.2/0.3 : auto-héberger, ajouter un `poster`, passer les images par
+        `<Image />` d'Astro avec dimensions, et mesurer au PageSpeed.
+
+- [x] **4.5 — `robots.txt` contredit le `noindex` de `/merci`** 🔍 *Mineur.*
+      `public/robots.txt:5` interdit l'exploration de `/merci`, ce qui empêche
+      Google d'y **lire** le `noindex` de la page. Les deux signaux s'annulent.
+      → **Fait.** `public/robots.txt` est supprimé au profit de
+        `src/pages/robots.txt.js`, généré : le `Disallow: /merci` a disparu, le
+        `noindex` seul fait foi. Le fichier suit maintenant la bascule `BETA`, ce
+        qu'un fichier statique n'aurait pas pu faire.
+
+- [ ] **4.6 — Search Console** ✅ Non configurée. À faire à la mise en ligne :
+      propriété vérifiée + sitemap soumis.
+
+---
+
+## 5. Accessibilité et mobile
+
+- [ ] **5.1 — Cibles tactiles sous la taille minimale** ✅ *Confirmé, l'audit vise juste.*
+      - `Header.astro` : liens de nav à **9 px** avec `py-2.5` ⇒ ~34 px de haut,
+        et 4 libellés + logo serrés dans une pastille sur mobile.
+      - `Footer.astro` : icônes réseaux/mail à `h-3.5 w-3.5` ⇒ **14 px**.
+      - `.bouton-primaire` : ~42 px de haut sur mobile, tout juste sous la barre.
+      → Viser 44 px de hauteur tactile partout (le padding suffit, la taille du
+        texte peut rester).
+
+- [ ] **5.2 — La vidéo d'accueil ignore `prefers-reduced-motion`** 🔍
+      `effets.js` respecte scrupuleusement la préférence pour les révélations et
+      la parallaxe, mais la vidéo `autoplay loop` du Hero, elle, tourne quoi qu'il
+      arrive. C'est le plus gros mouvement de la page.
+      → Ne lancer la lecture que si `matchMedia('(prefers-reduced-motion)')` est
+        à `no-preference`, sinon afficher le `poster`.
+
+- [ ] **5.3 — Longueur du formulaire** ⚠️ *À nuancer.*
+      L'audit conseille de raccourcir. Sur 7 champs, **3 seulement sont
+      obligatoires** (nom, email, message) — c'est déjà court. Le vrai frein n'est
+      pas le nombre de champs mais la perte de saisie en cas d'erreur (voir 1.1b).
+      → Traiter 1.1b d'abord, et ne raccourcir qu'ensuite si la mesure (1.2) montre
+        des abandons.
+
+- [ ] **5.4 — Parcours mobile complet non testé** ✅
+      → Sur un vrai téléphone : accueil → offre → contact → envoi → `/merci`,
+        avec la vidéo en 4G et pas en Wi-Fi.
+
+---
+
+## 6. Zone d'intervention
+
+- [ ] **6.1 — Périmètre annoncé plus large que la capacité réelle** ⚠️ *Avis, pas défaut.*
+      `communes.json` couvre Arrageois + bassin minier + métropole lilloise, et
+      l'offre promet un déplacement photo d'une demi-journée par client. Lille est
+      à 45 min d'Arras : c'est tenable à 3 clients, plus à 12.
+      → Sans rien retirer : afficher une hiérarchie. `Offre.astro` groupe déjà par
+        secteur dans l'ordre du fichier — il suffit d'étiqueter
+        « Zone prioritaire » / « Sur demande ».
+
+---
+
+## 7. Dette technique repérée au passage 🔍
+
+- [ ] **7.1 — La CSP est écrite en triple** — `Base.astro:41`, `netlify.toml:19`,
+      `public/.htaccess:38`. Trois copies à maintenir à la main, avec des
+      commentaires qui se rappellent mutuellement de rester synchronisées : ça
+      finira par diverger.
+      → La générer depuis `medias.js` (au moins pour `.htaccess`, via un script de
+        build), ou supprimer la copie devenue inutile après 0.5.
+
+- [ ] **7.2 — Code mort** — `src/components/Tarif.astro` n'est importé nulle part
+      et attend des propriétés (`resume`, `inclus`, `misEnAvant`) qui n'existent
+      dans aucun objet de `offres.js`. `src/components/sections/Metiers.astro`
+      n'est jamais importé non plus.
+      → Supprimer `Tarif.astro`. Garder `Metiers.astro` **si** 4.1 est activé
+        (c'est lui qui porte le maillage interne vers les pages métier), le
+        supprimer sinon.
+
+- [x] **7.3 — Commentaires périmés** — `site.js:105` explique le comportement de
+      `cheminPropre` par `build.format: 'file'` et cite Netlify, alors que
+      `astro.config.mjs` est en `'directory'` et que le déploiement vise OVH. Le
+      code est bon, l'explication ne l'est plus — c'est le genre de commentaire qui
+      induit en erreur dans six mois.
+      → **Fait.** Le commentaire de `cheminPropre` décrit maintenant le vrai réglage
+      (`directory` + `trailingSlash: 'never'` sur Apache).
+
+- [x] **7.4 — README contradictoire** — ligne 3 : « hébergement Netlify ».
+      Section 2 : « Déploiement — OVH mutualisé ». À trancher avec 0.5.
+      → **Fait.** Ligne 3 corrigée, plus la mention périmée de Netlify Forms dans la
+      checklist et le renvoi à `netlify.toml` pour la redirection `kaniro.fr`.
+
+- [ ] **7.5 — Favicon provisoire**, pas d'`apple-touch-icon`. Un artisan qui ajoute
+      le site à son écran d'accueil verra une icône générique.
+
+- [x] **7.6 — Node local trop ancien** — Astro 7 exige Node >= 22.12, la version
+      par défaut de la machine est la 18.19. `netlify.toml` déclare bien
+      `NODE_VERSION = "24"`, mais rien ne le signale en local : `npm install` sous
+      Node 18 installe le mauvais binaire `rolldown` et le build casse avec une
+      erreur illisible (`Cannot find module '@rolldown/binding-wasm32-wasi'`).
+      → Ajouter un `.nvmrc` (`24`) et un champ `engines` dans `package.json`.
+      → **Fait.** `.nvmrc` (`24`) et `"engines": { "node": ">=22.12.0" }`.
+
+---
+
+## Ordre suggéré
+
+**Cette semaine** — 0.1, 1.1a, 1.1b, 1.1c, 0.5
+*Le tunnel doit être irréprochable avant d'envoyer un seul prospect dessus.*
+
+**Ensuite** — 2.1, 2.2, 2.3, 2.4
+*Le premier écran et la lisibilité du prix : le plus gros gain pour le moins d'effort.*
+
+**Avant la mise en ligne publique** — 0.2, 0.3, 0.4, 4.2, 4.4, 5.1
+*Les blocages juridiques et le poids de la page.*
+
+**Après le premier client** — 3.1, 3.2, 4.1, 2.3 (volet abonnement)
+*Tout ce qui a besoin d'un vrai chantier livré pour exister.*
