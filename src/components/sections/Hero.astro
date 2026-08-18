@@ -1,5 +1,23 @@
 ---
 import { MEDIAS } from '../../config/medias.js';
+import { offre } from '../../data/offres.js';
+
+/*
+ * Le premier écran répond à quatre questions, dans cet ordre : pour qui, quoi,
+ * où, et quelle action.
+ *
+ * Il portait auparavant « TROIS CHANTIERS » en h1. L'accroche est excellente,
+ * mais elle laissait un visiteur découvrir l'activité au bout de quelques
+ * secondes — et surtout, c'est le seul h1 du site : il ne contenait aucun des
+ * mots que la cible tape dans Google, sur une vitrine qui vend précisément du
+ * référencement local.
+ *
+ * L'argument économique n'est pas perdu, il descend d'un écran : la section
+ * Showcase juste dessous s'appelle « Le calcul est court » et existe pour ça.
+ *
+ * La promesse vient de offres.js — la même phrase que la section Offre, pour
+ * qu'un changement de positionnement ne se fasse pas à deux endroits.
+ */
 ---
 
 <section class="relative h-screen w-full overflow-hidden">
@@ -39,26 +57,29 @@ import { MEDIAS } from '../../config/medias.js';
       Arrageois · Bassin minier · Lille
     </p>
 
+    {/* Même duo serif / sans que précédemment : c'est la signature typographique
+        de la page. Seuls les mots changent. La seconde ligne est plus longue que
+        « CHANTIERS », d'où une échelle un cran en dessous — elle reste la plus
+        grosse chose à l'écran. */}
     <h1
       class="hero-fade-up mt-8 leading-[1.05] drop-shadow-[0_2px_24px_rgba(0,0,0,0.25)] [animation-delay:250ms]"
     >
       <span
-        class="font-arsenica block text-5xl tracking-wide sm:text-7xl md:text-8xl lg:text-[7rem]"
+        class="font-arsenica block text-2xl tracking-wide sm:text-4xl md:text-5xl lg:text-6xl"
       >
-        TROIS
+        Sites internet pour
       </span>
       <span
-        class="font-inter block text-5xl font-semibold tracking-tight sm:text-7xl md:text-8xl lg:text-[7rem]"
+        class="font-inter mt-1 block text-4xl font-semibold tracking-tight text-balance uppercase sm:text-6xl md:text-7xl lg:text-8xl"
       >
-        CHANTIERS
+        artisans du bâtiment
       </span>
     </h1>
 
     <p
       class="hero-fade-up font-arsenica mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [animation-delay:400ms] sm:text-lg md:text-xl"
     >
-      Trois chantiers signés paient votre site. Le reste, c'est ce qu'il vous
-      rapporte les années suivantes.
+      {offre.promesse}
     </p>
 
     <a

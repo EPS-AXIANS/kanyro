@@ -3,9 +3,10 @@
 > Établie le 18/08/2026 à partir d'un audit réalisé par une IA externe **qui n'a
 > lu que le HTML public du site**, puis recoupée point par point avec le code.
 >
-> **Avancement au 18/08/2026 : 9 points sur 42.** Hébergement tranché (OVH),
-> tunnel de conversion durci, bêta sortie de l'index. Restent bloqués sur des
-> données ou un déploiement : 0.1 (SIREN) et 1.1c (test en ligne).
+> **Avancement au 18/08/2026 : 15 points sur 42.** Hébergement tranché (OVH),
+> tunnel de conversion durci, bêta sortie de l'index, message et offre repris.
+> Restent bloqués sur des données ou un déploiement : 0.1 (SIREN) et 1.1c (test
+> en ligne).
 >
 > Chaque point porte un verdict :
 > - ✅ **Confirmé** — le problème existe bien dans le code.
@@ -157,7 +158,7 @@ réponds sous 48 heures. »
 
 ## 2. Message et offre
 
-- [ ] **2.1 — Le `h1` de l'accueil ne dit ni le métier, ni la cible, ni le lieu** ✅
+- [x] **2.1 — Le `h1` de l'accueil ne dit ni le métier, ni la cible, ni le lieu** ✅
       *Confirmé, et plus grave que ce que dit l'audit.*
       `src/components/sections/Hero.astro:44` : le `h1` est littéralement
       « TROIS / CHANTIERS ». Ce n'est pas seulement un problème de compréhension
@@ -168,16 +169,30 @@ réponds sous 48 heures. »
         sous-titre qui pose *artisans du bâtiment* + *Hauts-de-France*.
         « TROIS CHANTIERS » descend en accroche secondaire — la section
         `Showcase` (« Le calcul est court ») est déjà exactement à sa place pour ça.
+      → **Fait le 18/08/2026.** Le `h1` devient « Sites internet pour artisans du
+      bâtiment », dans le même duo serif/sans qu'avant — la signature
+      typographique est conservée, seuls les mots changent. La promesse sous le
+      titre vient de `offre.promesse`, donc elle ne peut plus diverger de la
+      section Offre. « TROIS CHANTIERS » n'est pas perdu : il descend d'un écran
+      et devient le `h2` du Showcase, qui s'appelait déjà « Le calcul est court »
+      et existait pour porter cet argument.
 
-- [ ] **2.2 — 1 200 € et 1 900–2 900 € cohabitent sans règle** ✅ *Confirmé.*
+- [x] **2.2 — 1 200 € et 1 900–2 900 € cohabitent sans règle** ✅ *Confirmé.*
       `src/data/offres.js:29` affiche `1 900 – 2 900 €`, et `tarifReference:69`
       affiche `1 200 €` deux sections plus bas. Aucun quota, aucune échéance,
       aucun « au lieu de ». Un prospect en déduit que le prix se négocie.
       → Ajouter `quota` et `echeance` à `tarifReference`, afficher
         « 1 200 € au lieu de 1 900 € — 3 premières entreprises », et retirer
         l'offre (`actif: false`) une fois les trois signées.
+      → **Fait.** `tarifReference` porte maintenant `quota: 3`, `restants: 3` et
+      `prixBarre: '1 900 €'` — le bas de la fourchette normale, pas un prix gonflé
+      pour l'occasion : un faux rabais se voit. Le bloc preuve affiche le prix
+      barré, « 3 premières entreprises » et le nombre de places restantes ; le
+      prix principal y renvoie par un lien, parce que c'est en lisant
+      1 900–2 900 € qu'on se demande pourquoi l'autre existe. À `restants: 0`,
+      la section disparaît d'elle-même.
 
-- [ ] **2.3 — La FAQ parle d'un abonnement qui n'existe nulle part** ⚠️ *À nuancer.*
+- [x] **2.3 — La FAQ parle d'un abonnement qui n'existe nulle part** ⚠️ *À nuancer.*
       L'audit demande d'afficher un prix mensuel. Or `offreMensuelle.actif = false`
       est une décision documentée et défendable : on ne vend pas un engagement
       récurrent dont on n'a jamais mesuré le coût réel.
@@ -188,19 +203,35 @@ réponds sous 48 heures. »
         sans nommer un produit fantôme.
       → Après le 1er client : activer `offreMensuelle` avec les livrables
         réellement tenus, et là seulement afficher un prix.
+      → **Fait.** La question devient « Et après la mise en ligne, il se passe
+      quoi ? » et décrit le réel : première année comprise, puis reprise en main
+      ou accompagnement, et l'aveu qu'aucune formule mensuelle n'est vendue tant
+      que le rythme tenable n'a pas été mesuré sur un vrai chantier. Le produit
+      fantôme disparaît sans qu'on ait eu à inventer un prix.
 
-- [ ] **2.4 — Aucune section « Comment ça se passe ? »** ✅ *Confirmé, et facile.*
+- [x] **2.4 — Aucune section « Comment ça se passe ? »** ✅ *Confirmé, et facile.*
       L'accueil enchaîne Hero → Showcase → Offre → Q&R → Citation. Rien n'explique
       ce qui se passe après le « oui ».
       → **Le contenu existe déjà** : `docs/processus-livraison.md` décrit les six
         étapes. Il suffit d'en faire un composant `sections/Processus.astro` et de
         l'insérer entre `Offre` et `QandA`.
+      → **Fait.** `sections/Processus.astro`, six étapes, inséré entre Offre et
+      Q&R — on ne se demande « comment ça se passe » qu'une fois qu'on sait ce
+      qu'on achète et combien. Contenu tiré de `processus-livraison.md` mais
+      **réécrit** : ce document est une checklist interne (acompte de 30 %,
+      modifications facturées, relances). Ce qui appartient au devis n'a rien à
+      faire sur une page de vente.
 
-- [ ] **2.5 — Vocabulaire trop « agence » par endroits** ✅ *Confirmé, mineur.*
+- [x] **2.5 — Vocabulaire trop « agence » par endroits** ✅ *Confirmé, mineur.*
       `QandA.astro:29` : « un site techniquement propre », « un suivi chiffré de
       vos positions mois par mois ».
       → Remplacer par le résultat : « chaque mois, je vous montre ce qui change :
         votre visibilité sur Google, les visites, et les demandes reçues. »
+      → **Fait.** « un site techniquement propre » et « un suivi chiffré de vos
+      positions mois par mois » deviennent « un site rapide qui s'affiche
+      correctement sur un téléphone » et « chaque mois un point sur ce qui
+      change — où vous sortez sur Google, combien de personnes sont venues,
+      combien vous ont écrit ».
 
 - [ ] **2.6 — Ajouter 4–5 objections concrètes à la Q&R** ✅ *Confirmé.*
       Manquent : « je n'ai pas de belles photos », « j'ai déjà une fiche Google »,
@@ -211,12 +242,17 @@ réponds sous 48 heures. »
         ce tableau — une classe assemblée à l'exécution ne serait jamais générée
         par Tailwind.
 
-- [ ] **2.7 — Un seul libellé d'appel à l'action** ✅ *Confirmé, mineur.*
+- [x] **2.7 — Un seul libellé d'appel à l'action** ✅ *Confirmé, mineur.*
       Quatre libellés différents aujourd'hui : « Demander un devis » (Hero, Offre),
       « Voir l'offre » (Showcase), « En parler » (bloc preuve), « Envoyer ma
       demande » (formulaire).
       → Garder « Demander un devis » partout où l'action est la même. « En parler »
         (`Offre.astro:171`) devient « Demander un devis ».
+      → **Fait.** « En parler » devient « Demander un devis », et le bouton passe en
+      primaire — c'était le seul appel à l'action secondaire sur le chemin de
+      conversion. L'accueil affiche désormais quatre fois le même libellé.
+      « Voir l'offre » reste dans le Showcase : c'est de la navigation interne
+      vers `#offre`, pas un appel à l'action concurrent.
 
 ---
 

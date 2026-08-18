@@ -1,0 +1,110 @@
+---
+import { offre } from '../../data/offres.js';
+
+/*
+ * « Concrètement, qu'est-ce qui se passe après que je dis oui ? »
+ *
+ * La section Offre décrit très bien ce qu'on achète — cinq pages, des photos,
+ * une fiche Google — mais rien ne disait ce qui allait arriver ensuite. Sur une
+ * cible non technique qui engage deux mille euros auprès de quelqu'un sans
+ * référence, l'inconnu du déroulé est un frein au moins aussi fort que le prix.
+ *
+ * Les étapes viennent de docs/processus-livraison.md, mais réécrites : ce
+ * document est une checklist interne, avec l'acompte, les relances et les
+ * modifications facturées. Ce qui appartient au devis n'a rien à faire sur une
+ * page de vente — on répond à « comment ça se passe », pas « quelles sont mes
+ * obligations ».
+ *
+ * Le délai affiché vient de offres.js pour qu'il ne puisse pas contredire celui
+ * annoncé deux sections plus haut.
+ */
+const etapes = [
+  {
+    titre: 'On fait le point',
+    duree: '30 minutes',
+    detail:
+      'Votre activité, vos chantiers, les communes où vous vous déplacez vraiment. Et je vous dis franchement si un site va vous rapporter quelque chose — si la réponse est non, vous l’entendrez à ce moment-là, pas après la facture.',
+  },
+  {
+    titre: 'Je viens sur vos chantiers',
+    duree: 'une demi-journée',
+    detail:
+      'Deux ou trois chantiers finis, photographiés tôt le matin ou en fin de journée. Dans le bâtiment, c’est la photo qui signe le devis. Vous n’avez rien à préparer.',
+  },
+  {
+    titre: 'Vous validez les textes',
+    duree: 'avant tout dessin',
+    detail:
+      'Je vous envoie ce qui sera écrit, sans mise en forme. C’est volontaire : devant une maquette, on regarde les couleurs et on ne lit plus rien. Les mots sont les vôtres, pas les miens.',
+  },
+  {
+    titre: 'Je construis le site',
+    duree: 'deux à trois semaines',
+    detail:
+      'Les pages, le formulaire de devis, votre numéro cliquable, la fiche Google créée ou reprise. Vous recevez un aperçu en ligne avant que quiconque puisse le voir.',
+  },
+  {
+    titre: 'On corrige ensemble',
+    duree: 'une semaine',
+    detail:
+      'Vous me dites ce qui ne va pas, je reprends. C’est le moment de tout dire — une couleur, une photo, une phrase qui ne vous ressemble pas.',
+  },
+  {
+    titre: 'Mise en ligne',
+    duree: 'le jour J',
+    detail:
+      'Le nom de domaine et le site sont à votre nom, les accès vous sont remis, et on prend trente minutes pour que vous sachiez ajouter une photo tout seul. À un mois, je vous envoie les premiers chiffres.',
+  },
+];
+---
+
+<section id="deroulement" class="bg-fond px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
+  <div class="mx-auto max-w-5xl">
+    <p class="surtitre reveal text-center">Le déroulement</p>
+    <h2
+      class="font-arsenica reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+    >
+      Comment ça se passe
+    </h2>
+    <p
+      class="font-inter reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [animation-delay:120ms]"
+    >
+      {offre.delai} entre le premier rendez-vous et la mise en ligne. Vous
+      n’intervenez qu’à trois moments — le reste, c’est mon travail.
+    </p>
+
+    {/*
+      Liste ordonnée : l'ordre porte du sens ici, ce n'est pas une énumération.
+      Le compteur est décoratif et sorti du flux d'accessibilité, puisque <ol>
+      annonce déjà le rang aux lecteurs d'écran.
+    */}
+    <ol class="mt-16 space-y-px overflow-hidden rounded-2xl bg-white/10">
+      {
+        etapes.map((etape, i) => (
+          <li class="reveal bg-surface p-8 sm:flex sm:gap-8">
+            <p
+              class="font-arsenica shrink-0 text-3xl text-signal-vif tabular-nums sm:w-16 sm:text-4xl"
+              aria-hidden="true"
+            >
+              {String(i + 1).padStart(2, '0')}
+            </p>
+
+            <div class="mt-3 sm:mt-0">
+              <h3 class="font-arsenica text-2xl tracking-wide">{etape.titre}</h3>
+              <p class="font-inter mt-1 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+                {etape.duree}
+              </p>
+              <p class="font-inter mt-3 max-w-2xl text-xs leading-relaxed text-texte-doux">
+                {etape.detail}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="reveal mt-12 text-center">
+      <a href="/contact" class="bouton-primaire">Demander un devis</a>
+    </div>
+  </div>
+</section>

@@ -25,11 +25,22 @@ const colonneGauche = [
 const colonneDroite = [
   {
     q: 'Vous garantissez la première place sur Google ?',
-    r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Je garantis un site techniquement propre, des pages qui visent les recherches que vos clients tapent vraiment, et un suivi chiffré de vos positions mois par mois.",
+    r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Ce que je garantis : un site rapide qui s'affiche correctement sur un téléphone, des pages écrites autour des mots que vos clients tapent vraiment, et chaque mois un point sur ce qui change — où vous sortez sur Google, combien de personnes sont venues, combien vous ont écrit.",
   },
+  /*
+   * Cette question demandait auparavant « L'abonnement mensuel est obligatoire ? »
+   * et répondait « Non ». Elle nommait donc un produit dont la page ne donnait ni
+   * le prix ni le contenu — le prospect repartait avec une question de plus.
+   *
+   * L'abonnement n'existe pas encore volontairement (voir offreMensuelle dans
+   * offres.js) : on ne vend pas un engagement récurrent dont on n'a jamais mesuré
+   * le coût réel. La bonne réponse n'est donc pas d'afficher un prix inventé,
+   * c'est de dire ce qui se passe après la livraison — et d'assumer qu'on ne
+   * vend rien de récurrent aujourd'hui, ce qui est plutôt rassurant à entendre.
+   */
   {
-    q: 'L’abonnement mensuel est obligatoire ?',
-    r: "Non. Sans lui, il faut prévoir l'hébergement de votre côté et le site n'évoluera plus. Beaucoup le prennent parce qu'ils ne veulent pas y penser, mais ça reste votre choix et il se résilie.",
+    q: 'Et après la mise en ligne, il se passe quoi ?',
+    r: "La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Ensuite, soit vous reprenez la main — le site est à vous, il tourne, comptez une trentaine d'euros par an —, soit je continue à m'en occuper. Je ne vends pas encore de formule mensuelle : je veux d'abord mesurer sur un vrai chantier ce que je peux tenir tous les mois. Vous ne signerez donc rien de récurrent aujourd'hui.",
   },
   {
     q: 'Et si un site ne me sert à rien ?',

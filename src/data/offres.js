@@ -61,10 +61,29 @@ export const offre = {
  * accepte de travailler avec quelqu'un qui n'a pas encore de références. Il est
  * normal que ça se paie dans le prix, et le dire ainsi vaut mieux que de brader
  * sans l'expliquer.
+ *
+ * ⚠ `quota` et `prixBarre` ne sont pas décoratifs.
+ *
+ * Deux prix affichés sur la même page sans règle qui les relie, et le prospect
+ * n'en retient qu'une chose : le prix se négocie. La discussion commerciale
+ * devient un marchandage avant même le premier rendez-vous.
+ *
+ * Le quota répond à « pourquoi lui et pas moi ? » — parce qu'il était dans les
+ * trois premiers — et il crée la seule urgence honnête dont on dispose quand on
+ * n'a rien à montrer. `prixBarre` reprend le bas de la fourchette normale, pas
+ * un prix gonflé pour l'occasion : afficher 2 900 € barré serait un faux rabais.
+ *
+ * `restants` se décrémente à la main après chaque signature. À zéro, l'offre
+ * disparaît d'elle-même — c'est ce qui la rend crédible. La laisser tourner
+ * après le troisième client transforme la rareté annoncée en mensonge, et un
+ * artisan qui repasse sur le site six mois plus tard le verra.
  */
 export const tarifReference = {
   actif: true,
   prix: '1 200 €',
+  prixBarre: '1 900 €',
+  quota: 3,
+  restants: 3,
   contrepartie:
     'En échange, j’utilise votre chantier comme référence : photos, chiffres et votre nom sur le site, avec votre accord écrit.',
 };

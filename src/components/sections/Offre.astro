@@ -47,6 +47,19 @@ const secteurs = [
           {offre.prix}
         </p>
         <p class="font-inter mt-2 text-xs text-white/50">{offre.mention}</p>
+        {
+          /* Le tarif de lancement est annoncé ici, et pas seulement deux sections
+             plus bas : c'est en lisant le prix normal qu'on se demande pourquoi
+             l'autre existe. Répondre sur place évite que l'écart passe pour une
+             marge de négociation. */
+          tarifReference.actif && tarifReference.restants > 0 && (
+            <p class="font-inter mt-3 text-xs text-signal-vif">
+              <a href="#preuve" class="underline underline-offset-4">
+                {tarifReference.prix} pour les {tarifReference.quota} premiers
+              </a>
+            </p>
+          )
+        }
       </div>
 
       <div class="hidden h-16 w-px bg-white/15 sm:block" aria-hidden="true"></div>
@@ -136,7 +149,7 @@ const secteurs = [
 </section>
 
 {
-  tarifReference.actif && (
+  tarifReference.actif && tarifReference.restants > 0 && (
     <section id="preuve" class="px-4 py-24 sm:px-8 md:px-16 lg:px-28">
       <div class="carte reveal mx-auto max-w-3xl p-10 text-center">
         <p class="surtitre">La preuve, parlons-en</p>
@@ -153,16 +166,28 @@ const secteurs = [
         </p>
 
         <p class="font-inter mt-8 text-[10px] tracking-[0.25em] text-texte-faible uppercase">
-          Tarif de lancement
+          Tarif de lancement — {tarifReference.quota} premières entreprises
         </p>
-        <p class="font-inter mt-2 text-4xl font-semibold tracking-tight text-signal-vif">
-          {tarifReference.prix}
+        <p class="font-inter mt-2 flex items-baseline justify-center gap-3">
+          <span class="text-4xl font-semibold tracking-tight text-signal-vif">
+            {tarifReference.prix}
+          </span>
+          <span class="text-lg text-texte-faible line-through">
+            {tarifReference.prixBarre}
+          </span>
         </p>
         <p class="font-inter mx-auto mt-5 max-w-lg text-xs leading-relaxed text-texte-faible">
           {tarifReference.contrepartie}
         </p>
+        <p class="font-inter mx-auto mt-3 max-w-lg text-xs leading-relaxed text-texte-faible">
+          {
+            tarifReference.restants > 1
+              ? `Il reste ${tarifReference.restants} places. Ensuite, l'offre s'arrête et le tarif revient à la fourchette normale.`
+              : "Il reste une place. Ensuite, l'offre s'arrête et le tarif revient à la fourchette normale."
+          }
+        </p>
 
-        <a href="/contact" class="bouton-secondaire mt-9">En parler</a>
+        <a href="/contact" class="bouton-primaire mt-9">Demander un devis</a>
       </div>
     </section>
   )

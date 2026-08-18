@@ -28,23 +28,40 @@ import { MEDIAS } from '../../config/medias.js';
     <div
       class="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-32 text-center text-white"
     >
+      {/*
+        « TROIS CHANTIERS » vient du premier écran, où il occupait le h1 sans
+        jamais dire ce que fait l'agence. Ici il est chez lui : la section existe
+        pour porter l'argument économique, et l'accroche garde toute sa force une
+        fois qu'on sait de quoi on parle.
+      */}
+      <p class="surtitre reveal text-white/60">Le calcul est court</p>
+
       <h2
-        class="reveal font-arsenica text-4xl tracking-wide drop-shadow-[0_2px_20px_rgba(0,0,0,0.3)] sm:text-5xl md:text-6xl lg:text-7xl"
+        class="reveal mt-6 leading-[1.05] drop-shadow-[0_2px_20px_rgba(0,0,0,0.3)] [animation-delay:100ms]"
       >
-        Le calcul est court
+        <span
+          class="font-arsenica block text-5xl tracking-wide sm:text-7xl md:text-8xl lg:text-[7rem]"
+        >
+          TROIS
+        </span>
+        <span
+          class="font-inter block text-5xl font-semibold tracking-tight sm:text-7xl md:text-8xl lg:text-[7rem]"
+        >
+          CHANTIERS
+        </span>
       </h2>
 
       <p
-        class="reveal font-arsenica mt-10 text-xl tracking-wide text-white/90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.25)] [animation-delay:150ms] sm:text-2xl md:text-3xl lg:text-4xl"
+        class="reveal font-arsenica mt-10 max-w-3xl text-xl tracking-wide text-white/90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.25)] [animation-delay:250ms] sm:text-2xl md:text-3xl"
       >
-        Un chantier pèse entre<br />
-        cinq et vingt mille euros.<br />
-        Il en faut trois.
+        Un chantier pèse entre cinq et vingt mille euros. Trois chantiers signés
+        paient votre site — le reste, c'est ce qu'il vous rapporte les années
+        suivantes.
       </p>
 
       <a
         href="/#offre"
-        class="reveal font-inter mt-12 inline-block rounded-[50%] border border-white/50 px-10 py-4 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:300ms] hover:scale-[1.03] hover:border-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] sm:px-12 sm:py-5 sm:text-xs"
+        class="reveal font-inter mt-12 inline-block rounded-[50%] border border-white/50 px-10 py-4 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:400ms] hover:scale-[1.03] hover:border-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] sm:px-12 sm:py-5 sm:text-xs"
       >
         Voir l'offre
       </a>
