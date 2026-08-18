@@ -5,10 +5,15 @@ OVH. Direction visuelle sombre et cinématographique, reprise d'un template de
 galerie d'art et transposée sur le socle SEO.
 
 ```bash
+npm run verifier # contrôle que le poste a tout ce qu'il faut
 npm run dev      # développement, http://localhost:4321
 npm run build    # génère dist/
 npm run preview  # sert dist/ — c'est ici qu'on vérifie, la CSP n'existe qu'en prod
 ```
+
+**Sur un poste neuf :** `nvm install && nvm use && npm ci && npm run verifier`.
+Le détail de ce qu'il faut installer — et de ce qu'il ne faut pas chercher —
+est dans [`docs/environnement.md`](docs/environnement.md).
 
 > **Ne jamais ouvrir `dist/index.html` en double-cliquant.** Les chemins générés
 > sont absolus (`/_astro/…`) : en `file://` le navigateur les cherche à la racine
@@ -174,6 +179,8 @@ Dans `docs/`, hors du site :
 | `questionnaire-client.md` | À remplir en rendez-vous, pas à envoyer par mail |
 | `devis-modele.md` | Modèle avec les mentions légales obligatoires |
 | `processus-livraison.md` | Les six étapes et le cahier de recette |
+| `environnement.md` | Ce qu'il faut installer sur un poste neuf |
+| `tasklist.md` | Corrections issues de l'audit externe, avec leur verdict |
 
 ## Prise de rendez-vous
 
