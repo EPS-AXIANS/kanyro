@@ -37,7 +37,7 @@ const jsonLd = filAriane([
   description={`Création de site et référencement local pour ${metier.pluriel} des Hauts-de-France. ${metier.accroche}`}
   jsonLd={jsonLd}
 >
-  <nav class="contenu sous-navbar font-inter pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase" aria-label="Fil d'Ariane">
+  <nav class="contenu sous-navbar font-texte pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase" aria-label="Fil d'Ariane">
     <a href="/metiers" class="hover:text-texte">Métiers</a>
     <span class="mx-2" aria-hidden="true">·</span>
     <span class="text-texte-doux">{metier.nom}</span>
@@ -47,10 +47,10 @@ const jsonLd = filAriane([
     <h1 class="titre-page reveal max-w-4xl">
       Un site pour {metier.article} {metier.nom.toLowerCase()}
     </h1>
-    <p class="font-arsenica reveal mt-7 max-w-2xl text-xl text-signal-vif [animation-delay:80ms] sm:text-2xl">
+    <p class="font-titre reveal mt-7 max-w-2xl text-xl text-signal-vif [animation-delay:80ms] sm:text-2xl">
       {metier.accroche}
     </p>
-    <p class="font-inter reveal mt-6 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]">
+    <p class="font-texte reveal mt-6 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]">
       {metier.contexte}
     </p>
     <a href="/contact" class="bouton-primaire reveal mt-10 [animation-delay:240ms]">
@@ -61,13 +61,13 @@ const jsonLd = filAriane([
   <section class="bg-brique py-20">
     <div class="contenu grid gap-14 md:grid-cols-2">
       <div>
-        <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+        <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">
           Ce que je mets en place
         </h2>
         <ul class="mt-8 space-y-4">
           {
             metier.prestations.map((p) => (
-              <li class="font-inter reveal flex gap-3 text-sm text-white/70">
+              <li class="font-texte reveal flex gap-3 text-sm text-white/70">
                 <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                 <span>{p}</span>
               </li>
@@ -77,10 +77,10 @@ const jsonLd = filAriane([
       </div>
 
       <div>
-        <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+        <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">
           Ce que vos clients tapent
         </h2>
-        <p class="font-inter reveal mt-5 text-sm leading-relaxed text-white/60">
+        <p class="font-texte reveal mt-5 text-sm leading-relaxed text-white/60">
           Ce sont ces recherches-là qu'on vise, associées à votre commune. Pas des
           mots-clés génériques sur lesquels vous ne sortirez jamais.
         </p>
@@ -94,7 +94,7 @@ const jsonLd = filAriane([
           }
         </ul>
 
-        <p class="font-inter reveal mt-9 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
+        <p class="font-texte reveal mt-9 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
           Chantier moyen dans votre métier : <strong class="text-white">{metier.panierMoyen}</strong>.
           C'est ce qui rend le calcul simple — quelques chantiers gagnés grâce au site
           le remboursent.
@@ -104,8 +104,8 @@ const jsonLd = filAriane([
   </section>
 
   <section class="contenu py-20">
-    <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">Votre secteur</h2>
-    <p class="font-inter reveal mt-5 max-w-2xl text-sm leading-relaxed text-texte-doux">
+    <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">Votre secteur</h2>
+    <p class="font-texte reveal mt-5 max-w-2xl text-sm leading-relaxed text-texte-doux">
       Le référencement local se joue commune par commune. Voici celles que je couvre
       pour votre métier.
     </p>
@@ -117,10 +117,10 @@ const jsonLd = filAriane([
               href={`/metiers/${metier.slug}/${c.slug}`}
               class="carte flex h-full flex-col justify-between p-6 no-underline transition-colors duration-500 hover:border-white/30 hover:bg-surface-haute"
             >
-              <span class="font-arsenica text-xl tracking-wide">
+              <span class="font-titre text-xl tracking-wide">
                 {metier.nom} à {c.nom}
               </span>
-              <span class="font-inter mt-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+              <span class="font-texte mt-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
                 {c.secteur}
               </span>
             </a>

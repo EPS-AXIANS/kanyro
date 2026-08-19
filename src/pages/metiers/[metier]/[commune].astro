@@ -75,7 +75,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
 
 <Base titre={titre} description={description} jsonLd={jsonLd}>
   <nav
-    class="contenu sous-navbar font-inter pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
+    class="contenu sous-navbar font-texte pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
     aria-label="Fil d'Ariane"
   >
     <a href="/metiers" class="hover:text-texte">Métiers</a>
@@ -91,7 +91,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
       {metier.nom} à {commune.nom} : être trouvé par vos voisins
     </h1>
     <p
-      class="font-inter reveal mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      class="font-texte reveal mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
     >
       Quand un habitant de {commune.nom} cherche {metier.article}
       {metier.nom.toLowerCase()}, il tape le métier et le nom de sa commune, puis
@@ -106,16 +106,16 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
   <section class="bg-brique py-20">
     <div class="contenu grid gap-14 md:grid-cols-2">
       <div>
-        <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+        <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">
           Le bâti à {commune.nom}
         </h2>
-        <p class="font-inter reveal mt-6 text-sm leading-relaxed text-white/70">
+        <p class="font-texte reveal mt-6 text-sm leading-relaxed text-white/70">
           {commune.contexte}
         </p>
-        <p class="font-inter reveal mt-4 text-xs text-white/45">
+        <p class="font-texte reveal mt-4 text-xs text-white/45">
           Commune {commune.repere}, dans {commune.secteur.toLowerCase()}.
         </p>
-        <p class="font-inter reveal mt-8 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
+        <p class="font-texte reveal mt-8 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
           Ça compte pour votre site : les gens cherchent avec les mots de leur
           situation. Une page qui parle du bâti local convertit mieux qu'une page qui
           récite des généralités.
@@ -123,10 +123,10 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
       </div>
 
       <div>
-        <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+        <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">
           Votre métier ici
         </h2>
-        <p class="font-inter reveal mt-6 text-sm leading-relaxed text-white/70">
+        <p class="font-texte reveal mt-6 text-sm leading-relaxed text-white/70">
           {metier.contexte}
         </p>
         <ul class="reveal mt-7 flex flex-wrap gap-2.5">
@@ -143,20 +143,20 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
   </section>
 
   <section class="contenu py-20">
-    <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+    <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">
       Ce que je mets en place
     </h2>
     <ul class="mt-10 grid gap-4 sm:grid-cols-2">
       {
         metier.prestations.map((p) => (
-          <li class="carte reveal p-6 font-inter text-sm leading-relaxed text-texte-doux">
+          <li class="carte reveal p-6 font-texte text-sm leading-relaxed text-texte-doux">
             {p}
           </li>
         ))
       }
     </ul>
 
-    <h2 class="font-arsenica reveal mt-20 text-3xl tracking-wide sm:text-4xl">
+    <h2 class="font-titre reveal mt-20 text-3xl tracking-wide sm:text-4xl">
       Autour de {commune.nom}
     </h2>
     <ul class="reveal mt-8 flex flex-wrap gap-3">
@@ -165,7 +165,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
           <li>
             <a
               href={`/metiers/${metier.slug}/${c.slug}`}
-              class="font-inter inline-flex min-h-11 items-center rounded-full border border-trait px-5 text-xs text-texte-doux no-underline transition-colors duration-500 hover:border-white/40 hover:text-texte"
+              class="font-texte inline-flex min-h-11 items-center rounded-full border border-trait px-5 text-xs text-texte-doux no-underline transition-colors duration-500 hover:border-white/40 hover:text-texte"
             >
               {metier.nom} à {c.nom}
             </a>

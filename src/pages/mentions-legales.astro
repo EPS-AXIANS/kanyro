@@ -24,7 +24,7 @@ const champsManquants = [
 
     {
       champsManquants.length > 0 && (
-        <p class="font-inter mt-10 rounded-2xl border border-signal bg-brique p-6 text-sm leading-relaxed">
+        <p class="font-texte mt-10 rounded-2xl border border-signal bg-brique p-6 text-sm leading-relaxed">
           <strong>À compléter avant la mise en ligne :</strong> {champsManquants.join(', ')}.
           Ces informations sont obligatoires (article 19 de la LCEN). Renseignez-les
           dans <code class="text-signal-vif">src/config/site.js</code>.
@@ -32,8 +32,8 @@ const champsManquants = [
       )
     }
 
-    <h2 class="font-arsenica mt-14 text-2xl tracking-wide">Éditeur du site</h2>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <h2 class="font-titre mt-14 text-2xl tracking-wide">Éditeur du site</h2>
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       {SITE.nom} — {SITE.legal.formeJuridique}<br />
       Directeur de la publication : {SITE.legal.directeurPublication}<br />
       {SITE.zone.ville} ({SITE.zone.codePostal}), {SITE.zone.region}<br />
@@ -44,19 +44,19 @@ const champsManquants = [
       </a>
     </p>
 
-    <h2 class="font-arsenica mt-12 text-2xl tracking-wide">Hébergement</h2>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <h2 class="font-titre mt-12 text-2xl tracking-wide">Hébergement</h2>
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       {SITE.legal.hebergeur}
     </p>
 
-    <h2 class="font-arsenica mt-12 text-2xl tracking-wide">Données personnelles</h2>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <h2 class="font-titre mt-12 text-2xl tracking-wide">Données personnelles</h2>
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       Les informations transmises via le formulaire de contact (nom, entreprise,
       email, téléphone, message) servent uniquement à répondre à votre demande. Elles
       ne sont ni revendues, ni transmises à des tiers à des fins commerciales, et sont
       conservées trois ans à compter du dernier échange.
     </p>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       Vous disposez d'un droit d'accès, de rectification et de suppression de ces
       données. Pour l'exercer, écrivez à{' '}
       <a class="text-signal-vif" href={`mailto:${SITE.contact.email}`}>
@@ -64,22 +64,22 @@ const champsManquants = [
       </a>.
     </p>
 
-    <h2 class="font-arsenica mt-12 text-2xl tracking-wide">Cookies</h2>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <h2 class="font-titre mt-12 text-2xl tracking-wide">Cookies</h2>
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       Ce site ne dépose aucun cookie et n'utilise aucun outil de mesure d'audience
       tiers. C'est aussi pour ça qu'aucune bannière ne vous barre l'écran.
     </p>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       Une seule exception, et elle ne sort pas de votre navigateur : si l'envoi du
       formulaire échoue, ce que vous aviez saisi est conservé le temps de vous le
       réafficher, puis effacé. Rien n'est transmis, et tout disparaît à la
       fermeture de l'onglet.
     </p>
 
-    <h2 class="font-arsenica mt-12 text-2xl tracking-wide">
+    <h2 class="font-titre mt-12 text-2xl tracking-wide">
       Propriété intellectuelle
     </h2>
-    <p class="font-inter mt-4 text-sm leading-relaxed text-texte-doux">
+    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
       Les textes et visuels présents sur ce site sont la propriété de {SITE.nom}, sauf
       mention contraire. Les photographies de chantiers sont publiées avec l'accord des
       clients concernés.

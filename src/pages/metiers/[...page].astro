@@ -35,7 +35,7 @@ const jsonLd = filAriane([
       Chaque métier se cherche différemment
     </h1>
     <p
-      class="font-inter reveal mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      class="font-texte reveal mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
     >
       Une fuite se cherche à 22 h sur un téléphone. Une pompe à chaleur se compare
       pendant trois semaines. Un site qui ignore cette différence rate la moitié de
@@ -48,13 +48,13 @@ const jsonLd = filAriane([
       {
         metiers.map((m) => (
           <li class="carte reveal p-8">
-            <h2 class="font-arsenica text-3xl tracking-wide">{m.nom}</h2>
-            <p class="font-inter mt-3 text-sm text-signal-vif">{m.accroche}</p>
-            <p class="font-inter mt-5 text-xs leading-relaxed text-texte-doux">
+            <h2 class="font-titre text-3xl tracking-wide">{m.nom}</h2>
+            <p class="font-texte mt-3 text-sm text-signal-vif">{m.accroche}</p>
+            <p class="font-texte mt-5 text-xs leading-relaxed text-texte-doux">
               {m.contexte}
             </p>
 
-            <p class="font-inter mt-6 text-xs text-texte-faible">
+            <p class="font-texte mt-6 text-xs text-texte-faible">
               Chantier moyen : <span class="text-texte-doux">{m.panierMoyen}</span>
             </p>
 
@@ -68,11 +68,11 @@ const jsonLd = filAriane([
   </section>
 
   <section class="contenu pb-8 text-center">
-    <h2 class="font-arsenica reveal text-3xl tracking-wide sm:text-4xl">
+    <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">
       Où j'interviens
     </h2>
     <p
-      class="font-inter reveal mx-auto mt-5 max-w-xl text-xs leading-relaxed text-texte-doux"
+      class="font-texte reveal mx-auto mt-5 max-w-xl text-xs leading-relaxed text-texte-doux"
     >
       Je me déplace sur vos chantiers. Au-delà de ce périmètre on peut travailler à
       distance, mais autant être honnête : je fais de meilleures photos quand je suis
@@ -81,7 +81,7 @@ const jsonLd = filAriane([
     <ul class="reveal mt-8 flex flex-wrap justify-center gap-2.5">
       {
         communes.map((c) => (
-          <li class="font-inter rounded-full border border-trait px-4 py-2 text-[11px] text-texte-doux">
+          <li class="font-texte rounded-full border border-trait px-4 py-2 text-[11px] text-texte-doux">
             {c.nom} <span class="text-texte-faible">{c.codePostal}</span>
           </li>
         ))

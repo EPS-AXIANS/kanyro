@@ -12,27 +12,27 @@ const { offre } = Astro.props;
 >
   {
     offre.misEnAvant && (
-      <p class="font-inter mb-4 self-start rounded-full bg-signal px-3 py-1 text-[9px] font-semibold tracking-[0.2em] uppercase">
+      <p class="font-texte mb-4 self-start rounded-full bg-signal px-3 py-1 text-[9px] font-semibold tracking-[0.2em] uppercase">
         Le plus demandé
       </p>
     )
   }
 
-  <h3 class="font-arsenica text-3xl tracking-wide">{offre.nom}</h3>
-  <p class="font-inter mt-2 text-xs text-texte-doux">{offre.resume}</p>
+  <h3 class="font-titre text-3xl tracking-wide">{offre.nom}</h3>
+  <p class="font-texte mt-2 text-xs text-texte-doux">{offre.resume}</p>
 
   <p class="mt-7">
-    <span class="font-inter text-3xl font-semibold tracking-tight">{offre.prix}</span>
-    <span class="font-inter ml-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+    <span class="font-texte text-3xl font-semibold tracking-tight">{offre.prix}</span>
+    <span class="font-texte ml-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
       {offre.mention}
     </span>
   </p>
 
-  <p class="font-inter mt-5 border-l border-signal pl-4 text-xs text-texte-doux italic">
+  <p class="font-texte mt-5 border-l border-signal pl-4 text-xs text-texte-doux italic">
     {offre.pour}
   </p>
 
-  <ul class="font-inter mt-7 flex-1 space-y-3 text-xs">
+  <ul class="font-texte mt-7 flex-1 space-y-3 text-xs">
     {
       offre.inclus.map((ligne) => (
         <li class="flex gap-3 text-texte-doux">

@@ -11,6 +11,30 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
+/*
+ * Fontes auto-hébergées. Vite récupère les .woff2 dans node_modules, les émet
+ * dans le bundle et réécrit les URL — rien ne sort du domaine, là où les deux
+ * <link> précédents (Google Fonts et un redistributeur d'essai) imposaient une
+ * requête bloquante vers un tiers avant le premier rendu.
+ *
+ * Archivo n'a pas besoin de son axe de chasse, `index` (graisse seule) suffit.
+ *
+ * Seul le sous-ensemble utile est téléchargé par le navigateur : chaque
+ * @font-face porte son `unicode-range`, et un site français ne déclenche jamais
+ * le vietnamien. C'est aussi pourquoi importer le romain ET l'italique de
+ * Cormorant ne coûte rien tant qu'un seul des deux est employé.
+ */
+import '@fontsource-variable/archivo';
+import '@fontsource-variable/cormorant';
+/*
+ * L'italique est un fichier séparé, et il faut l'importer explicitement : sans
+ * lui le navigateur ne refuse pas la demande, il PENCHE le romain lui-même. Ce
+ * faux oblique déforme les courbes au lieu de les redessiner, et sur un Garamond
+ * de display — dont l'italique est une construction calligraphique à part
+ * entière — la différence saute aux yeux.
+ */
+import '@fontsource-variable/cormorant/wght-italic.css';
+
 const {
   titre,
   description,
@@ -45,16 +69,25 @@ const imageAbsolue = image ? urlAbsolue(image) : null;
  * par des classes utilitaires, les fonds par des <img>), ce qui permet de garder
  * style-src sans 'unsafe-inline' malgré la richesse visuelle.
  */
+/*
+ * Assemble une directive sans espace parasite quand la liste d'hôtes est vide —
+ * ce qui est désormais le cas de `fontes` et `styles`, les fontes étant
+ * auto-hébergées. Une valeur comme `font-src 'self' ` reste valide, mais elle se
+ * retrouve telle quelle dans l'en-tête et rend la comparaison avec `.htaccess`
+ * pénible à l'œil.
+ */
+const directive = (nom, ...valeurs) => [nom, ...valeurs.flat()].join(' ');
+
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
   "object-src 'none'",
-  `img-src 'self' data: ${HOTES_MEDIAS.images.join(' ')}`,
-  `media-src 'self' ${HOTES_MEDIAS.video.join(' ')}`,
-  `style-src 'self' ${HOTES_MEDIAS.styles.join(' ')}`,
-  `font-src 'self' ${HOTES_MEDIAS.fontes.join(' ')}`,
+  directive('img-src', "'self'", 'data:', HOTES_MEDIAS.images),
+  directive('media-src', "'self'", HOTES_MEDIAS.video),
+  directive('style-src', "'self'", HOTES_MEDIAS.styles),
+  directive('font-src', "'self'", HOTES_MEDIAS.fontes),
   "script-src 'self'",
   "connect-src 'self'",
   /*
@@ -102,18 +135,8 @@ const csp = [
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    {/* ⚠ Fonte d'essai servie par un tiers — voir README avant mise en ligne. */}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://db.onlinewebfonts.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://db.onlinewebfonts.com/c/cbb3cb559d2e4387e139cfb1656e31f5?family=Arsenica+Trial+Light"
-    />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-    />
+    {/* Les fontes sont importées en haut de ce fichier : plus aucun <link> vers
+        un hôte tiers, donc plus de preconnect à maintenir. */}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fr_FR" />

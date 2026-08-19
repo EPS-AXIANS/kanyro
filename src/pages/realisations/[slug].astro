@@ -33,7 +33,7 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
 
 <Base titre={fiche.data.titre} description={fiche.data.resume} jsonLd={jsonLd}>
   <nav
-    class="contenu sous-navbar font-inter pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
+    class="contenu sous-navbar font-texte pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
     aria-label="Fil d'Ariane"
   >
     <a href="/realisations" class="hover:text-texte">Réalisations</a>
@@ -45,12 +45,12 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
     <p class="surtitre reveal">{fiche.data.metier} · {fiche.data.commune}</p>
     <h1 class="titre-page reveal mt-6 [animation-delay:80ms]">{fiche.data.titre}</h1>
     <p
-      class="font-inter reveal mt-6 text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      class="font-texte reveal mt-6 text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
     >
       {fiche.data.resume}
     </p>
 
-    <p class="font-inter reveal mt-5 text-xs text-texte-faible">
+    <p class="font-texte reveal mt-5 text-xs text-texte-faible">
       {fiche.data.client} — mis en ligne en {dateLisible}
       {
         fiche.data.enLigne && (
@@ -69,10 +69,10 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
         <dl class="carte reveal mt-10 grid gap-8 bg-brique p-8 sm:grid-cols-2">
           {fiche.data.resultats.map((r) => (
             <div>
-              <dt class="font-inter text-[10px] tracking-[0.2em] text-white/40 uppercase">
+              <dt class="font-texte text-[10px] tracking-[0.2em] text-white/40 uppercase">
                 {r.libelle}
               </dt>
-              <dd class="font-arsenica mt-2 text-4xl text-signal-vif">{r.valeur}</dd>
+              <dd class="font-titre mt-2 text-4xl text-signal-vif">{r.valeur}</dd>
             </div>
           ))}
         </dl>

@@ -24,12 +24,12 @@ const delais = [
 <section class="relative bg-[#410C01] px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
   <div class="mx-auto max-w-6xl">
     <h2
-      class="reveal font-arsenica text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="reveal font-titre text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
       Chaque métier se cherche autrement
     </h2>
     <p
-      class="reveal font-inter mx-auto mt-6 max-w-xl text-center text-xs leading-relaxed text-white/60 [animation-delay:120ms] sm:text-sm"
+      class="reveal font-texte mx-auto mt-6 max-w-xl text-center text-xs leading-relaxed text-white/60 [animation-delay:120ms] sm:text-sm"
     >
       Une fuite se cherche à 22 h sur un téléphone. Une pompe à chaleur se compare
       pendant trois semaines. Un site qui ignore cette différence rate la moitié de
@@ -44,11 +44,11 @@ const delais = [
               href={`/metiers/${m.slug}`}
               class="group flex h-full flex-col bg-[#410C01] p-8 no-underline transition-colors duration-500 hover:bg-[#4d1002]"
             >
-              <h3 class="font-arsenica text-2xl tracking-wide text-white">{m.nom}</h3>
-              <p class="font-inter mt-3 flex-1 text-xs leading-relaxed text-white/55">
+              <h3 class="font-titre text-2xl tracking-wide text-white">{m.nom}</h3>
+              <p class="font-texte mt-3 flex-1 text-xs leading-relaxed text-white/55">
                 {m.accroche}
               </p>
-              <span class="font-inter mt-6 text-[10px] font-medium tracking-[0.25em] text-white/70 uppercase transition-colors group-hover:text-white">
+              <span class="font-texte mt-6 text-[10px] font-medium tracking-[0.25em] text-white/70 uppercase transition-colors group-hover:text-white">
                 Voir la page →
               </span>
             </a>
@@ -58,13 +58,13 @@ const delais = [
     </ul>
 
     <div class="reveal mt-16 text-center">
-      <p class="font-inter text-[10px] font-medium tracking-[0.25em] text-white/40 uppercase">
+      <p class="font-texte text-[10px] font-medium tracking-[0.25em] text-white/40 uppercase">
         Zone d'intervention
       </p>
       <ul class="mt-5 flex flex-wrap justify-center gap-2.5">
         {
           communes.map((c) => (
-            <li class="font-inter rounded-full border border-white/15 px-4 py-2 text-[11px] text-white/70">
+            <li class="font-texte rounded-full border border-white/15 px-4 py-2 text-[11px] text-white/70">
               {c.nom}
             </li>
           ))

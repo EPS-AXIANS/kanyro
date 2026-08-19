@@ -3,9 +3,8 @@
 /*
  * Direction visuelle : sombre, cinématographique, éditoriale.
  *
- * ⚠ FONTE ET MÉDIAS PROVISOIRES — voir la section « À remplacer avant la mise en
- * ligne » du README. « Arsenica Trial » est une version d'essai non licenciée
- * pour la production, servie par un redistributeur tiers.
+ * ⚠ MÉDIAS PROVISOIRES — voir la section « À remplacer avant la mise en ligne »
+ * du README. Les fontes, elles, sont réglées : libres et auto-hébergées.
  */
 @theme {
   /*
@@ -26,10 +25,40 @@
   --color-signal-vif: #f26a1b;
   --color-trait: rgba(255, 255, 255, 0.14);
 
-  /* Typographie */
-  --font-arsenica: 'Arsenica Trial Light', 'Times New Roman', serif;
-  --font-inter:
-    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /*
+   * Typographie — nommée par rôle, comme la palette juste au-dessus. Une classe
+   * `font-inter` qui ne pointe plus sur Inter est un piège à six mois ; un
+   * changement de fonte se fait ici et nulle part ailleurs.
+   *
+   * Les deux familles sont libres (SIL OFL) et auto-hébergées : les fichiers
+   * arrivent par @fontsource-variable et sont importés dans Base.astro, donc
+   * servis depuis le domaine. Ni requête bloquante vers un tiers avant le
+   * premier rendu, ni hôte à autoriser dans la CSP.
+   *
+   * Cormorant porte tous les titres. C'est un Garamond de display : contraste
+   * très marqué, graisses naturellement fines, italique calligraphique. Il a
+   * d'abord été pris pour la seule ligne du hero, puis étendu à l'ensemble —
+   * Fraunces, qui tenait ce rôle, paraissait molle et un peu rustique juste à
+   * côté, et deux serifs différents sur la même page ne se justifiaient pas.
+   *
+   * Fraunces avait elle-même remplacé « Arsenica Trial » : version d'essai, non
+   * licenciée en usage commercial, et dont les dix chiffres étaient rendus par un
+   * seul et même symbole.
+   *
+   * Archivo remplace Inter. Inter n'avait rien d'illicite, mais c'est la fonte
+   * par défaut d'une grande partie du web récent : elle donne à un site l'air
+   * d'être sorti d'un gabarit. Elle garde le texte courant et les petites
+   * capitales d'étiquette, où Cormorant serait illisible.
+   *
+   * ⚠ Toute fonte qui remplacerait celles-ci se vérifie SUR LES CHIFFRES avant
+   * d'être adoptée. C'est précisément ce qui manquait à Arsenica, et ça n'était
+   * visible qu'au rendu.
+   */
+  --font-titre: 'Cormorant Variable', Georgia, 'Times New Roman', serif;
+
+  --font-texte:
+    'Archivo Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
 
   /* Échelle fluide */
   --text-affiche: clamp(3rem, 1.2rem + 7.5vw, 7rem);
@@ -37,11 +66,6 @@
   --text-sous-titre: clamp(1.25rem, 1rem + 1.1vw, 2.25rem);
 
   --ease-rideau: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-:root {
-  --font-serif: 'Arsenica Trial Light', serif;
-  --font-sans: 'Inter', sans-serif;
 }
 
 @layer base {
@@ -52,8 +76,26 @@
     color-scheme: dark;
   }
 
+  /*
+   * Graisse 400 par défaut, et pas 300 comme du temps de Fraunces.
+   *
+   * Cormorant est déjà une fonte fine : sa Light est plus légère que bien des
+   * Thin, et ses déliés disparaissent sur fond sombre dès qu'on descend sous
+   * 30 px. 400 est donc le bon défaut pour les titres de section et les h3.
+   *
+   * Le très grand display reprend la main avec `font-light` — c'est là que la
+   * finesse devient une qualité, pas un handicap. La couche `utilities` passant
+   * après `base`, l'utilitaire posée dans le balisage l'emporte toujours.
+   *
+   * ⚠ Cormorant n'a pas de graisse sous 300 : un `font-extralight` (200) est
+   * silencieusement ramené à 300. Ne pas s'en servir en croyant gagner en finesse.
+   */
+  .font-titre {
+    font-weight: 400;
+  }
+
   body {
-    font-family: var(--font-sans);
+    font-family: var(--font-texte);
     color: var(--color-texte);
     line-height: 1.65;
     text-wrap: pretty;
@@ -85,12 +127,12 @@
 }
 
 @layer components {
-  .font-arsenica {
-    font-family: var(--font-serif);
-  }
-  .font-inter {
-    font-family: var(--font-sans);
-  }
+  /*
+   * `font-titre` et `font-texte` ne sont pas déclarées ici : Tailwind les génère
+   * à partir des variables `--font-*` du bloc @theme. Les redéclarer ferait
+   * exister la même classe dans deux couches, avec un gagnant qui dépend de
+   * l'ordre de compilation.
+   */
 
   .contenu {
     width: 100%;
@@ -159,14 +201,14 @@
   }
 
   .titre-page {
-    font-family: var(--font-serif);
+    font-family: var(--font-titre);
     font-size: var(--text-titre);
     letter-spacing: 0.02em;
     line-height: 1.05;
   }
 
   .surtitre {
-    font-family: var(--font-sans);
+    font-family: var(--font-texte);
     font-size: 0.625rem;
     font-weight: 500;
     letter-spacing: 0.3em;

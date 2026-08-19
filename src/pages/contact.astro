@@ -10,11 +10,11 @@ const jsonLd = filAriane([
 ]);
 
 const champClasses =
-  'font-inter mt-2 w-full rounded-xl border border-trait bg-surface px-4 py-3.5 text-sm text-texte placeholder:text-texte-faible transition-colors focus:border-white/40';
+  'font-texte mt-2 w-full rounded-xl border border-trait bg-surface px-4 py-3.5 text-sm text-texte placeholder:text-texte-faible transition-colors focus:border-white/40';
 const labelClasses =
-  'font-inter text-[10px] font-medium tracking-[0.2em] text-texte-faible uppercase';
+  'font-texte text-[10px] font-medium tracking-[0.2em] text-texte-faible uppercase';
 const classesErreur =
-  'font-inter mb-8 rounded-xl border border-signal bg-brique p-5 text-sm leading-relaxed';
+  'font-texte mb-8 rounded-xl border border-signal bg-brique p-5 text-sm leading-relaxed';
 ---
 
 <Base
@@ -29,7 +29,7 @@ const classesErreur =
         Parlons de votre activité
       </h1>
       <p
-        class="font-inter reveal mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+        class="font-texte reveal mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
       >
         Quelques lignes suffisent. Je réponds sous 48 heures, et je vous dis
         franchement si un site vous rapportera quelque chose.
@@ -191,14 +191,14 @@ const classesErreur =
 
         {
           SITE.rendezVous.url && (
-            <p class="font-inter mt-4 text-xs text-texte-faible">
+            <p class="font-texte mt-4 text-xs text-texte-faible">
               Le calendrier n'affiche que des créneaux réellement ouverts —{' '}
               {SITE.rendezVous.duree}, par téléphone ou sur votre chantier.
             </p>
           )
         }
 
-        <p class="font-inter mt-5 text-xs text-texte-faible">
+        <p class="font-texte mt-5 text-xs text-texte-faible">
           Vos coordonnées servent uniquement à vous répondre. Elles ne sont ni
           revendues, ni utilisées pour de la prospection.
         </p>
@@ -207,11 +207,11 @@ const classesErreur =
 
     <aside class="reveal lg:pt-32">
       <div class="carte bg-brique p-8">
-        <h2 class="font-arsenica text-2xl tracking-wide">Écrire directement</h2>
+        <h2 class="font-titre text-2xl tracking-wide">Écrire directement</h2>
         <p class="mt-4">
           <a
             href={`mailto:${SITE.contact.email}`}
-            class="font-inter text-sm break-all text-signal-vif hover:text-texte"
+            class="font-texte text-sm break-all text-signal-vif hover:text-texte"
           >
             {SITE.contact.email}
           </a>
@@ -222,7 +222,7 @@ const classesErreur =
             <p class="mt-4">
               <a
                 href={`tel:${SITE.contact.telephone}`}
-                class="font-inter text-sm text-signal-vif hover:text-texte"
+                class="font-texte text-sm text-signal-vif hover:text-texte"
               >
                 {SITE.contact.telephoneAffiche}
               </a>
@@ -232,13 +232,13 @@ const classesErreur =
 
         <hr class="my-8 border-white/15" />
 
-        <h2 class="font-arsenica text-2xl tracking-wide">Quand je suis joignable</h2>
-        <p class="font-inter mt-4 text-xs leading-relaxed text-white/60">
+        <h2 class="font-titre text-2xl tracking-wide">Quand je suis joignable</h2>
+        <p class="font-texte mt-4 text-xs leading-relaxed text-white/60">
           Le samedi matin, à coup sûr. Et certains soirs en semaine, mais pas tous :
           je suis en alternance, donc je termine à 16 h une semaine et à 22 h la
           suivante.
         </p>
-        <p class="font-inter mt-3 text-xs leading-relaxed text-white/60">
+        <p class="font-texte mt-3 text-xs leading-relaxed text-white/60">
           {
             SITE.rendezVous.url
               ? 'Plutôt que de vous faire deviner, le calendrier n’affiche que les créneaux réellement ouverts.'
@@ -248,8 +248,8 @@ const classesErreur =
 
         <hr class="my-8 border-white/15" />
 
-        <h2 class="font-arsenica text-2xl tracking-wide">Le secteur</h2>
-        <p class="font-inter mt-4 text-xs leading-relaxed text-white/60">
+        <h2 class="font-titre text-2xl tracking-wide">Le secteur</h2>
+        <p class="font-texte mt-4 text-xs leading-relaxed text-white/60">
           L'Arrageois, le bassin minier et la métropole lilloise. Je me déplace sur
           vos chantiers — c'est là que se prennent les photos qui font signer.
         </p>

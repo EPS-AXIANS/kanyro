@@ -32,10 +32,19 @@ export const MEDIAS = {
     'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260616_042421_41f4fa0b-770c-4545-a416-73a809366e49.png&w=1280&q=85',
 };
 
-/** Hôtes tiers à autoriser dans la CSP tant que les médias ne sont pas rapatriés. */
+/**
+ * Hôtes tiers à autoriser dans la CSP tant que les médias ne sont pas rapatriés.
+ *
+ * `fontes` et `styles` sont vides depuis que Cormorant et Archivo sont
+ * auto-hébergées : `font-src 'self'` et `style-src 'self'` sont revenus à leur
+ * forme stricte. Les deux listes restent déclarées pour que la structure ne
+ * change pas le jour où il faudrait rouvrir l'une d'elles — et pour que
+ * `public/.htaccess`, qui doit rester le miroir de ce fichier, garde les mêmes
+ * directives dans le même ordre.
+ */
 export const HOTES_MEDIAS = {
   images: ['https://images.higgs.ai', 'https://soft-zoom-63098134.figma.site'],
   video: ['https://d8j0ntlcm91z4.cloudfront.net'],
-  fontes: ['https://fonts.gstatic.com', 'https://db.onlinewebfonts.com'],
-  styles: ['https://fonts.googleapis.com', 'https://db.onlinewebfonts.com'],
+  fontes: [],
+  styles: [],
 };

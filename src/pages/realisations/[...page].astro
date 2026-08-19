@@ -34,7 +34,7 @@ const jsonLd = filAriane([
     <p class="surtitre reveal">Réalisations</p>
     <h1 class="titre-page reveal mt-6 [animation-delay:80ms]">Les chantiers livrés</h1>
     <p
-      class="font-inter reveal mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      class="font-texte reveal mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
     >
       Avec les chiffres réels et la date à laquelle ils ont été mesurés.
     </p>
@@ -49,15 +49,15 @@ const jsonLd = filAriane([
        */
       <section class="contenu pb-20">
         <div class="carte reveal mx-auto max-w-2xl bg-brique p-10 text-center">
-          <h2 class="font-arsenica text-3xl tracking-wide sm:text-4xl">
+          <h2 class="font-titre text-3xl tracking-wide sm:text-4xl">
             C'est nouveau, et ça se voit
           </h2>
-          <p class="font-inter mt-6 text-sm leading-relaxed text-white/70">
+          <p class="font-texte mt-6 text-sm leading-relaxed text-white/70">
             Je démarre. Plutôt que de remplir cette page de fausses références ou de
             maquettes présentées comme des chantiers, je préfère la laisser vide
             jusqu'au premier client livré.
           </p>
-          <p class="font-inter mt-4 text-sm leading-relaxed text-white/70">
+          <p class="font-texte mt-4 text-sm leading-relaxed text-white/70">
             En attendant, ça se traduit par un tarif de démarrage pour les premiers
             clients : vous prenez un risque sur quelqu'un qui n'a pas encore de
             références, c'est normal que ça se paie dans le prix.
@@ -77,10 +77,10 @@ const jsonLd = filAriane([
                 <p class="surtitre">
                   {f.data.metier} · {f.data.commune}
                 </p>
-                <h2 class="font-arsenica mt-4 text-2xl tracking-wide">
+                <h2 class="font-titre mt-4 text-2xl tracking-wide">
                   {f.data.titre}
                 </h2>
-                <p class="font-inter mt-3 flex-1 text-sm leading-relaxed text-texte-doux">
+                <p class="font-texte mt-3 flex-1 text-sm leading-relaxed text-texte-doux">
                   {f.data.resume}
                 </p>
 
@@ -88,10 +88,10 @@ const jsonLd = filAriane([
                   <dl class="mt-6 flex flex-wrap gap-8">
                     {f.data.resultats.map((r) => (
                       <div>
-                        <dt class="font-inter text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+                        <dt class="font-texte text-[10px] tracking-[0.2em] text-texte-faible uppercase">
                           {r.libelle}
                         </dt>
-                        <dd class="font-arsenica mt-1 text-2xl text-signal-vif">
+                        <dd class="font-titre mt-1 text-2xl text-signal-vif">
                           {r.valeur}
                         </dd>
                       </div>
