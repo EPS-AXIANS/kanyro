@@ -200,19 +200,7 @@ d'elle-même sur le champ « quand vous joindre » du formulaire.
 Ces éléments viennent du template de référence. Ils permettent de juger le rendu
 tout de suite, mais **aucun ne doit rester en production.**
 
-### 1. La fonte Arsenica Trial
-
-Chargée depuis `db.onlinewebfonts.com` dans `src/layouts/Base.astro`.
-
-« Trial » désigne une version d'essai : **elle n'est pas licenciée pour un usage
-commercial**, et le site qui la sert la redistribue sans en détenir les droits.
-Sur la vitrine d'une entreprise qui facture, c'est une exposition réelle.
-
-Options : acheter Arsenica chez son fondeur, ou basculer sur une serif display
-libre au caractère proche — Fraunces, Instrument Serif, Bodoni Moda. Dans les
-deux cas, auto-héberger le fichier dans `public/fonts/` et remplacer le `@font-face`.
-
-### 2. Les médias
+### 1. Les médias
 
 Tous centralisés dans `src/config/medias.js` — vidéo d'accueil, nuages, colombe,
 fonds de section. Ils pointent vers le CloudFront et l'export Figma d'un tiers.
@@ -221,11 +209,14 @@ Deux risques : ces URL peuvent disparaître sans préavis, et rien n'établit le
 droit de les diffuser. À remplacer par vos propres visuels — idéalement des
 photos de chantiers réels, qui serviront de toute façon mieux le propos.
 
-### 3. Resserrer la CSP après remplacement
+### 2. Resserrer la CSP après remplacement
 
-Une fois fontes et médias rapatriés dans `public/` :
+Le volet fontes est fait : `fontes` et `styles` sont vides, et `style-src` comme
+`font-src` sont revenus à `'self'` des deux côtés. Reste le volet médias, une
+fois les visuels rapatriés dans `public/` :
 
-1. vider les tableaux de `HOTES_MEDIAS` dans `src/config/medias.js` ;
+1. vider les tableaux `images` et `video` de `HOTES_MEDIAS` dans
+   `src/config/medias.js` ;
 2. retirer les mêmes hôtes de l'en-tête `Content-Security-Policy` de
    `public/.htaccess`.
 
@@ -233,7 +224,7 @@ La balise `<meta>` du layout se resserre alors d'elle-même, puisqu'elle est
 construite depuis `HOTES_MEDIAS`. L'en-tête du `.htaccess`, lui, est écrit à la
 main : les deux doivent rester le miroir l'un de l'autre.
 
-### 4. Le reste
+### 3. Le reste
 
 - [ ] SIREN et téléphone dans `src/config/site.js` — sans SIREN, les mentions
       légales sont en infraction (article 19 de la LCEN). La page affiche un
@@ -262,6 +253,29 @@ JavaScript gère les révélations au scroll et la parallaxe — purement décor
 que sous `@media (scripting: enabled)`. Sans JavaScript, sans
 `IntersectionObserver`, ou si le script échoue, tout reste lisible. C'est la
 condition pour avoir ces effets sans risquer une page vide pour un robot.
+
+**Typographie libre et auto-hébergée.** Cormorant pour les titres, Archivo pour
+le texte, toutes deux en SIL OFL, installées par `@fontsource-variable` et
+importées dans `src/layouts/Base.astro`. Elles sont donc servies depuis le
+domaine : aucune requête vers un tiers avant le premier rendu, et `font-src` /
+`style-src` restent à `'self'`.
+
+Cormorant est un Garamond de display : contraste marqué, graisses fines,
+italique calligraphique. Il a d'abord servi pour la seule ligne du hero, puis a
+pris tous les titres — Fraunces, qui tenait ce rôle, paraissait molle à côté.
+Archivo garde le texte courant et les petites capitales d'étiquette, où les
+déliés de Cormorant disparaîtraient.
+
+Le choix s'est fait contre deux écueils. La fonte d'origine, « Arsenica Trial »,
+était une version d'essai non licenciée — et ses dix chiffres étaient rendus par
+un seul et même symbole, ce qui ne s'est vu qu'en affichant une liste numérotée.
+**Vérifiez les chiffres de toute fonte que vous adopteriez.** Inter, elle, ne
+posait aucun problème juridique, mais c'est la fonte par défaut d'une grande
+partie du web récent : elle donnait au site l'air d'être sorti d'un gabarit.
+
+Les classes s'appellent `font-titre` et `font-texte`, pas `font-cormorant` : le
+rôle survit au changement de fonte, comme pour la palette. Ce site en a déjà
+changé deux fois sans toucher à un seul composant.
 
 **Zéro style inline.** Les délais d'animation passent par des classes Tailwind
 littérales, les fonds par des `<img>` positionnées. Ça permet de garder
@@ -293,7 +307,7 @@ donne un bouton invisible. Le rôle survit au changement de thème.
 | Communes couvertes | `src/data/communes.json` |
 | JSON-LD | `src/config/schema.js` |
 | Sections de l'accueil | `src/components/sections/` |
-| En-têtes HTTP, redirections | `netlify.toml` |
+| En-têtes HTTP, redirections | `public/.htaccess` |
 
 ---
 

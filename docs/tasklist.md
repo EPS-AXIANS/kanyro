@@ -3,10 +3,13 @@
 > Établie le 18/08/2026 à partir d'un audit réalisé par une IA externe **qui n'a
 > lu que le HTML public du site**, puis recoupée point par point avec le code.
 >
-> **Avancement au 18/08/2026 : 15 points sur 42.** Hébergement tranché (OVH),
-> tunnel de conversion durci, bêta sortie de l'index, message et offre repris.
-> Restent bloqués sur des données ou un déploiement : 0.1 (SIREN) et 1.1c (test
-> en ligne).
+> **Avancement au 19/08/2026 : 16 points sur 37.** Hébergement tranché (OVH),
+> tunnel de conversion durci, bêta sortie de l'index, message et offre repris,
+> typographie libre et auto-hébergée. Restent bloqués sur des données ou un
+> déploiement : 0.1 (SIREN) et 1.1c (test en ligne).
+>
+> *(Le total annoncé était « 42 » jusqu'au 19/08 : en énumérant les points
+> numérotés, de 0.1 à 7.6, il y en a 37.)*
 >
 > Chaque point porte un verdict :
 > - ✅ **Confirmé** — le problème existe bien dans le code.
@@ -32,12 +35,31 @@
       mentions légales s'est réduit à lui. Une ligne dans `src/config/site.js` le
       fera disparaître.
 
-- [ ] **0.2 — Fonte « Arsenica Trial » non licenciée** 🔍 *Trouvé en plus.*
+- [x] **0.2 — Fonte « Arsenica Trial » non licenciée** 🔍 *Trouvé en plus.*
       `src/layouts/Base.astro:97` charge une version d'**essai** depuis
       `db.onlinewebfonts.com`, un redistributeur tiers. Interdite en usage
       commercial, et c'est toute l'identité visuelle du site qui repose dessus.
-      → Acheter la licence, ou basculer sur une serif display libre (Fraunces,
-      Instrument Serif, Bodoni Moda), auto-hébergée dans `public/fonts/`.
+      → **Constaté au rendu le 19/08/2026 : les chiffres de la fonte sont
+      neutralisés.** Les dix chiffres sortent tous comme un même symbole — mesuré
+      en comparant la signature de pixels de chacun, identique de `0` à `9`, alors
+      que les lettres diffèrent. C'est le bridage habituel d'une version d'essai.
+      La numérotation de `sections/Processus.astro` est passée en Inter, seule
+      rustine possible ; aucun autre chiffre du site n'était en Arsenica, les prix
+      étaient déjà en Inter. Autrement dit, la fonte n'est pas seulement interdite
+      en production, elle est **incomplète**.
+      → **Fait le 19/08/2026.** Cormorant (titres) et Archivo (texte), toutes deux
+      en SIL OFL, installées par `@fontsource-variable` et importées dans
+      `Base.astro` : les .woff2 sont émis dans le bundle et servis depuis le
+      domaine. Les cinq `<link>` vers `fonts.googleapis.com`, `fonts.gstatic.com`
+      et `db.onlinewebfonts.com` ont disparu du `<head>`.
+      → **Inter est parti aussi, pour une autre raison.** Rien d'illicite, mais
+      c'est la fonte par défaut d'une grande partie du web récent : elle donnait
+      au site l'air d'être sorti d'un gabarit. Archivo tient les grandes capitales
+      du Showcase sans ce défaut.
+      → Les classes ont été renommées `font-titre` / `font-texte` dans les 19
+      fichiers qui les utilisaient — `font-inter` pointant sur autre chose
+      qu'Inter était un piège à six mois. Chiffres revérifiés au rendu après
+      bascule : les six testés sont bien distincts.
 
 - [ ] **0.3 — Tous les médias appartiennent à quelqu'un d'autre** 🔍 *Trouvé en plus.*
       `src/config/medias.js` : vidéo d'accueil, nuages, colombe, fonds de section
@@ -50,6 +72,13 @@
       Une fois fontes et médias rapatriés : vider `HOTES_MEDIAS`
       (`src/config/medias.js`) **et** retirer les mêmes hôtes de `public/.htaccess`.
       Les deux doivent rester le miroir l'un de l'autre.
+      → **Moitié faite le 19/08/2026, avec 0.2.** `fontes` et `styles` sont vides,
+      `style-src` et `font-src` sont revenus à `'self'` des deux côtés. Restent
+      `img-src` et `media-src`, qui tomberont avec 0.3.
+      → Au passage, les directives sont assemblées par une petite fonction plutôt
+      que par interpolation : une liste vide produisait `font-src 'self' ` avec un
+      espace en trop, ce qui rendait la comparaison à l'œil avec `.htaccess`
+      pénible.
 
 - [x] **0.5 — Trancher l'hébergement : OVH ou Netlify** 🔍 *Trouvé en plus, sérieux.*
       Le repo contient les deux configurations. `netlify.toml` est resté, et le
@@ -316,6 +345,12 @@ réponds sous 48 heures. »
       décalages de mise en page).
       → Après 0.2/0.3 : auto-héberger, ajouter un `poster`, passer les images par
         `<Image />` d'Astro avec dimensions, et mesurer au PageSpeed.
+      → **Volet fontes fait le 19/08/2026.** Les deux feuilles de style externes
+      bloquantes ont disparu : plus aucune connexion à un tiers n'est ouverte
+      avant le premier rendu. Le navigateur télécharge ~102 ko de woff2 latin
+      (Cormorant romain 35 + italique 38 + Archivo 35), servis depuis le domaine
+      et en `font-display: swap`. Restent la vidéo plein écran et les images sans dimensions, qui
+      pèsent bien plus lourd.
 
 - [x] **4.5 — `robots.txt` contredit le `noindex` de `/merci`** 🔍 *Mineur.*
       `public/robots.txt:5` interdit l'exploration de `/merci`, ce qui empêche
