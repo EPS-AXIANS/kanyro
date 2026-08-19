@@ -49,6 +49,18 @@ const colonneDroite = [
 ];
 
 /*
+ * ⚠ Les questions sont en capitales et en serif : c'est la combinaison la plus
+ * fragile de tout le site. Cormorant est une fonte à contraste marqué, ses
+ * déliés font moins d'un pixel en dessous de 16 px, et ils s'effacent sur le
+ * fond brique. D'où `font-medium` au lieu de la graisse 400 par défaut, un cran
+ * de corps en plus, et de l'interlettrage — une capitale serrée à petit corps se
+ * lit encore moins bien.
+ *
+ * Si la fonte de titre change un jour, c'est ce bloc qu'il faut regarder en
+ * premier, avant les grands titres qui, eux, pardonnent tout.
+ */
+
+/*
  * Décalages en cascade, continus d'une colonne à l'autre pour que les six
  * entrées ne montent pas par paires.
  *
@@ -71,7 +83,7 @@ const delais = [
   class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[50vh] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
 >
   <h2
-    class="reveal font-arsenica flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
+    class="reveal font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
   >
     <span>Q</span>
     <span class="text-xl italic text-white/80 sm:text-2xl md:text-3xl lg:text-4xl">
@@ -85,10 +97,10 @@ const delais = [
       {
         colonneGauche.map((item, i) => (
           <article class:list={['reveal', delais[i]]}>
-            <h3 class="font-arsenica text-xs tracking-wide uppercase sm:text-sm md:text-base">
+            <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
               {item.q}
             </h3>
-            <p class="font-inter mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
+            <p class="font-texte mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
               {item.r}
             </p>
           </article>
@@ -100,10 +112,10 @@ const delais = [
       {
         colonneDroite.map((item, i) => (
           <article class:list={['reveal', delais[i + 3]]}>
-            <h3 class="font-arsenica text-xs tracking-wide uppercase sm:text-sm md:text-base">
+            <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
               {item.q}
             </h3>
-            <p class="font-inter mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
+            <p class="font-texte mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
               {item.r}
             </p>
           </article>

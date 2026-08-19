@@ -60,31 +60,55 @@ import { offre } from '../../data/offres.js';
     {/* Même duo serif / sans que précédemment : c'est la signature typographique
         de la page. Seuls les mots changent. La seconde ligne est plus longue que
         « CHANTIERS », d'où une échelle un cran en dessous — elle reste la plus
-        grosse chose à l'écran. */}
+        grosse chose à l'écran.
+
+        La seconde ligne était en Archivo `font-semibold tracking-tight` : une
+        grosse capitale grasse et resserrée, qui donnait de l'impact mais un
+        registre d'affiche. Elle passe en Cormorant Light, avec de l'interlettrage
+        positif — registre éditorial.
+
+        L'interlettrage n'est pas un ornement, il est indissociable du reste. Une
+        capitale maigre et serrée devient illisible : les fûts se touchent presque
+        et l'œil n'a plus de blanc pour séparer les lettres. C'est l'écart qui
+        donne à un trait fin l'air d'être choisi plutôt que subi.
+
+        ⚠ L'échelle ne se lit pas comme celle d'une sans. Cormorant a une hauteur
+        de capitale nettement plus basse par em : à taille égale il paraît plus
+        petit qu'Archivo. Les paliers sont donc montés d'un cran, et la ligne
+        mesurée à chaque largeur plutôt qu'estimée.
+
+        ⚠ Interlettrage et corps coûtent de la place, et le point de bascule sur
+        deux lignes est à 1 280 px — une taille d'écran très courante. À cette
+        largeur il reste 1 225 px utiles, et la ligne en fait 1 088 à 84 px, contre
+        1 243 à 96 px. D'où le palier intermédiaire `xl:text-[5.25rem]`, qui
+        n'existe pas dans l'échelle Tailwind mais que la mesure impose.
+
+        Toute reprise du `tracking` ou du corps impose de refaire cette mesure,
+        sur 1 280 en premier. */}
     <h1
       class="hero-fade-up mt-8 leading-[1.05] drop-shadow-[0_2px_24px_rgba(0,0,0,0.25)] [animation-delay:250ms]"
     >
       <span
-        class="font-arsenica block text-2xl tracking-wide sm:text-4xl md:text-5xl lg:text-6xl"
+        class="font-titre block text-2xl tracking-wide sm:text-4xl md:text-5xl lg:text-6xl"
       >
         Sites internet pour
       </span>
       <span
-        class="font-inter mt-1 block text-4xl font-semibold tracking-tight text-balance uppercase sm:text-6xl md:text-7xl lg:text-8xl"
+        class="font-titre mt-2 block text-5xl font-light tracking-[0.08em] text-balance uppercase italic sm:text-7xl xl:text-[5.25rem] 2xl:text-8xl"
       >
         artisans du bâtiment
       </span>
     </h1>
 
     <p
-      class="hero-fade-up font-arsenica mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [animation-delay:400ms] sm:text-lg md:text-xl"
+      class="hero-fade-up font-titre mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [animation-delay:400ms] sm:text-lg md:text-xl"
     >
       {offre.promesse}
     </p>
 
     <a
       href="/contact"
-      class="liquid-glass font-inter hero-fade-up mt-10 inline-block rounded-[50%] px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:550ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
+      class="liquid-glass font-texte hero-fade-up mt-10 inline-block rounded-[50%] px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:550ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
     >
       Demander un devis
     </a>

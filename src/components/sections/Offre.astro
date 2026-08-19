@@ -27,33 +27,45 @@ const secteurs = [
   <div class="mx-auto max-w-5xl">
     <p class="surtitre reveal text-center text-white/40">L'offre</p>
     <h2
-      class="font-arsenica reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="font-titre reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
       {offre.nom}
     </h2>
     <p
-      class="font-inter reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-white/70 [animation-delay:120ms] sm:text-base"
+      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-white/70 [animation-delay:120ms] sm:text-base"
     >
       {offre.promesse}
     </p>
 
     {/* Prix et délai côte à côte : ce sont les deux questions posées en premier. */}
     <div class="reveal mt-12 flex flex-col items-center gap-8 sm:flex-row sm:justify-center sm:gap-16">
+      {/*
+        Prix et délai en serif, pas en sans.
+
+        Ils étaient en Archivo `font-semibold tracking-tight` — le registre exact
+        d'une grille tarifaire SaaS, et ce qui faisait le plus « site à 500 € »
+        dans toute la section. Un chiffre en Cormorant Light annonce un devis
+        d'atelier, pas un abonnement.
+
+        Les étiquettes au-dessus (« LE PRIX », « LE DÉLAI ») restent en petites
+        capitales sans : c'est le contraste entre les deux qui fait l'effet, tout
+        passer en serif l'annulerait.
+      */}
       <div class="text-center">
-        <p class="font-inter text-[10px] tracking-[0.25em] text-white/40 uppercase">
+        <p class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
           Le prix
         </p>
-        <p class="font-inter mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+        <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
           {offre.prix}
         </p>
-        <p class="font-inter mt-2 text-xs text-white/50">{offre.mention}</p>
+        <p class="font-texte mt-2 text-xs text-white/50">{offre.mention}</p>
         {
           /* Le tarif de lancement est annoncé ici, et pas seulement deux sections
              plus bas : c'est en lisant le prix normal qu'on se demande pourquoi
              l'autre existe. Répondre sur place évite que l'écart passe pour une
              marge de négociation. */
           tarifReference.actif && tarifReference.restants > 0 && (
-            <p class="font-inter mt-3 text-xs text-signal-vif">
+            <p class="font-texte mt-3 text-xs text-signal-vif">
               <a href="#preuve" class="underline underline-offset-4">
                 {tarifReference.prix} pour les {tarifReference.quota} premiers
               </a>
@@ -65,13 +77,13 @@ const secteurs = [
       <div class="pointer-events-none hidden h-16 w-px bg-white/15 sm:block" aria-hidden="true"></div>
 
       <div class="text-center">
-        <p class="font-inter text-[10px] tracking-[0.25em] text-white/40 uppercase">
+        <p class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
           Le délai
         </p>
-        <p class="font-inter mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+        <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
           {offre.delai}
         </p>
-        <p class="font-inter mt-2 text-xs text-white/50">annoncé, et tenu</p>
+        <p class="font-texte mt-2 text-xs text-white/50">annoncé, et tenu</p>
       </div>
     </div>
 
@@ -79,8 +91,8 @@ const secteurs = [
       {
         offre.contenu.map((bloc, i) => (
           <li class:list={['reveal bg-brique p-8', delais[i]]}>
-            <h3 class="font-arsenica text-2xl tracking-wide">{bloc.titre}</h3>
-            <p class="font-inter mt-3 text-xs leading-relaxed text-white/60">
+            <h3 class="font-titre text-[1.75rem] leading-snug tracking-wide">{bloc.titre}</h3>
+            <p class="font-texte mt-3 text-sm leading-relaxed text-white/60">
               {bloc.detail}
             </p>
           </li>
@@ -90,11 +102,11 @@ const secteurs = [
 
     <div class="mt-16 grid gap-12 md:grid-cols-2">
       <div>
-        <h3 class="font-arsenica reveal text-2xl tracking-wide">C'est pour vous si</h3>
+        <h3 class="font-titre reveal text-[1.75rem] tracking-wide">C'est pour vous si</h3>
         <ul class="mt-5 space-y-3">
           {
             offre.pour.map((p) => (
-              <li class="font-inter reveal flex gap-3 text-sm text-white/70">
+              <li class="font-texte reveal flex gap-3 text-sm text-white/70">
                 <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                 <span>{p}</span>
               </li>
@@ -104,11 +116,11 @@ const secteurs = [
       </div>
 
       <div>
-        <h3 class="font-arsenica reveal text-2xl tracking-wide">Ce que je ne fais pas</h3>
+        <h3 class="font-titre reveal text-[1.75rem] tracking-wide">Ce que je ne fais pas</h3>
         <ul class="mt-5 space-y-3">
           {
             offre.horsPerimetre.map((h) => (
-              <li class="font-inter reveal flex gap-3 text-sm text-white/50">
+              <li class="font-texte reveal flex gap-3 text-sm text-white/50">
                 <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
                 <span>{h}</span>
               </li>
@@ -122,7 +134,7 @@ const secteurs = [
         sans qu'on génère des pages qu'il est trop tôt pour tenir à jour.
         Groupé par secteur — douze noms à la file ne se lisent pas. */}
     <div class="reveal mt-16 text-center">
-      <p class="font-inter text-xs leading-relaxed text-white/45">
+      <p class="font-texte text-xs leading-relaxed text-white/45">
         Pensé pour les {metiers.map((m) => m.nom.toLowerCase()).join(', ')}.
       </p>
 
@@ -130,10 +142,10 @@ const secteurs = [
         {
           secteurs.map(([secteur, villes]) => (
             <div>
-              <dt class="font-inter text-[10px] tracking-[0.25em] text-white/40 uppercase">
+              <dt class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
                 {secteur}
               </dt>
-              <dd class="font-inter mt-2 text-xs leading-relaxed text-white/60">
+              <dd class="font-texte mt-2 text-xs leading-relaxed text-white/60">
                 {villes.map((v) => v.nom).join(' · ')}
               </dd>
             </div>
@@ -153,33 +165,33 @@ const secteurs = [
     <section id="preuve" class="px-4 py-24 sm:px-8 md:px-16 lg:px-28">
       <div class="carte reveal mx-auto max-w-3xl p-10 text-center">
         <p class="surtitre">La preuve, parlons-en</p>
-        <h2 class="font-arsenica mt-6 text-3xl tracking-wide sm:text-4xl">
+        <h2 class="font-titre mt-6 text-3xl tracking-wide sm:text-4xl">
           Je démarre, et ça se voit
         </h2>
-        <p class="font-inter mx-auto mt-6 max-w-xl text-sm leading-relaxed text-texte-doux">
+        <p class="font-texte mx-auto mt-6 max-w-xl text-sm leading-relaxed text-texte-doux">
           Je n'ai pas encore de chantier livré à vous montrer. Plutôt que de
           remplir cette page de maquettes présentées comme des clients, je préfère
           le dire : vous seriez parmi les premiers.
         </p>
-        <p class="font-inter mx-auto mt-4 max-w-xl text-sm leading-relaxed text-texte-doux">
+        <p class="font-texte mx-auto mt-4 max-w-xl text-sm leading-relaxed text-texte-doux">
           Ça se paie dans le prix, pas dans la qualité du travail.
         </p>
 
-        <p class="font-inter mt-8 text-[10px] tracking-[0.25em] text-texte-faible uppercase">
+        <p class="font-texte mt-8 text-[10px] tracking-[0.25em] text-texte-faible uppercase">
           Tarif de lancement — {tarifReference.quota} premières entreprises
         </p>
-        <p class="font-inter mt-2 flex items-baseline justify-center gap-3">
-          <span class="text-4xl font-semibold tracking-tight text-signal-vif">
+        <p class="font-texte mt-2 flex items-baseline justify-center gap-3">
+          <span class="font-titre text-5xl font-light tracking-[0.01em] text-signal-vif">
             {tarifReference.prix}
           </span>
-          <span class="text-lg text-texte-faible line-through">
+          <span class="font-titre text-2xl text-texte-faible line-through">
             {tarifReference.prixBarre}
           </span>
         </p>
-        <p class="font-inter mx-auto mt-5 max-w-lg text-xs leading-relaxed text-texte-faible">
+        <p class="font-texte mx-auto mt-5 max-w-lg text-xs leading-relaxed text-texte-faible">
           {tarifReference.contrepartie}
         </p>
-        <p class="font-inter mx-auto mt-3 max-w-lg text-xs leading-relaxed text-texte-faible">
+        <p class="font-texte mx-auto mt-3 max-w-lg text-xs leading-relaxed text-texte-faible">
           {
             tarifReference.restants > 1
               ? `Il reste ${tarifReference.restants} places. Ensuite, l'offre s'arrête et le tarif revient à la fourchette normale.`
