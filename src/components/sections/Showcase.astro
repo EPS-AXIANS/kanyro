@@ -3,34 +3,94 @@ import { MEDIAS } from '../../config/medias.js';
 ---
 
 {/*
-  Marges négatives : elles font chevaucher le nuage de transition, le showcase et
-  le hero, pour supprimer toute couture visible entre les sections.
+  Le nuage de transition est HORS FLUX, et c'est tout le principe.
 
-  ⚠ `pointer-events-none` doit être sur ce DIV, pas seulement sur l'image.
+  ---- Ce qui ne marche pas, et pourquoi ----
 
-  La marge négative remonte ce bloc jusqu'à 384 px par-dessus le bas du hero, et
-  `z-20` le place au-dessus. Un div transparent reste cliquable : le navigateur
-  teste la boîte, pas les pixels peints. Avec la propriété uniquement sur l'img,
-  le div avalait les clics du bouton « Demander un devis » du hero, qui tombe
-  dans cette zone sur la plupart des hauteurs d'écran. Le bouton avait l'air
-  normal, le curseur changeait — mais rien ne se passait.
+  Le nuage est en `w-full` : sa hauteur vaut largeur / 1,768, elle suit donc la
+  largeur de la fenêtre. Le hero, lui, est en `min-h-screen` : il suit la HAUTEUR
+  de la fenêtre. Deux axes différents.
 
-  La règle vaut pour tout calque décoratif ajouté ici : elle se pose sur
-  l'élément positionné, pas sur son contenu.
+  Tant que le nuage occupait de la place dans le flux, il écartait le hero du
+  showcase d'une distance qui grandissait avec l'écran, pendant que les marges
+  négatives censées les rapprocher restaient fixes. Au-delà de ~1 130 px de large
+  une bande s'ouvrait entre les deux — 437 px sur un 1920 — sans aucune image
+  derrière : on y voyait le fond de page en noir à travers les creux de la PNG.
+
+  Trois corrections ont été essayées et rejetées, elles sont notées ici pour
+  qu'on ne les retente pas :
+
+  1. Marges en pourcentage. Elles suivent alors la largeur comme le nuage, donc
+     la couture ferme — mais à 1920 le nuage remonte de 720 px et mord sur le h1.
+     Aucune constante ne peut satisfaire un axe vertical et un axe horizontal.
+
+  2. Plafond de hauteur + `object-cover`. Le recadrage garde le bas et coupe le
+     haut — or le haut de cette PNG n'est pas transparent. La coupe tombait en
+     plein dans les nuages peints et laissait une arête droite en travers de
+     l'écran.
+
+  3. Masque en dégradé pour effacer cette arête. Pire encore : la PNG n'est opaque
+     qu'à partir d'environ 25 % de sa hauteur, et le masque rendait transparent
+     tout ce qui était au-dessus de 38 %. Il détruisait donc la bande opaque qui
+     masquait justement la couture — on voyait la vidéo du hero par le trou.
+
+  ---- Ce qui marche ----
+
+  Sortir le nuage du flux. Il ne sépare plus rien : le hero et le showcase se
+  touchent, et se recouvrent même de 2 rem. AUCUNE bande ne peut s'ouvrir entre
+  eux, à aucune résolution — ce n'est plus un réglage à ajuster, c'est une
+  propriété de la structure.
+
+  Le nuage redevient ce qu'il est : un calque décoratif posé à cheval sur la
+  couture, affiché à sa taille naturelle, sans recadrage ni masque, donc avec
+  toute sa matière peinte intacte.
+
+  `-translate-y-[65%]` en pose 65 % au-dessus de la couture : le bord franc du
+  fond du showcase tombe donc à 65 % de la hauteur du nuage, dans sa masse
+  pleine.
+
+  Ce chiffre a d'abord été réglé à 40 %, pour limiter la remontée du nuage dans le
+  hero — elle se compte en pixels absolus qui grandissent avec la largeur, 936 px
+  sur un écran 2560. À 40 % la délimitation entre la vidéo du hero et le fond du
+  showcase se voyait encore : la PNG n'est pas franchement opaque à cette
+  profondeur, seulement à partir de sa masse basse.
+
+  Depuis que le nuage est passé sous les textes (voir plus bas), cette remontée ne
+  coûte plus rien — elle ne recouvre que des fonds. Le chiffre peut donc être pris
+  au seul critère qui compte : la couture doit tomber assez bas dans le nuage pour
+  qu'il n'y ait plus rien à voir au travers.
+
+  C'est le seul chiffre à toucher si la délimitation réapparaît : l'augmenter.
+
+  ---- L'ordre des calques, qui fait le reste du travail ----
+
+  `z-[5]`, et la valeur est choisie, pas trouvée. Ni le hero ni le showcase ne
+  créent de contexte d'empilement — ils sont `relative` sans z-index — donc leurs
+  descendants positionnés se rangent tous dans le même contexte, celui de la
+  racine. Le nuage s'y intercale :
+
+      z-10   les deux blocs de texte, hero et showcase
+      z-[5]  le nuage           ← au-dessus des fonds, sous les mots
+      z-0    les fonds de section, vidéo et image
+
+  Le nuage couvre donc les bords francs des deux fonds — c'est son seul travail —
+  mais passe DERRIÈRE les titres. Sans ça il faudrait choisir entre masquer la
+  couture et masquer « TROIS » : en `z-20`, un nuage de 1 439 px de haut sur un
+  écran 2560 recouvrait le titre du showcase.
+
+  C'est ce qui rend le compromis du 40 % confortable : ce que le nuage recouvre
+  en remontant ou en descendant, ce sont des fonds, jamais du texte.
+
+  ⚠ `pointer-events-none` est sur l'IMG parce que c'est elle l'élément positionné.
+  Un calque transparent reste cliquable : le navigateur teste la boîte, pas les
+  pixels peints. C'est ce qui avait fait avaler les clics du bouton « Demander un
+  devis » du hero. La règle vaut pour tout calque décoratif ajouté ici.
 */}
-<div
-  class="pointer-events-none relative z-20 -mt-64 sm:-mt-72 md:-mt-80 lg:-mt-96"
->
-  <img
-    src={MEDIAS.nuageTransition}
-    alt=""
-    aria-hidden="true"
-    class="w-full select-none"
-  />
-</div>
-
-<div class="relative -mt-40 sm:-mt-48 md:-mt-56 lg:-mt-64">
+<div class="relative -mt-8">
   <section class="relative min-h-screen w-full overflow-hidden">
+    {/* Ni masque ni doublure ici : le bord franc de ce fond est couvert par la
+        zone opaque du nuage, posé par-dessus. Les fondus essayés à cet endroit
+        ne faisaient que déplacer le problème — voir le bloc de tête. */}
     <img
       src={MEDIAS.fondShowcase}
       alt=""
@@ -53,20 +113,29 @@ import { MEDIAS } from '../../config/medias.js';
       <h2
         class="reveal mt-6 leading-[1.05] drop-shadow-[0_2px_20px_rgba(0,0,0,0.3)] [animation-delay:100ms]"
       >
+        {/*
+          `font-light` (300) et pas la graisse 400 par défaut de `.font-titre` :
+          à 7 rem, 400 alourdit le mot. L'exception ne vaut que pour le très
+          grand display — plus bas, les déliés de Cormorant disparaissent sur
+          fond sombre.
+
+          Ce n'était pas `font-extralight` : Cormorant n'a pas de graisse sous
+          300, et un 200 y est silencieusement ramené à 300. Autant l'écrire.
+        */}
         <span
-          class="font-arsenica block text-5xl tracking-wide sm:text-7xl md:text-8xl lg:text-[7rem]"
+          class="font-titre block text-5xl font-light tracking-wide sm:text-7xl md:text-8xl lg:text-[7rem]"
         >
           TROIS
         </span>
         <span
-          class="font-inter block text-5xl font-semibold tracking-tight sm:text-7xl md:text-8xl lg:text-[7rem]"
+          class="font-texte block text-5xl font-semibold tracking-tight sm:text-7xl md:text-8xl lg:text-[7rem]"
         >
           CHANTIERS
         </span>
       </h2>
 
       <p
-        class="reveal font-arsenica mt-10 max-w-3xl text-xl tracking-wide text-white/90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.25)] [animation-delay:250ms] sm:text-2xl md:text-3xl"
+        class="reveal font-titre mt-10 max-w-3xl text-xl tracking-wide text-white/90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.25)] [animation-delay:250ms] sm:text-2xl md:text-3xl"
       >
         Un chantier pèse entre cinq et vingt mille euros. Trois chantiers signés
         paient votre site — le reste, c'est ce qu'il vous rapporte les années
@@ -75,7 +144,7 @@ import { MEDIAS } from '../../config/medias.js';
 
       <a
         href="/#offre"
-        class="reveal font-inter mt-12 inline-block rounded-[50%] border border-white/50 px-10 py-4 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:400ms] hover:scale-[1.03] hover:border-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] sm:px-12 sm:py-5 sm:text-xs"
+        class="reveal font-texte mt-12 inline-block rounded-[50%] border border-white/50 px-10 py-4 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:400ms] hover:scale-[1.03] hover:border-white hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] sm:px-12 sm:py-5 sm:text-xs"
       >
         Voir l'offre
       </a>
@@ -88,6 +157,13 @@ import { MEDIAS } from '../../config/medias.js';
     >
     </div>
   </section>
+
+  <img
+    src={MEDIAS.nuageTransition}
+    alt=""
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-0 z-[5] w-full -translate-y-[65%] select-none"
+  />
 
   <img
     src={MEDIAS.colombe}
