@@ -17,84 +17,182 @@ import { offre } from '../../data/offres.js';
  *
  * Le délai affiché vient de offres.js pour qu'il ne puisse pas contredire celui
  * annoncé deux sections plus haut.
+ *
+ * ---- Mise en forme ----
+ *
+ * Première version : six cartes empilées pleine largeur dans un cadre arrondi,
+ * 1 608 px de haut, posées juste après une section Offre qui contient déjà une
+ * grille de cartes. Deux blocs encadrés à la suite, sur un site qui respire
+ * partout ailleurs — ça se lisait comme un tableau de bord.
+ *
+ * D'où la frise chronologique : un axe, six nœuds numérotés, et rien d'autre
+ * comme décor.
+ *
+ * `champClient` est ce qui fait que l'alternance dit quelque chose au lieu de
+ * décorer. L'intro promet « vous n'intervenez qu'à trois moments » : ce sont les
+ * étapes 1, 3 et 5. Elles passent AU-DESSUS de l'axe, en orange ; les trois
+ * autres passent en dessous, en gris. La forme porte donc l'argument — on voit
+ * d'un coup d'œil que les deux tiers du travail se font sans vous.
+ *
+ * ⚠ La couleur ne peut pas porter seule cette information : un lecteur d'écran
+ * n'y a pas accès, un daltonien non plus. D'où le libellé en `sr-only`.
  */
 const etapes = [
   {
     titre: 'On fait le point',
     duree: '30 minutes',
-    detail:
-      'Votre activité, vos chantiers, les communes où vous vous déplacez vraiment. Et je vous dis franchement si un site va vous rapporter quelque chose — si la réponse est non, vous l’entendrez à ce moment-là, pas après la facture.',
+    detail: 'Votre activité, vos chantiers, et les communes où vous allez vraiment.',
+    champClient: true,
   },
   {
-    titre: 'Je viens sur vos chantiers',
+    titre: 'Je viens photographier',
     duree: 'une demi-journée',
-    detail:
-      'Deux ou trois chantiers finis, photographiés tôt le matin ou en fin de journée. Dans le bâtiment, c’est la photo qui signe le devis. Vous n’avez rien à préparer.',
+    detail: 'Deux ou trois chantiers finis. Vous n’avez rien à préparer.',
+    champClient: false,
   },
   {
     titre: 'Vous validez les textes',
     duree: 'avant tout dessin',
-    detail:
-      'Je vous envoie ce qui sera écrit, sans mise en forme. C’est volontaire : devant une maquette, on regarde les couleurs et on ne lit plus rien. Les mots sont les vôtres, pas les miens.',
+    detail: 'Les mots d’abord : devant une maquette, on ne lit plus rien.',
+    champClient: true,
   },
   {
     titre: 'Je construis le site',
     duree: 'deux à trois semaines',
-    detail:
-      'Les pages, le formulaire de devis, votre numéro cliquable, la fiche Google créée ou reprise. Vous recevez un aperçu en ligne avant que quiconque puisse le voir.',
+    detail: 'Les pages, le formulaire, la fiche Google.',
+    champClient: false,
   },
   {
     titre: 'On corrige ensemble',
     duree: 'une semaine',
-    detail:
-      'Vous me dites ce qui ne va pas, je reprends. C’est le moment de tout dire — une couleur, une photo, une phrase qui ne vous ressemble pas.',
+    detail: 'Vous dites ce qui ne va pas, je reprends. Le moment de tout dire.',
+    champClient: true,
   },
   {
     titre: 'Mise en ligne',
     duree: 'le jour J',
-    detail:
-      'Le nom de domaine et le site sont à votre nom, les accès vous sont remis, et on prend trente minutes pour que vous sachiez ajouter une photo tout seul. À un mois, je vous envoie les premiers chiffres.',
+    detail: 'Les accès sont à vous. À un mois, les premiers chiffres.',
+    champClient: false,
   },
 ];
+
+/*
+ * Classes de position écrites en toutes lettres, jamais assemblées.
+ *
+ * Tailwind lit les fichiers source comme du texte : un `lg:mb-[54px]` construit
+ * à l'exécution ne serait jamais généré, et le bloc se retrouverait collé à
+ * l'axe. Les deux variantes existent donc en littéral, et le ternaire ne fait
+ * que choisir laquelle poser.
+ *
+ * 54 px = le rayon du nœud (22) + la hauteur du raccord (32). Changer l'un
+ * impose de reprendre l'autre, sinon le trait flotte ou déborde.
+ *
+ * Même chaîne pour la hauteur de cellule, `lg:h-[25rem]` plus bas : une frise
+ * chronologique n'a pas de hauteur naturelle, puisque les blocs sont positionnés
+ * par rapport à l'axe et non empilés. C'est donc la cellule qui doit réserver la
+ * place, et sa moitié (200 px) doit tenir le décalage de 54 px plus le bloc le
+ * plus haut.
+ *
+ * La valeur est donc liée à la fonte de titre, et deux changements l'ont déjà
+ * bougée : 22 rem ne suffisaient plus quand les titres passaient sur deux
+ * lignes, d'où 25 rem. Cormorant, plus étroit, les a ramenés sur une ligne — il
+ * reste aujourd'hui 43 px de marge de chaque côté. C'est confortable et ça peut
+ * rester tel quel ; à revérifier si la fonte de titre change encore.
+ */
+const POS_CONTENU_HAUT = 'lg:absolute lg:inset-x-0 lg:bottom-1/2 lg:mb-[54px]';
+const POS_CONTENU_BAS = 'lg:absolute lg:inset-x-0 lg:top-1/2 lg:mt-[54px]';
+const POS_RACCORD_HAUT = 'lg:bottom-1/2 lg:mb-[22px]';
+const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
 ---
 
-<section id="deroulement" class="bg-fond px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
-  <div class="mx-auto max-w-5xl">
+<section id="deroulement" class="bg-fond px-4 py-24 sm:px-8 md:px-16 lg:px-12 lg:py-32">
+  <div class="mx-auto max-w-6xl">
     <p class="surtitre reveal text-center">Le déroulement</p>
     <h2
-      class="font-arsenica reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="font-titre reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
       Comment ça se passe
     </h2>
     <p
-      class="font-inter reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [animation-delay:120ms]"
+      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [animation-delay:120ms]"
     >
       {offre.delai} entre le premier rendez-vous et la mise en ligne. Vous
-      n’intervenez qu’à trois moments — le reste, c’est mon travail.
+      n’intervenez qu’à trois moments — en orange ci-dessous. Le reste, c’est mon
+      travail.
     </p>
 
     {/*
-      Liste ordonnée : l'ordre porte du sens ici, ce n'est pas une énumération.
-      Le compteur est décoratif et sorti du flux d'accessibilité, puisque <ol>
-      annonce déjà le rang aux lecteurs d'écran.
+      Liste ordonnée : l'ordre porte du sens, ce n'est pas une énumération.
+
+      Une seule structure sert les deux orientations. Dupliquer le balisage en
+      « version mobile » + « version bureau » aurait sorti chaque étape deux fois
+      du DOM : deux fois le texte pour un lecteur d'écran, et deux fois pour
+      Google.
+
+      < lg : axe vertical à gauche, étapes empilées à droite.
+      ≥ lg : axe horizontal, étapes alternées de part et d'autre.
     */}
-    <ol class="mt-16 space-y-px overflow-hidden rounded-2xl bg-white/10">
+    <ol class="relative mt-20 lg:mt-28 lg:grid lg:grid-cols-6">
+      {/*
+        8,3333 % = une demi-colonne sur six. L'axe s'arrête donc au centre du
+        premier et du dernier nœud, au lieu de déborder dans le vide : une frise
+        chronologique a un début et une fin, c'est tout son propos.
+      */}
+      <div
+        class="absolute top-2 bottom-2 left-[21px] w-px bg-trait lg:top-1/2 lg:right-[8.3333%] lg:bottom-auto lg:left-[8.3333%] lg:h-px lg:w-auto"
+        aria-hidden="true"
+      >
+      </div>
+
       {
         etapes.map((etape, i) => (
-          <li class="reveal bg-surface p-8 sm:flex sm:gap-8">
-            <p
-              class="font-arsenica shrink-0 text-3xl text-signal-vif tabular-nums sm:w-16 sm:text-4xl"
+          <li class="relative pb-12 pl-16 last:pb-0 lg:h-[25rem] lg:px-3 lg:pb-0 lg:pl-3">
+            {/*
+              Le nœud est opaque et au-dessus de l'axe : c'est lui qui coupe le
+              trait, sinon la ligne traverse le chiffre.
+            */}
+            <span
+              class:list={[
+                'absolute top-0 left-0 z-10 flex h-11 w-11 items-center justify-center rounded-full border bg-fond lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2',
+                etape.champClient ? 'border-signal-vif/60' : 'border-trait',
+              ]}
               aria-hidden="true"
             >
-              {String(i + 1).padStart(2, '0')}
-            </p>
+              <span
+                class:list={[
+                  'font-texte text-[11px] font-semibold tracking-[0.08em] tabular-nums',
+                  etape.champClient ? 'text-signal-vif' : 'text-texte-faible',
+                ]}
+              >
+                {String(i + 1).padStart(2, '0')}
+              </span>
+            </span>
 
-            <div class="mt-3 sm:mt-0">
-              <h3 class="font-arsenica text-2xl tracking-wide">{etape.titre}</h3>
-              <p class="font-inter mt-1 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+            {/* Raccord entre le nœud et le texte — sur l'axe horizontal seulement. */}
+            <span
+              class:list={[
+                'absolute left-1/2 hidden h-8 w-px bg-trait lg:block',
+                etape.champClient ? POS_RACCORD_HAUT : POS_RACCORD_BAS,
+              ]}
+              aria-hidden="true"
+            />
+
+            <div
+              class:list={[
+                'reveal lg:text-center',
+                etape.champClient ? POS_CONTENU_HAUT : POS_CONTENU_BAS,
+              ]}
+            >
+              <h3 class="font-titre text-2xl tracking-wide lg:text-xl">
+                {etape.titre}
+                {etape.champClient && (
+                  <span class="sr-only"> — vous intervenez à cette étape.</span>
+                )}
+              </h3>
+              <p class="font-texte mt-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
                 {etape.duree}
               </p>
-              <p class="font-inter mt-3 max-w-2xl text-xs leading-relaxed text-texte-doux">
+              <p class="font-texte mt-3 text-xs leading-relaxed text-texte-doux">
                 {etape.detail}
               </p>
             </div>
@@ -103,7 +201,7 @@ const etapes = [
       }
     </ol>
 
-    <div class="reveal mt-12 text-center">
+    <div class="reveal mt-16 text-center lg:mt-20">
       <a href="/contact" class="bouton-primaire">Demander un devis</a>
     </div>
   </div>
