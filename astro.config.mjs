@@ -3,7 +3,33 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
-import { SITE } from './src/config/site.js';
+import { BETA, SITE } from './src/config/site.js';
+
+/*
+ * Garde-fou de bascule bêta → production.
+ *
+ * `BETA.actif` et `BETA.url` doivent bouger ensemble, et rien dans le code ne
+ * le rappelait au moment du build. Laisser `actif` à true en basculant `url`
+ * sur le domaine de l'agence livre le site commercial avec `noindex, follow`
+ * sur chaque page et un `robots.txt` en `Disallow: /` — un site invisible qui
+ * s'affiche parfaitement, donc une panne qu'on ne voit pas avant des semaines.
+ *
+ * L'erreur est levée au build, pas au démarrage du serveur de développement :
+ * c'est la mise en ligne qu'il faut arrêter, pas le travail en cours.
+ */
+if (BETA.actif && BETA.url === SITE.urlPublique) {
+  throw new Error(
+    [
+      'Configuration incohérente dans src/config/site.js :',
+      `  BETA.actif = true et BETA.url = ${BETA.url} (le domaine public).`,
+      '',
+      "Le build produirait le site de l'agence en noindex, avec un robots.txt",
+      'interdisant toute exploration. Pour ouvrir au public, passez',
+      'BETA.actif à false — et pensez alors au verrou htpasswd de',
+      'public/.htaccess, qui protégeait la bêta.',
+    ].join('\n')
+  );
+}
 
 export default defineConfig({
   site: SITE.url,

@@ -47,6 +47,22 @@ $pageErreurLimite = '/contact?erreur=limite';
  */
 $limiteEnvois = 5;
 $fenetreLimite = 3600; // secondes
+
+/*
+ * Sel du nom de fichier de quota.
+ *
+ * Sur un mutualisé, `sys_get_temp_dir()` est `/tmp`, partagé en 1777 avec tous
+ * les autres comptes de la machine. Un nom de fichier dérivé de la seule IP est
+ * donc devinable : un voisin qui connaît l'IP d'un visiteur peut y déposer
+ * d'avance cinq horodatages frais et lui fermer le formulaire pour une heure,
+ * renouvelable indéfiniment. Le sel rend le chemin imprévisible.
+ *
+ * À personnaliser au déploiement — la valeur ci-dessous est publique puisque le
+ * dépôt l'est. `KANYRO_SEL_QUOTA` dans l'environnement PHP la remplace si vous
+ * préférez la garder hors du dépôt. En changer invalide les fichiers existants,
+ * c'est aussi le geste de rotation si vous soupçonnez une fuite.
+ */
+$selQuota = getenv('KANYRO_SEL_QUOTA') ?: 'kanyro-quota-a-personnaliser';
 // ────────────────────────────────────────────────────────────────────────────
 
 /** Redirige et coupe l'exécution. Aucun message d'erreur technique n'est exposé. */
@@ -73,6 +89,49 @@ function champ(string $nom): string
     return isset($_POST[$nom]) && is_string($_POST[$nom]) ? trim($_POST[$nom]) : '';
 }
 
+/**
+ * Vrai si la requête ne vient pas d'une page du site lui-même.
+ *
+ * `form-action 'self'` dans la CSP empêche déjà le formulaire du site de poster
+ * ailleurs ; il n'empêche pas le formulaire de quelqu'un d'autre de poster ici.
+ * Or ce point d'entrée envoie un accusé de réception signé Kanyro à l'adresse
+ * saisie : un tiers qui héberge son propre formulaire pointant sur cette URL
+ * s'en sert comme relais d'un mail crédible. Comparer l'origine annoncée à
+ * l'hôte servi ferme ce détournement, sans rien changer pour le visiteur.
+ *
+ * Origin d'abord — le navigateur l'envoie sur toute soumission de formulaire et
+ * ne le laisse pas falsifier. Referer en repli, pour les clients plus anciens.
+ * Aucun des deux : on laisse passer. Certains proxys d'entreprise et extensions
+ * de confidentialité les suppriment, et perdre une vraie demande de devis coûte
+ * plus cher que d'accepter un POST forgé de plus — que le quota borne déjà.
+ */
+function origineEtrangere(): bool
+{
+    $hote = $_SERVER['HTTP_HOST'] ?? '';
+    if (!is_string($hote) || $hote === '') {
+        return false;
+    }
+
+    $source = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? '';
+    if (!is_string($source) || $source === '') {
+        return false;
+    }
+
+    $hoteSource = parse_url($source, PHP_URL_HOST);
+    if (!is_string($hoteSource) || $hoteSource === '') {
+        // « null », « about:blank », ou en-tête illisible : rien qui ressemble
+        // à une page du site. On refuse.
+        return true;
+    }
+
+    $port = parse_url($source, PHP_URL_PORT);
+    if (is_int($port)) {
+        $hoteSource .= ':' . $port;
+    }
+
+    return strcasecmp($hoteSource, $hote) !== 0;
+}
+
 /** Encode un sujet en UTF-8, seule forme acceptée partout pour les accents. */
 function sujetEncode(string $sujet): string
 {
@@ -90,18 +149,41 @@ function sujetEncode(string $sujet): string
  * la fonction laisse passer. Bloquer une vraie demande de devis coûte plus cher
  * que laisser passer un abus, qui reste borné par les filtres en amont.
  */
-function quotaDepasse(int $limite, int $fenetre): bool
+function quotaDepasse(int $limite, int $fenetre, string $sel): bool
 {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     if ($ip === '') {
         return false;
     }
 
-    $fichier = sys_get_temp_dir() . '/kanyro-devis-' . hash('sha256', $ip) . '.txt';
+    // HMAC et non simple hachage : voir le commentaire de $selQuota. Un hachage
+    // nu de l'IP se recalcule par quiconque connaît l'IP, et le chemin devient
+    // une cible que l'on peut pré-créer dans un /tmp partagé.
+    $fichier = sys_get_temp_dir() . '/kanyro-devis-' . hash_hmac('sha256', $ip, $sel) . '.txt';
 
     $flux = @fopen($fichier, 'c+');
     if ($flux === false) {
         return false;
+    }
+
+    /*
+     * Deuxième verrou, au cas où le sel fuiterait : un fichier de quota qui ne
+     * nous appartient pas n'a pas été écrit par ce script. Son contenu ne dit
+     * rien de l'activité du visiteur, seulement ce qu'un tiers veut nous faire
+     * croire — on ne le lit pas. Comme partout ailleurs dans cette fonction,
+     * l'échec laisse passer : refuser un devis coûte plus cher que l'abus.
+     */
+    $etat = fstat($flux);
+    $nous = function_exists('posix_geteuid') ? posix_geteuid() : getmyuid();
+    if (!is_array($etat) || $nous === false || $etat['uid'] !== $nous) {
+        fclose($flux);
+        return false;
+    }
+
+    // Fichier neuf : le refermer sur nous seuls. Les horodatages d'un visiteur
+    // n'ont pas à être lisibles par les autres comptes de la machine.
+    if ($etat['size'] === 0) {
+        @chmod($fichier, 0600);
     }
 
     try {
@@ -139,6 +221,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     terminer('/');
 }
 
+// Soumission depuis une page qui n'est pas la nôtre : on ne sert pas de relais.
+if (origineEtrangere()) {
+    terminer($pageErreurSaisie);
+}
+
 // Pot de miel : rempli, c'est un robot. On répond comme à un envoi réussi pour
 // ne pas lui signaler que le piège a été détecté.
 if (champ('bot-field') !== '') {
@@ -166,7 +253,7 @@ if (mb_strlen($message) > 5000 || mb_strlen($nom) > 200) {
 
 // Vérifié après la validation, pour qu'une simple faute de frappe corrigée dans
 // la foulée ne consomme pas le quota du visiteur.
-if (quotaDepasse($limiteEnvois, $fenetreLimite)) {
+if (quotaDepasse($limiteEnvois, $fenetreLimite, $selQuota)) {
     terminer($pageErreurLimite);
 }
 
