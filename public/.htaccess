@@ -11,6 +11,12 @@
 Options -Indexes
 DirectoryIndex index.html
 
+# Retire « Apache/2.4.x (Debian) Server at ... » du pied des pages d'erreur.
+# `ServerTokens`, qui ferait de même sur l'en-tête `Server:`, ne s'écrit qu'en
+# configuration serveur : sur un mutualisé il n'est pas à notre portée, et le
+# placer ici renverrait une 500 sur tout le site.
+ServerSignature Off
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
@@ -59,7 +65,10 @@ DirectoryIndex index.html
   Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https://images.higgs.ai https://soft-zoom-63098134.figma.site; media-src 'self' https://d8j0ntlcm91z4.cloudfront.net; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; upgrade-insecure-requests"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  # Un site vitrine n'a besoin d'aucune de ces API. Les refuser toutes coûte
+  # zéro en compatibilité et retire d'avance la surface à un script tiers qui
+  # arriverait par un chemin que la CSP n'aurait pas vu venir.
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=(), midi=(), serial=(), bluetooth=(), display-capture=(), xr-spatial-tracking=()"
 
   # HSTS : à n'activer qu'une fois le certificat vérifié et le site accessible
   # en HTTPS sans erreur. Une fois envoyé, le navigateur refusera le HTTP

@@ -35,6 +35,31 @@ import '@fontsource-variable/cormorant';
  */
 import '@fontsource-variable/cormorant/wght-italic.css';
 
+/**
+ * Échappe une chaîne JSON avant injection dans un
+ * <script type="application/ld+json">.
+ *
+ * `JSON.stringify` produit du JSON valide, pas du HTML sûr : il laisse passer
+ * `</script>` tel quel. Une valeur qui contient ce fragment referme la balise
+ * JSON-LD trop tôt, et tout ce qui suit est parsé comme du balisage exécutable.
+ * Le danger n'est pas théorique : `filAriane()` interpole le titre d'une fiche
+ * réalisation — un champ de frontmatter Markdown — dans le JSON-LD dès que
+ * `FONCTIONS.realisations` passe à true.
+ *
+ * Les cinq caractères sont remplacés par leur échappement Unicode : la chaîne
+ * reste du JSON strictement équivalent (`JSON.parse` rend la valeur d'origine),
+ * mais plus aucun d'eux n'atteint l'analyseur HTML. U+2028 et U+2029 sont des
+ * fins de ligne pour l'analyseur JavaScript alors que `JSON.stringify` les
+ * émet bruts : sans échappement, un consommateur qui `eval`e le bloc casse.
+ */
+const echapperJsonLd = (json) =>
+  json
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
 const {
   titre,
   description,
@@ -157,7 +182,7 @@ const csp = [
       jsonLd && (
         <script
           type="application/ld+json"
-          set:html={JSON.stringify(jsonLd)}
+          set:html={echapperJsonLd(JSON.stringify(jsonLd))}
           is:inline
         />
       )
