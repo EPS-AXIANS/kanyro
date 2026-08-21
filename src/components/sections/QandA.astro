@@ -78,59 +78,116 @@ const delais = [
 ];
 ---
 
-<section
-  id="questions"
-  class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[50vh] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
->
-  <h2
-    class="reveal font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
+<div class="relative">
+  <section
+    id="questions"
+    class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[50vh] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
   >
-    <span>Q</span>
-    <span class="text-xl italic text-white/80 sm:text-2xl md:text-3xl lg:text-4xl">
-      &amp;
-    </span>
-    <span>R</span>
-  </h2>
+    <h2
+      class="reveal font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
+    >
+      <span>Q</span>
+      <span class="text-xl italic text-white/80 sm:text-2xl md:text-3xl lg:text-4xl">
+        &amp;
+      </span>
+      <span>R</span>
+    </h2>
 
-  <div class="relative z-20 mx-auto mt-16 grid max-w-6xl gap-10 md:grid-cols-2 md:gap-16 lg:gap-20">
-    <div class="space-y-10 lg:space-y-14">
-      {
-        colonneGauche.map((item, i) => (
-          <article class:list={['reveal', delais[i]]}>
-            <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
-              {item.q}
-            </h3>
-            <p class="font-texte mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
-              {item.r}
-            </p>
-          </article>
-        ))
-      }
+    <div class="relative z-20 mx-auto mt-16 grid max-w-6xl gap-10 md:grid-cols-2 md:gap-16 lg:gap-20">
+      <div class="space-y-10 lg:space-y-14">
+        {
+          colonneGauche.map((item, i) => (
+            <article class:list={['reveal', delais[i]]}>
+              <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
+                {item.q}
+              </h3>
+              <p class="font-texte mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
+                {item.r}
+              </p>
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="space-y-10 md:mt-24 lg:space-y-14">
+        {
+          colonneDroite.map((item, i) => (
+            <article class:list={['reveal', delais[i + 3]]}>
+              <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
+                {item.q}
+              </h3>
+              <p class="font-texte mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
+                {item.r}
+              </p>
+            </article>
+          ))
+        }
+      </div>
     </div>
+  </section>
 
-    <div class="space-y-10 md:mt-24 lg:space-y-14">
-      {
-        colonneDroite.map((item, i) => (
-          <article class:list={['reveal', delais[i + 3]]}>
-            <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
-              {item.q}
-            </h3>
-            <p class="font-texte mt-3 text-[11px] leading-relaxed text-white/60 sm:text-xs md:text-sm">
-              {item.r}
-            </p>
-          </article>
-        ))
-      }
-    </div>
-  </div>
+  {/*
+    ---- Le nuage est à cheval sur la couture, pas dedans ----
 
-  {/* Nuage en parallaxe : monte lentement à mesure que la section défile. */}
+    Il vivait dans la section, qui est en `overflow-hidden` : sa moitié basse
+    était rognée par le bord, et la coupe tombait en plein dans sa masse pleine.
+    Ça laissait une arête droite en travers de l'écran, entre le fond brique des
+    questions et le ciel de la citation — deux valeurs que tout oppose.
+
+    Même remède qu'en haut du showcase, et pour la même raison : sorti du flux,
+    le nuage ne sépare plus rien, il recouvre. Aucune bande ne peut s'ouvrir
+    entre les deux sections, à aucune résolution.
+
+    ---- Les 36 %, et pourquoi ils ne se règlent pas au hasard ----
+
+    La PNG n'est franchement opaque, sur toute sa largeur, qu'entre 52 % et 68 %
+    de sa hauteur (mesuré sur son canal alpha). C'est la seule bande qui masque
+    vraiment ce qu'il y a derrière : ailleurs, la couture se verrait au travers.
+
+    `translate-y-[36%]` pose donc la couture à 64 % du nuage, dans cette bande,
+    et au plus près de son bord bas : c'est ce qui règle la retombée du nuage sur
+    la citation, et elle se compte en pixels qui grandissent avec la largeur de
+    l'écran — 380 px sur un 1892, 520 px sur un 2560. Descendre plus bas ferait
+    sortir la couture de la zone opaque ; c'est le seul chiffre à toucher si une
+    arête réapparaît, et il faut alors l'augmenter.
+
+    C'est aussi ce qui borne la parallaxe : ±2 % promènent la couture entre 62 %
+    et 66 %, jamais au-delà. Une amplitude plus large — celle d'avant valait
+    30 % — la ferait ressortir de la zone opaque en fin de défilement.
+
+    Le décalage de base est dans la classe (propriété `translate`) et la
+    parallaxe dans le style en ligne (propriété `transform`) : les deux se
+    composent, donc le nuage reste posé au bon endroit même quand le script ne
+    tourne pas — JavaScript coupé, ou `prefers-reduced-motion`.
+
+    ---- Le fondu du bas ----
+
+    Un masque en dégradé a déjà été essayé sur ce nuage, en haut du showcase, et
+    rejeté : il mangeait la bande opaque et rouvrait la couture. Celui-ci part de
+    70 %, soit quatre points SOUS la couture la plus basse. Il ne touche donc que
+    ce qui déborde sur le ciel de la citation, jamais ce qui masque la jonction.
+
+    C'est lui, et pas la position du nuage, qui règle le poids de la retombée. La
+    PNG traîne jusqu'à son bord une matière de plus en plus ténue, plus la queue
+    du ruban rouge qu'elle coupe net ; laissée entière, elle descendait jusque
+    sur la première ligne de la citation. En éteignant le nuage à 86 % au lieu
+    de 100 %, il ne retombe plus qu'une vingtaine de points sous la couture —
+    environ 215 px sur un écran de 1892, moitié moins qu'avant — et il se dissout
+    dans le ciel bien au-dessus du texte.
+
+    Les seize points de dégradé, eux, ne sont pas négociables à la baisse : c'est
+    ce qui fait une dissolution et pas une arête.
+
+    ⚠ `pointer-events-none` sur l'IMG : un calque transparent reste cliquable,
+    le navigateur teste la boîte et pas les pixels peints.
+  */}
+
   <img
     src={MEDIAS.nuageTransition}
     alt=""
     aria-hidden="true"
-    data-parallaxe="30"
-    data-parallaxe-depart="60"
-    class="pointer-events-none absolute bottom-0 left-0 z-10 w-full will-change-transform select-none"
+    data-parallaxe="4"
+    data-parallaxe-depart="2"
+    class="pointer-events-none absolute inset-x-0 bottom-0 z-10 w-full translate-y-[36%] mask-b-from-70% mask-b-to-86% will-change-transform select-none"
   />
-</section>
+</div>
