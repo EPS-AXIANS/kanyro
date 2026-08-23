@@ -17,6 +17,14 @@ const colonneGauche = [
     r: "Quatre à six semaines. Je monte cette activité en parallèle d'une alternance, donc je travaille le soir et le week-end. D'autres annoncent quinze jours ; je préfère un délai que je tiens à une promesse que je rate.",
   },
   {
+    q: "Je n'ai pas le temps de m'en occuper",
+    r: "C'est un peu l'idée. De votre côté, ça tient en quatre moments : le rendez-vous de cadrage, où je pose les questions et je prends les notes ; la demi-journée de photos ; une relecture des textes, avant toute mise en forme ; et trente minutes à la fin pour récupérer vos accès. Le reste — écrire, monter le site, le mettre en ligne, remettre la fiche Google d'aplomb —, c'est mon travail, pas le vôtre. Photos mises à part, comptez deux ou trois heures étalées sur six semaines.",
+  },
+  {
+    q: "Je n'ai pas de belles photos de mes chantiers",
+    r: "Presque personne n'en a. Les clichés pris au téléphone en plein midi pour suivre un chantier ne font pas un site. Donc on y va : une demi-journée, deux ou trois chantiers finis, tôt le matin ou en fin d'après-midi pour la lumière, des plans larges et des détails d'exécution — et vous au travail, si vous êtes d'accord. C'est du temps en plus, donc ça situe le devis plutôt vers le haut de la fourchette. C'est aussi ce qui change le plus l'allure d'un site.",
+  },
+  {
     q: 'Le site m’appartient vraiment ?',
     r: "Oui. Le nom de domaine et le contenu sont à votre nom dès le premier jour, pas au mien. Si on arrête de travailler ensemble, vous partez avec, sans négociation et sans frais de sortie.",
   },
@@ -26,6 +34,14 @@ const colonneDroite = [
   {
     q: 'Vous garantissez la première place sur Google ?',
     r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Ce que je garantis : un site rapide qui s'affiche correctement sur un téléphone, des pages écrites autour des mots que vos clients tapent vraiment, et chaque mois un point sur ce qui change — où vous sortez sur Google, combien de personnes sont venues, combien vous ont écrit.",
+  },
+  {
+    q: 'Je travaille déjà au bouche-à-oreille, pourquoi un site ?',
+    r: "Le bouche-à-oreille reste ce qui marche le mieux, et un site ne le remplace pas. Ce qu'il change, c'est ce qui se passe entre la recommandation et l'appel : on donne votre nom à quelqu'un, et cette personne le tape sur son téléphone avant de composer le numéro. Si elle ne trouve rien, ou une page qui date de 2012, elle appelle quand même — mais elle appelle aussi le suivant. Un site sert d'abord à ne pas perdre les clients que vous avez déjà gagnés.",
+  },
+  {
+    q: 'Vous pouvez reprendre mon ancien site ?',
+    r: "Le site lui-même, non : je repars d'une base propre, c'est plus rapide que de rattraper le travail d'un autre. Ce qu'on récupère, c'est ce qui a de la valeur — le nom de domaine d'abord, pour que votre adresse ne change pas, et vos textes ou vos photos s'il y en a de bons. Reste à savoir si vous avez la main sur ce domaine : c'est le point qui fait dérailler les chantiers, souvent acheté par quelqu'un qu'on ne joint plus. On le vérifie au premier rendez-vous, pas le jour de la mise en ligne.",
   },
   /*
    * Cette question demandait auparavant « L'abonnement mensuel est obligatoire ? »
@@ -61,7 +77,7 @@ const colonneDroite = [
  */
 
 /*
- * Décalages en cascade, continus d'une colonne à l'autre pour que les six
+ * Décalages en cascade, continus d'une colonne à l'autre pour que les dix
  * entrées ne montent pas par paires.
  *
  * Ce sont des littéraux et pas des chaînes construites : Tailwind analyse les
@@ -75,6 +91,10 @@ const delais = [
   '[animation-delay:480ms]',
   '[animation-delay:600ms]',
   '[animation-delay:720ms]',
+  '[animation-delay:840ms]',
+  '[animation-delay:960ms]',
+  '[animation-delay:1080ms]',
+  '[animation-delay:1200ms]',
 ];
 ---
 
@@ -112,7 +132,7 @@ const delais = [
       <div class="space-y-10 md:mt-24 lg:space-y-14">
         {
           colonneDroite.map((item, i) => (
-            <article class:list={['reveal', delais[i + 3]]}>
+            <article class:list={['reveal', delais[i + 5]]}>
               <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                 {item.q}
               </h3>
