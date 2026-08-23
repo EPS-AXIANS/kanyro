@@ -164,3 +164,37 @@ if (calques.length && !doux) {
   window.addEventListener('scroll', auScroll, { passive: true });
   window.addEventListener('resize', auScroll, { passive: true });
 }
+
+// ---- Vidéo du hero : reprise au premier geste ----
+//
+// La vidéo de fond est `autoplay muted loop playsinline`, ce qui suffit dans le
+// cas général. Certains contextes mobiles la bloquent malgré tout — mode
+// économie d'énergie sur iOS, économiseur de données sur Android. Le navigateur
+// affiche alors son propre bouton de lecture, centré sur la vidéo donc sous le
+// bloc de texte et le bouton du hero : impossible à taper. La vidéo reste figée
+// sur sa première image.
+//
+// Le premier geste du visiteur, n'importe où sur la page, vaut interaction
+// utilisateur : c'est le moment où `play()` est autorisé. On ne le tente qu'une
+// fois (`once`), et `touchstart` est passif pour ne pas retarder le défilement.
+// Rappeler `play()` sur une vidéo déjà en lecture est sans effet — inutile de
+// vérifier au préalable qu'elle est en pause.
+//
+// Volontairement hors du garde `doux` : `prefers-reduced-motion` couvre le
+// mouvement décoratif ajouté par le site, pas cette vidéo. Le propriétaire
+// assume qu'elle joue dans tous les cas.
+const videoHero = document.getElementById('video-hero');
+
+if (videoHero) {
+  const relancer = () => {
+    videoHero.play().catch(() => {
+      /* Refus persistant du navigateur : on n'insiste pas. */
+    });
+  };
+
+  document.addEventListener('touchstart', relancer, {
+    once: true,
+    passive: true,
+  });
+  document.addEventListener('click', relancer, { once: true });
+}
