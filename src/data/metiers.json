@@ -42,7 +42,7 @@
       "Bloc dépannage visible dès la première seconde, numéro cliquable",
       "Pages séparées pour la rénovation énergétique et le dépannage",
       "Explication des aides (MaPrimeRénov', CEE) en langage clair",
-      "Mention RGE mise en avant — sans elle, pas d'aides pour le client"
+      "Mention RGE mise en avant, sans elle, pas d'aides pour le client"
     ],
     "recherches": [
       "plombier urgence",
@@ -58,7 +58,7 @@
     "pluriel": "électriciens",
     "article": "un",
     "accroche": "La mise aux normes se vend par la tranquillité, pas par le tableau.",
-    "contexte": "Rénovation électrique, borne de recharge, domotique : le client ne connaît pas le vocabulaire. Le site doit traduire le besoin ressenti — « mon installation est vieille » — en prestation nommée.",
+    "contexte": "Rénovation électrique, borne de recharge, domotique : le client ne connaît pas le vocabulaire. Le site doit traduire le besoin ressenti, « mon installation est vieille », en prestation nommée.",
     "prestations": [
       "Page mise aux normes NF C 15-100 expliquée simplement",
       "Page borne de recharge véhicule électrique, en forte demande",
@@ -99,7 +99,7 @@
     "nom": "Plâtrier-plaquiste",
     "pluriel": "plâtriers-plaquistes",
     "article": "un",
-    "accroche": "Un métier qui vit d'abord de la recommandation — le site la prolonge.",
+    "accroche": "Un métier qui vit d'abord de la recommandation, le site la prolonge.",
     "contexte": "Le plaquiste travaille beaucoup en sous-traitance et par bouche-à-oreille. Le site sert autant à rassurer un particulier qu'à être trouvé par un maître d'œuvre qui cherche une équipe disponible.",
     "prestations": [
       "Page dédiée aux professionnels et à la sous-traitance",

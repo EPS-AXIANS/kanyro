@@ -36,7 +36,7 @@ export const offre = {
     {
       titre: 'Visibilité locale',
       detail:
-        'Fiche Google Business créée ou reprise et optimisée, et des pages pensées pour les recherches réelles de vos clients — votre métier associé à vos communes.',
+        'Fiche Google Business créée ou reprise et optimisée, et des pages pensées pour les recherches réelles de vos clients, votre métier associé à vos communes.',
     },
     {
       titre: 'Vous êtes propriétaire',
@@ -50,7 +50,7 @@ export const offre = {
   horsPerimetre: [
     'Je ne gère pas vos réseaux sociaux au quotidien',
     'Je ne fais pas de boutique en ligne à gros catalogue',
-    'Je ne garantis pas une position sur Google — personne ne le peut sérieusement',
+    'Je ne garantis pas une position sur Google, personne ne le peut sérieusement',
   ],
 };
 

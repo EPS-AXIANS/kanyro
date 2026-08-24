@@ -181,6 +181,7 @@ Dans `docs/`, hors du site :
 | `processus-livraison.md` | Les six étapes et le cahier de recette |
 | `environnement.md` | Ce qu'il faut installer sur un poste neuf |
 | `tasklist.md` | Corrections issues de l'audit externe, avec leur verdict |
+| `prospects_artisans_arras.md` | Liste de prospection commerciale, artisans du bâtiment à Arras |
 
 ## Prise de rendez-vous
 
@@ -197,48 +198,28 @@ d'elle-même sur le champ « quand vous joindre » du formulaire.
 
 ## ⚠ À REMPLACER AVANT TOUTE MISE EN LIGNE
 
-Ces éléments viennent du template de référence. Ils permettent de juger le rendu
-tout de suite, mais **aucun ne doit rester en production.**
-
 ### 1. Les médias
 
-Tous centralisés dans `src/config/medias.js` — vidéo d'accueil, nuages, colombe,
-fonds de section. Ils pointent vers le CloudFront et l'export Figma d'un tiers.
+Vidéo d'accueil, nuages, colombe, fonds de section : rapatriés du template de
+référence dans `public/medias/`, sous licence commerciale acquise — le site ne
+dépend plus du CDN du vendeur, qui pouvait disparaître sans préavis. Restent
+des visuels de template, pas une urgence légale ou technique. À remplacer par
+vos propres visuels quand l'occasion se présente — idéalement des photos de
+chantiers réels, qui serviront de toute façon mieux le propos. Tout est
+centralisé dans `src/config/medias.js`, pour qu'un remplacement soit un seul
+fichier à éditer.
 
-Deux risques : ces URL peuvent disparaître sans préavis, et rien n'établit le
-droit de les diffuser. À remplacer par vos propres visuels — idéalement des
-photos de chantiers réels, qui serviront de toute façon mieux le propos.
+### 2. Le reste
 
-### 2. Resserrer la CSP après remplacement
-
-Le volet fontes est fait : `fontes` et `styles` sont vides, et `style-src` comme
-`font-src` sont revenus à `'self'` des deux côtés. Reste le volet médias, une
-fois les visuels rapatriés dans `public/` :
-
-1. vider les tableaux `images` et `video` de `HOTES_MEDIAS` dans
-   `src/config/medias.js` ;
-2. retirer les mêmes hôtes de l'en-tête `Content-Security-Policy` de
-   `public/.htaccess`.
-
-La balise `<meta>` du layout se resserre alors d'elle-même, puisqu'elle est
-construite depuis `HOTES_MEDIAS`. L'en-tête du `.htaccess`, lui, est écrit à la
-main : les deux doivent rester le miroir l'un de l'autre.
-
-### 3. Le reste
-
-- [ ] SIREN et téléphone dans `src/config/site.js` — sans SIREN, les mentions
-      légales sont en infraction (article 19 de la LCEN). La page affiche un
-      encart d'avertissement tant que le champ est vide.
+- [ ] SIREN dans `src/config/site.js` (`SITE.legal.siren`) — sans lui, les
+      mentions légales sont en infraction (article 19 de la LCEN). La page
+      affiche un encart d'avertissement tant que le champ est vide.
 - [ ] Image de partage (`og:image`), à passer via la prop `image` du layout.
       Aucune balise n'est émise tant qu'elle n'existe pas, ce qui vaut mieux
       qu'une balise pointant vers un fichier absent.
-- [ ] Favicon définitive une fois le logo dessiné.
 - [ ] Redirection `kaniro.fr` à ajouter dans `public/.htaccess` si le domaine
       défensif est réservé — le nom sera mal orthographié à l'oral (« Kaniro »).
       Mieux vaut une redirection 301 qu'un second site à maintenir.
-- [ ] **Tester le formulaire de bout en bout après déploiement.** `mail()` n'existe
-      pas en local : ni l'envoi, ni l'accusé de réception, ni le passage des
-      filtres anti-spam ne sont vérifiables ailleurs qu'en ligne.
 - [ ] Livrer un chantier de référence avant de pousser le site.
 
 ---

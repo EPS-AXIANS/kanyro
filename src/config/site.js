@@ -90,22 +90,22 @@ export const SITE = {
    * alimentent `areaServed`.
    */
   zone: {
-    ville: 'Arras',
-    departement: 'Pas-de-Calais',
+    ville: 'Arras - Lille',
+    departement: 'Pas-de-Calais - Nord',
     region: 'Hauts-de-France',
-    codePostal: '62000',
+    codePostal: '62000 - 59000',
     pays: 'FR',
   },
 
   reseaux: {
-    linkedin: '',
-    instagram: '',
-    facebook: '',
+    linkedin: 'https://www.linkedin.com/in/elio-pallois/',
+    instagram: '#',
+    facebook: '#',
   },
 
   /** Renseigner après immatriculation — sert aussi aux mentions légales. */
   legal: {
-    siren: '',
+    siren: 'Arrive prochainement',
     formeJuridique: 'Entreprise individuelle',
     directeurPublication: 'Elio Pallois',
     /* L'identification exacte de l'hébergeur est une obligation de l'article 19
