@@ -69,6 +69,19 @@ une **limite de 5 envois par heure et par IP** : sans elle, on soumet l'adresse
 d'un tiers en boucle et c'est le domaine expéditeur qui finit sur les listes
 noires.
 
+### Le serveur mail
+
+Depuis le 26 août 2026, `contact@kanyro.tech` existe vraiment : Postfix,
+Dovecot et OpenDKIM tournent sur le VPS Hostinger, à côté du site. Les demandes
+de devis arrivent dans une boîte que l'on relève avec n'importe quel client mail,
+et les messages sortent signés DKIM depuis notre propre domaine plutôt qu'expédiés
+par les serveurs d'un tiers.
+
+L'architecture, les correctifs posés et les enregistrements DNS encore à ajouter
+chez Hostinger sont détaillés dans [`docs/serveur-mail.md`](docs/serveur-mail.md).
+Sans ces enregistrements (`mail`, SPF, DKIM, DMARC, PTR), les messages partent
+en spam : la boîte est fonctionnelle mais pas encore crédible aux yeux de Gmail.
+
 ### Bêta sur elio-pallois.fr
 
 Le site tourne actuellement sur le domaine personnel. Tout est piloté par un seul
@@ -182,6 +195,7 @@ Dans `docs/`, hors du site :
 | `environnement.md` | Ce qu'il faut installer sur un poste neuf |
 | `tasklist.md` | Corrections issues de l'audit externe, avec leur verdict |
 | `prospects_artisans_arras.md` | Liste de prospection commerciale, artisans du bâtiment à Arras |
+| `serveur-mail.md` | Architecture du serveur mail kanyro.tech, DNS à ajouter, accès à la boîte |
 
 ## Prise de rendez-vous
 
