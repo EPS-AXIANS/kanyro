@@ -19,9 +19,9 @@
 declare(strict_types=1);
 
 // ── À renseigner ────────────────────────────────────────────────────────────
-$destinataire = 'kanyro@elio-pallois.fr';   // où vous recevez les demandes
-$expediteur   = 'kanyro@elio-pallois.fr';   // doit exister sur le domaine hébergé (OVH)
-$siteUrl      = 'https://www.kanyro.fr';    // signature de l'accusé de réception
+$destinataire = 'contact@kanyro.tech';   // où vous recevez les demandes
+$expediteur   = 'contact@kanyro.tech';   // doit exister sur le domaine hébergé
+$siteUrl      = 'https://kanyro.tech';    // signature de l'accusé de réception
 $pageMerci    = '/merci';
 
 /*
