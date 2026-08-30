@@ -1,5 +1,6 @@
 ---
 import { MEDIAS } from '../../config/medias.js';
+import { offreMensuelle } from '../../data/offres.js';
 
 /*
  * Les questions sont celles qui reviennent réellement en rendez-vous. Les
@@ -33,7 +34,7 @@ const colonneGauche = [
 const colonneDroite = [
   {
     q: 'Vous garantissez la première place sur Google ?',
-    r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Ce que je garantis : un site rapide qui s'affiche correctement sur un téléphone, des pages écrites autour des mots que vos clients tapent vraiment, et chaque mois un point sur ce qui change — où vous sortez sur Google, combien de personnes sont venues, combien vous ont écrit.",
+    r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Ce que je garantis : un site rapide qui s'affiche correctement sur un téléphone, des pages écrites autour des mots que vos clients tapent vraiment, et, la première année, chaque mois un point sur ce qui change — où vous sortez sur Google, combien de personnes sont venues, combien vous ont écrit.",
   },
   {
     q: 'Je travaille déjà au bouche-à-oreille, pourquoi un site ?',
@@ -48,15 +49,23 @@ const colonneDroite = [
    * et répondait « Non ». Elle nommait donc un produit dont la page ne donnait ni
    * le prix ni le contenu — le prospect repartait avec une question de plus.
    *
-   * L'abonnement n'existe pas encore volontairement (voir offreMensuelle dans
-   * offres.js) : on ne vend pas un engagement récurrent dont on n'a jamais mesuré
-   * le coût réel. La bonne réponse n'est donc pas d'afficher un prix inventé,
-   * c'est de dire ce qui se passe après la livraison — et d'assumer qu'on ne
-   * vend rien de récurrent aujourd'hui, ce qui est plutôt rassurant à entendre.
+   * Le forfait Suivi existe désormais (offreMensuelle dans offres.js) et c'est
+   * ici, et nulle part ailleurs sur la page, qu'il est chiffré. La décision est
+   * délibérée : afficher un second prix dans la section Offre ferait cohabiter
+   * deux tarifs sans règle qui les relie, et un prospect n'en retiendrait qu'une
+   * chose — que le prix se négocie.
+   *
+   * Les deux montants sont lus depuis offres.js et jamais réécrits à la main :
+   * un prix qui vit à deux endroits finit par diverger, et c'est le devis, lui,
+   * qui fera foi devant le client.
+   *
+   * L'alternative à ~30 €/an est citée avant le forfait, volontairement. La
+   * taire donnerait l'impression de la cacher, alors qu'elle est le meilleur
+   * argument dont on dispose : quelqu'un qui a le choix et qui reste, reste.
    */
   {
     q: 'Et après la mise en ligne, il se passe quoi ?',
-    r: "La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Ensuite, soit vous reprenez la main — le site est à vous, il tourne, comptez une trentaine d'euros par an —, soit je continue à m'en occuper. Je ne vends pas encore de formule mensuelle : je veux d'abord mesurer sur un vrai chantier ce que je peux tenir tous les mois. Vous ne signerez donc rien de récurrent aujourd'hui.",
+    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Au bout d'un an, deux chemins. Vous reprenez la main : le site est à vous, il tourne, comptez ${offreMensuelle.alternative}. Ou je continue à m'en occuper — c'est le forfait ${offreMensuelle.nom}, ${offreMensuelle.prix}, ou ${offreMensuelle.prixAnnuel} en une fois, soit ${offreMensuelle.mentionAnnuel}. Il couvre l'hébergement, le domaine et le certificat renouvelés à ma charge, une sauvegarde chaque nuit, les mises à jour de sécurité, le relevé mensuel, et vos nouveaux chantiers ajoutés au site. Si le site tombe, je le remets en ligne sous 24 heures ouvrées : c'est écrit dans le devis, pas seulement dit ici. Sans engagement de durée, un mois de préavis, et rien à signer aujourd'hui — la question ne se pose qu'au bout d'un an.`,
   },
   {
     q: 'Et si un site ne me sert à rien ?',

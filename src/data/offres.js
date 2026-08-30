@@ -89,23 +89,118 @@ export const tarifReference = {
 };
 
 /**
- * Offre mensuelle — VOLONTAIREMENT PAS ENCORE EN VITRINE.
+ * Forfait Suivi — hébergement et entretien du site, après la première année.
  *
- * Vendre un abonnement suppose des livrables récurrents concrets et tenables
- * chaque mois. Tant que le rythme réel n'a pas été mesuré sur un vrai client,
- * l'annoncer serait promettre un engagement dont on ignore le coût.
+ * ⚠ ACTIVÉ LE 30 AOÛT 2026, AVANT LA MESURE PRÉVUE.
  *
- * À activer après le premier ou le deuxième client, en remplaçant cette liste
- * par ce qui aura effectivement été livré tous les mois.
+ * Ce bloc portait auparavant `actif: false` et une consigne : ne pas vendre
+ * d'abonnement tant que le rythme réel n'a pas été mesuré sur un vrai client.
+ * La décision de l'ouvrir quand même a été prise sciemment. Ce qui limite le
+ * risque, ce n'est donc pas la mesure — elle reste à faire — c'est la façon
+ * dont `inclus` est dimensionné : voir le calcul de marge plus bas.
+ *
+ * ── Pourquoi 25 €/mois ────────────────────────────────────────────────
+ *
+ * Le coût d'infrastructure réel est d'environ 2 à 3 € par mois et par site :
+ * une part du VPS Hostinger déjà en service, le renouvellement du nom de
+ * domaine, et le certificat qui ne coûte rien (Let's Encrypt).
+ *
+ * Le prix ne paie donc pas l'infrastructure, il paie le fait que personne
+ * n'ait à y penser — d'où l'obligation d'écrire `engagement` : sans délai
+ * annoncé, 300 € par an face aux ~30 € que coûte un hébergement repris en
+ * main ne se défend pas en rendez-vous. C'est ce qui sépare un forfait d'une
+ * revente d'hébergement avec marge, et un artisan fait très bien la
+ * différence.
+ *
+ * Point de comparaison interne, à ne pas citer tel quel à un client : la
+ * formule Pro de Cloudflare est à 20 $/mois et par domaine, et ne couvre
+ * qu'une couche technique — pas un site entretenu, et personne au bout du
+ * fil. L'argument est bon en interne pour situer le prix ; en rendez-vous il
+ * s'attaque trop facilement, puisque l'hébergement statique nu, lui, est
+ * gratuit chez le même fournisseur.
+ *
+ * ── Le calcul qui contraint `inclus` ──────────────────────────────────
+ *
+ * 300 € par an, moins ~36 € d'infrastructure, laissent 264 € — soit environ
+ * quatre heures de travail par an au taux visé, pas davantage. Le relevé
+ * mensuel en consomme déjà la moitié à lui seul (12 × ~15 min).
+ *
+ * C'est la raison pour laquelle les ajouts de chantiers sont plafonnés au
+ * trimestre et non « à la demande ». Toute ligne ajoutée ici doit être
+ * retranchée de ces quatre heures, sinon le forfait se vend à perte sans que
+ * rien ne le signale avant la fin de l'année.
+ *
+ * ── À vérifier après le premier client ────────────────────────────────
+ *
+ * Noter le temps réellement passé chaque mois (cf. docs/processus-livraison.md).
+ * Si le relevé mensuel dépasse 20 minutes, c'est lui qu'il faut automatiser ou
+ * passer au trimestre — pas le prix qu'il faut monter.
  */
 export const offreMensuelle = {
-  actif: false,
+  actif: true,
   nom: 'Suivi',
-  prix: '90 – 190 €/mois',
-  livrablesAValider: [
-    'Hébergement, nom de domaine et certificat',
-    'Sauvegardes et mises à jour de sécurité',
-    'Ajout des nouveaux chantiers dans la galerie',
-    'Relevé mensuel des positions sur les recherches visées',
+  promesse:
+    'Votre site reste en ligne, à jour et surveillé, sans que vous ayez à y penser.',
+
+  prix: '25 €/mois',
+  prixAnnuel: '250 €/an',
+  mentionAnnuel: 'deux mois offerts',
+
+  /* Le forfait ne démarre qu'à la fin de la première année, déjà comprise dans
+     le prix du site. Le dire ici évite qu'il soit présenté comme un supplément
+     immédiat, ce qui ferait monter le prix d'entrée dans l'esprit du prospect. */
+  demarrage: 'à la fin de la première année, qui est comprise dans le prix du site',
+
+  inclus: [
+    {
+      titre: 'L’hébergement, le domaine et le certificat',
+      detail:
+        'Renouvelés à échéance, à ma charge. Aucune facture à suivre chez un hébergeur, aucun nom de domaine qui expire parce que le rappel est parti sur une ancienne adresse mail — c’est la panne la plus fréquente, et la plus bête.',
+    },
+    {
+      titre: 'Sauvegarde quotidienne, conservée un mois',
+      detail:
+        'Le site est sauvegardé chaque nuit et la restauration est à ma charge. Trente jours d’historique : de quoi revenir en arrière même si le problème n’a été remarqué qu’au bout de deux semaines.',
+    },
+    {
+      titre: 'Mises à jour de sécurité et surveillance',
+      detail:
+        'Le serveur est tenu à jour et sa disponibilité est vérifiée automatiquement. Si le site tombe, je suis prévenu avant vous.',
+    },
+    {
+      titre: 'Un relevé chaque mois',
+      detail:
+        'Où vous sortez sur les recherches visées, combien de personnes sont venues, combien vous ont écrit. Envoyé même quand les chiffres sont mauvais : c’est le mois où ils baissent qu’il faut le savoir.',
+    },
+    {
+      titre: 'Vos nouveaux chantiers ajoutés',
+      detail:
+        'Vous m’envoyez les photos, je m’occupe du reste — cadrage, poids des images, mise en page. Deux chantiers par trimestre.',
+    },
   ],
+
+  /* Le palier tarifaire retenu n'est défendable qu'écrit. Un délai annoncé
+     qu'on ne tient pas vaut moins que pas de délai du tout : ces deux chiffres
+     doivent rester tenables un soir de semaine, en alternance. */
+  engagement: [
+    'Je réponds à vos demandes sous 24 heures ouvrées',
+    'Site inaccessible : remise en ligne sous 24 heures ouvrées, depuis la sauvegarde de la veille',
+  ],
+
+  horsPerimetre: [
+    'Les nouvelles pages et les refontes font l’objet d’un devis à part',
+    'Je ne gère pas vos réseaux sociaux au quotidien',
+    'Je ne réécris pas vos textes dans le forfait — les corrections courtes, oui',
+  ],
+
+  /* Sans porte de sortie explicite, un forfait se lit comme un piège, et c'est
+     précisément la crainte que la promesse « le site vous appartient » cherche
+     à lever ailleurs sur le site. La contredire ici annulerait les deux. */
+  sortie:
+    'Sans engagement de durée, résiliable à tout moment avec un mois de préavis. Le site et le nom de domaine sont à vous : je transfère l’hébergement et les fichiers à qui vous voulez, sans frais de sortie.',
+
+  /* Repris tel quel dans la Q&R et dans le devis : c'est le chiffre auquel le
+     forfait se compare, et le taire donnerait l'impression de le cacher. */
+  alternative:
+    'une trentaine d’euros par an si vous reprenez l’hébergement à votre nom',
 };
