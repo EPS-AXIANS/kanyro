@@ -7,8 +7,8 @@
 > refermée, formulaire testé de bout en bout, dette technique nettoyée (code
 > mort, favicon), 4 objections ajoutées à la Q&R, zone d'intervention
 > clarifiée. Reste bloqué sur une donnée manquante : 0.1 (SIREN). Le reste des
-> points ouverts attend soit un premier client (3.1, 3.2, 4.1, volet abonnement
-> de 2.3), soit une mise en ligne publique (4.6), soit une décision ou un
+> points ouverts attend soit un premier client (3.1, 3.2, 4.1), soit une mise en
+> ligne publique (4.6), soit une décision ou un
 > chantier pas encore lancés (1.2, 4.2, 5.2, 5.4, 7.1).
 >
 > *(Le total annoncé était « 42 » jusqu'au 19/08 : en énumérant les points
@@ -261,11 +261,19 @@ réponds sous 48 heures. »
     sans nommer un produit fantôme.
   → Après le 1er client : activer `offreMensuelle` avec les livrables
     réellement tenus, et là seulement afficher un prix.
-  → **Fait.** La question devient « Et après la mise en ligne, il se passe
-  quoi ? » et décrit le réel : première année comprise, puis reprise en main
-  ou accompagnement, et l'aveu qu'aucune formule mensuelle n'est vendue tant
-  que le rythme tenable n'a pas été mesuré sur un vrai chantier. Le produit
-  fantôme disparaît sans qu'on ait eu à inventer un prix.
+  → **Fait le 23/08.** La question devient « Et après la mise en ligne, il se
+  passe quoi ? » et décrit le réel : première année comprise, puis reprise en
+  main ou accompagnement, sans nommer de produit fantôme.
+  → **Volet abonnement clos le 30/08, sans attendre le premier client.**
+  `offreMensuelle` est actif : 25 €/mois ou 250 €/an, démarrage à la fin de la
+  première année. La condition posée ici — « activer avec les livrables
+  réellement tenus » — n'est donc **pas** remplie : les livrables sont
+  dimensionnés par un calcul de marge, pas par une mesure. C'est un pari
+  assumé, à vérifier sur le premier chantier ; le premier signal à surveiller
+  est le temps réel du relevé mensuel, budgété à 15 minutes.
+  Le prix n'est affiché que dans la Q&R et dans le devis, pas dans la section
+  Offre : le voisinage de deux tarifs est précisément ce que 2.2 cherche à
+  éviter.
 
 - [x] **2.4 — Aucune section « Comment ça se passe ? »** ✅ *Confirmé, et facile.*
 
@@ -546,5 +554,10 @@ réponds sous 48 heures. »
 **Avant la mise en ligne publique** — ~~0.2, 0.3, 0.4~~, 4.2, ~~4.4, 5.1~~
 *Les blocages juridiques et le poids de la page. Ne reste que 4.2 (og:image).*
 
-**Après le premier client** — 3.1, 3.2, 4.1, 2.3 (volet abonnement)
+**Après le premier client** — 3.1, 3.2, 4.1
 *Tout ce qui a besoin d'un vrai chantier livré pour exister.*
+Le volet abonnement de 2.3 en est sorti le 30/08 : il a été tranché sans la
+mesure prévue. Ce qui reste à faire sur ce point n'est plus de l'activer mais de
+le vérifier — relever le temps réellement passé chaque mois sur le premier
+client, et corriger le contenu du forfait si le budget de quatre heures par an
+est dépassé.

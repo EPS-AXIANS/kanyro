@@ -93,8 +93,15 @@ Cahier de recette — à parcourir **avant** d'annoncer la mise en ligne :
 demandes reçues. Envoyer les chiffres, même s'ils sont faibles : c'est ce qui
 distingue un prestataire d'un vendeur de site.
 
-**À 90 jours** — deuxième relevé. C'est le moment où une offre de suivi mensuel
-devient crédible, parce qu'on a de quoi montrer ce qu'elle sert. Pas avant.
+**À 90 jours** — deuxième relevé. C'est le moment où le forfait Suivi se
+présente pour de bon : on a deux relevés en main, donc de quoi montrer à quoi il
+sert plutôt que de le décrire. L'annexe du devis, elle, a été remise dès le
+premier rendez-vous, pour information et sans signature.
+
+**À 11 mois** — relance. Le forfait démarre au treizième mois, et la question de
+l'hébergement se pose forcément à cette échéance : mieux vaut l'ouvrir un mois
+avant, avec les relevés de l'année, que de laisser le client la découvrir par un
+mail de renouvellement de nom de domaine.
 
 ## Ce qu'il faut mesurer sur les deux premiers chantiers
 
@@ -103,6 +110,19 @@ Noter le temps réel passé par étape. Deux décisions en dépendent :
 1. **Le prix de l'offre suivante.** Si un chantier prend 40 heures à 1 900 €, le
    taux horaire est de 47 € — à comparer honnêtement avec la charge de travail
    d'une soirée après une journée d'alternance.
-2. **Le contenu de l'offre mensuelle.** Elle ne doit lister que des livrables
-   déjà tenus en pratique, mois après mois. Tant que ce rythme n'a pas été
-   mesuré, l'annoncer serait promettre un engagement dont on ignore le coût.
+2. **Le contenu du forfait Suivi — qui est déjà vendu.** Il a été ouvert le
+   30/08/2026 sans attendre cette mesure : ses prestations ont été dimensionnées
+   par un calcul de marge (~4 heures de travail par an et par client, détaillé
+   dans `src/data/offres.js`), pas par une observation. La mesure ne sert donc
+   plus à décider s'il faut l'annoncer, mais à vérifier un engagement déjà pris.
+
+   Trois chiffres à relever, chaque mois, sur le premier client :
+   - le temps réel du **relevé mensuel**, budgété à 15 minutes — c'est le poste
+     le plus lourd du forfait et le premier à déraper ;
+   - le temps réel d'un **ajout de chantier**, plafonné à deux par trimestre ;
+   - le nombre et la durée des **demandes hors forfait**, celles qui arrivent
+     par téléphone et qu'on traite sans les compter.
+
+   Au-delà de quatre heures cumulées sur l'année, c'est le contenu qu'il faut
+   corriger — automatiser ou trimestrialiser le relevé — avant de toucher au
+   prix, qui a déjà été annoncé.

@@ -176,11 +176,30 @@ deux booléens de `FONCTIONS` dans `src/config/site.js` les éteignent, et
 `getStaticPaths` renvoie une liste vide. Les rallumer après le premier ou le
 deuxième vrai client est une ligne à changer, pas un chantier à refaire.
 
-**L'offre mensuelle est volontairement absente de la vitrine.** Vendre un
-abonnement suppose des livrables récurrents concrets et tenables chaque mois.
-Tant que ce rythme n'a pas été mesuré sur un vrai client, l'annoncer serait
-promettre un engagement dont on ignore le coût. Le squelette attend dans
-`src/data/offres.js`, avec `actif: false`.
+**Le forfait Suivi est chiffré dans la Q&R et dans le devis, pas dans la
+section Offre.** Depuis le 30 août 2026, `offreMensuelle` est actif :
+25 €/mois ou 250 €/an, à partir de la fin de la première année. Le prix
+n'apparaît qu'à un seul endroit de la page — la réponse « Et après la mise en
+ligne, il se passe quoi ? » — et il y est lu depuis `src/data/offres.js`.
+
+Deux tarifs affichés côte à côte dans la section Offre sans règle qui les relie
+feraient croire que le prix se négocie, ce qui est déjà l'objet du point 2.2 de
+la tasklist pour le tarif de lancement.
+
+Le forfait a été ouvert **avant** la mesure du rythme mensuel réel sur un premier
+client, contrairement à ce qui était prévu. Ce qui borne le risque n'est donc pas
+la mesure mais le dimensionnement de `inclus` : le fichier porte le calcul de
+marge — environ quatre heures de travail par an, dont la moitié consommée par le
+relevé mensuel. **Toute prestation ajoutée à cette liste doit être retranchée de
+ces quatre heures**, sinon le forfait se vend à perte sans que rien ne le signale
+avant la fin de l'année.
+
+Le palier retenu impose un engagement de délai écrit — réponse et remise en ligne
+sous 24 heures ouvrées, dans l'annexe de `docs/devis-modele.md`. C'est lui qui
+sépare le forfait d'une revente d'hébergement avec marge, face aux ~30 €/an que
+coûte un hébergement repris en main. Si le nombre de clients rend ces délais
+douteux, c'est le nombre de forfaits qu'il faut plafonner, pas le délai qu'il faut
+allonger.
 
 ## Documents de travail
 
@@ -343,8 +362,9 @@ Sur le build de production, CSP active :
 - 5 pages, une seule balise `h1` par page, aucun script ni style inline
 - Le script d'effets se charge et déclenche les 30 révélations de l'accueil
 - Aucun lien mort, toutes les ancres de la navbar résolvent
-- Prix, tarif de lancement et délai présents dans le HTML statique ; offre
-  mensuelle absente
+- Prix, tarif de lancement et délai présents dans le HTML statique ; le forfait
+  Suivi n'est chiffré que dans la Q&R, une occurrence de « 25 €/mois » et une
+  de « 250 €/an » dans toute la page
 - Contenu intégralement lisible sans exécuter de JavaScript
 - `canonical` et `og:url` sur l'URL propre, alignés sur le sitemap
 - Sitemap réduit à `/` et `/contact` ; pages `noindex` exclues

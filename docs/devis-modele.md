@@ -91,8 +91,77 @@ commerce).
 textes et photographies produits lui sont cédés à compter du paiement intégral.
 Aucune donnée n'est retenue en cas de fin de collaboration.
 
-**Hébergement** — Compris la première année. Au-delà, environ [x] € par an, à
-régler directement auprès de l'hébergeur ou via un contrat de suivi distinct.
+**Hébergement** — Compris la première année, sans supplément. Au-delà, deux
+possibilités, au choix du client et sans obligation : reprendre l'hébergement et
+le nom de domaine à son nom, pour un coût de l'ordre de 30 € par an réglé
+directement auprès du prestataire retenu ; ou souscrire le forfait Suivi décrit
+en annexe. Aucune des deux options n'est engagée par la signature du présent
+devis.
+
+```
+────────────────────────────────────────────────────────────
+Fait à [ville], le [date]
+
+Le client — mention « Bon pour accord », date et signature
+```
+
+---
+
+# Annexe — forfait Suivi
+
+**Facultatif. Ne se signe pas aujourd'hui.** Cette annexe est jointe au devis
+pour information : elle ne prend effet qu'à la fin de la première année, et
+uniquement si le client la signe alors séparément. Signer le devis ci-dessus
+n'engage rien de récurrent.
+
+**Objet** — Maintien en ligne, entretien et suivi du site livré.
+
+**Prix** — 25 € par mois, ou 250 € pour douze mois réglés en une fois (deux mois
+offerts). TVA non applicable, article 293 B du CGI.
+
+**Point de départ** — Le premier jour du treizième mois suivant la mise en ligne.
+Les douze premiers mois d'hébergement, de nom de domaine et de certificat sont
+compris dans le prix du site et ne sont pas facturés au titre de la présente
+annexe.
+
+## Ce que le forfait comprend
+
+| # | Prestation | Détail |
+|---|---|---|
+| 1 | Hébergement, nom de domaine et certificat | Renouvelés à échéance à la charge du prestataire |
+| 2 | Sauvegarde | Quotidienne, conservée 30 jours ; restauration à la charge du prestataire |
+| 3 | Sécurité et disponibilité | Mises à jour du serveur, surveillance automatique de la disponibilité |
+| 4 | Relevé mensuel | Positions sur les recherches visées, fréquentation, demandes reçues |
+| 5 | Ajout de chantiers | Deux chantiers par trimestre, à partir des photos fournies par le client |
+
+## Engagements de délai
+
+Ces deux délais sont fermes et constituent la contrepartie du prix. Ils
+s'entendent en heures ouvrées, du lundi au vendredi.
+
+- **Réponse** aux demandes du client sous 24 heures ouvrées.
+- **Remise en ligne** sous 24 heures ouvrées en cas d'indisponibilité du site,
+  au besoin par restauration de la sauvegarde de la veille.
+
+## Ce qui n'est pas compris
+
+- Création de nouvelles pages et refonte du site — devis distinct
+- Rédaction de nouveaux textes — les corrections courtes sont comprises
+- Gestion des réseaux sociaux
+- Achat et gestion d'espace publicitaire
+
+## Durée, résiliation et réversibilité
+
+**Durée** — Sans engagement de durée. Reconduction mensuelle, ou annuelle en cas
+de règlement en une fois.
+
+**Résiliation** — Par l'une ou l'autre des parties, à tout moment, par écrit,
+avec un préavis d'un mois. Aucune indemnité, aucuns frais de sortie.
+
+**Réversibilité** — Le nom de domaine reste déposé au nom du client pendant toute
+la durée du forfait. À la résiliation, le prestataire transfère le nom de
+domaine, les fichiers du site et les sauvegardes au client ou au prestataire de
+son choix, sans frais et sous 15 jours.
 
 ```
 ────────────────────────────────────────────────────────────
@@ -121,3 +190,29 @@ consulter.
 
 **Ne pas commencer avant l'acompte.** Pas par méfiance, mais parce que l'acompte
 est le seul signal fiable qu'un accord oral est devenu une décision.
+
+**Le forfait Suivi.** L'annexe se joint au devis dès le premier rendez-vous, mais
+ne se fait jamais signer le même jour. Deux raisons, et la seconde est la vraie.
+D'abord parce que la première année est comprise : la faire signer maintenant
+reviendrait à encaisser un engagement pour une prestation qui ne démarre que dans
+douze mois. Ensuite parce que le site n'a alors rien prouvé — le forfait se vend
+sur des relevés, pas sur une promesse, et il se vend beaucoup mieux au bout d'un
+an avec des chiffres en main.
+
+**L'alternative à 30 €/an se cite en premier, toujours.** Un artisan qui découvre
+seul qu'il aurait pu s'héberger pour 30 € par an au lieu de 300 € ne se dit pas
+qu'il a mal lu : il se dit qu'on lui a caché quelque chose, et c'est le genre de
+chose qui se raconte dans un tissu local. Dit d'emblée, l'écart s'explique en une
+phrase — ce qui se paie, c'est de n'avoir à y penser jamais, et les deux délais
+fermes de l'annexe.
+
+**Les deux délais de 24 heures ouvrées sont ce qui rend le prix défendable, et
+donc ce qu'il ne faut pas promettre à la légère.** Ils sont tenables en soirée
+parce qu'ils ne courent pas le week-end et parce que la remise en ligne consiste
+à restaurer une sauvegarde, pas à réparer. Le jour où le nombre de clients rend
+ces deux délais douteux, c'est le nombre de forfaits qu'il faut plafonner, pas le
+délai qu'il faut allonger : un délai annoncé et raté vaut moins que pas de délai.
+
+**Le coût réel est d'environ 3 € par mois** (part de VPS et nom de domaine). Le
+détail du calcul de marge — et pourquoi la liste des prestations comprises ne
+peut pas s'allonger sans changer le prix — est dans `src/data/offres.js`.
