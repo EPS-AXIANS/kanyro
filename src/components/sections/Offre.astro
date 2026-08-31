@@ -1,5 +1,5 @@
 ---
-import { offre, tarifReference } from '../../data/offres.js';
+import { offre, tarifReference, offreMensuelle } from '../../data/offres.js';
 import metiers from '../../data/metiers.json';
 import communes from '../../data/communes.json';
 
@@ -68,6 +68,23 @@ const secteurs = [
             <p class="font-texte mt-3 text-xs text-signal-vif">
               <a href="#preuve" class="underline underline-offset-4">
                 {tarifReference.prix} pour les {tarifReference.quota} premiers
+              </a>
+            </p>
+          )
+        }
+        {
+          /* Même raison que pour le tarif de lancement : un prix récurrent
+             découvert trois sections plus bas, sans y avoir été préparé, se lit
+             comme un supplément caché. Annoncé ici, il devient une suite.
+
+             En blanc discret et non en orange : le tarif de lancement juste
+             au-dessus est ce qui doit déclencher l'appel, et deux accents de la
+             même couleur se neutralisent. */
+          offreMensuelle.actif && (
+            <p class="font-texte mt-3 text-xs text-white/45">
+              <a href="#suivi" class="underline underline-offset-4">
+                Puis {offreMensuelle.prix} à partir de la deuxième année, si vous
+                voulez que je continue — facultatif
               </a>
             </p>
           )

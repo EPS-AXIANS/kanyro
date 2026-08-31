@@ -49,14 +49,17 @@ const colonneDroite = [
    * et répondait « Non ». Elle nommait donc un produit dont la page ne donnait ni
    * le prix ni le contenu — le prospect repartait avec une question de plus.
    *
-   * Le forfait Suivi existe désormais (offreMensuelle dans offres.js) et c'est
-   * ici, et nulle part ailleurs sur la page, qu'il est chiffré. La décision est
-   * délibérée : afficher un second prix dans la section Offre ferait cohabiter
-   * deux tarifs sans règle qui les relie, et un prospect n'en retiendrait qu'une
-   * chose — que le prix se négocie.
+   * Le forfait Suivi a désormais sa propre section (Suivi.astro), et cette
+   * réponse ne la répète pas : elle donne les deux chemins, les deux montants,
+   * et renvoie plus haut pour le détail. Une Q&R qui redit une section entière
+   * fatigue au lieu de rassurer, et les deux textes finissent par diverger.
    *
-   * Les deux montants sont lus depuis offres.js et jamais réécrits à la main :
-   * un prix qui vit à deux endroits finit par diverger, et c'est le devis, lui,
+   * Ce qu'elle garde et que la section ne dit pas aussi nettement : qu'on ne
+   * signe rien aujourd'hui. C'est la seule chose que le prospect a besoin
+   * d'entendre au moment où il lit un prix récurrent.
+   *
+   * Les montants sont lus depuis offres.js et jamais réécrits à la main : un
+   * prix qui vit à trois endroits finit par diverger, et c'est le devis, lui,
    * qui fera foi devant le client.
    *
    * L'alternative à ~30 €/an est citée avant le forfait, volontairement. La
@@ -65,7 +68,7 @@ const colonneDroite = [
    */
   {
     q: 'Et après la mise en ligne, il se passe quoi ?',
-    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Au bout d'un an, deux chemins. Vous reprenez la main : le site est à vous, il tourne, comptez ${offreMensuelle.alternative}. Ou je continue à m'en occuper — c'est le forfait ${offreMensuelle.nom}, ${offreMensuelle.prix}, ou ${offreMensuelle.prixAnnuel} en une fois, soit ${offreMensuelle.mentionAnnuel}. Il couvre l'hébergement, le domaine et le certificat renouvelés à ma charge, une sauvegarde chaque nuit, les mises à jour de sécurité, le relevé mensuel, et vos nouveaux chantiers ajoutés au site. Si le site tombe, je le remets en ligne sous 24 heures ouvrées : c'est écrit dans le devis, pas seulement dit ici. Sans engagement de durée, un mois de préavis, et rien à signer aujourd'hui — la question ne se pose qu'au bout d'un an.`,
+    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Au bout d'un an, deux chemins. Vous reprenez la main : le site est à vous, il tourne, comptez ${offreMensuelle.alternative}. Ou je continue à m'en occuper — c'est le forfait ${offreMensuelle.nom}, ${offreMensuelle.prix} ou ${offreMensuelle.prixAnnuel}, détaillé plus haut sur cette page. Dans les deux cas, rien ne se signe aujourd'hui : la question ne se pose qu'au bout d'un an.`,
   },
   {
     q: 'Et si un site ne me sert à rien ?',

@@ -165,7 +165,7 @@ moment de vendre.
 
 | Page | Rôle |
 |---|---|
-| `/` | Porte tout : offre, prix, délai, questions, preuve, appel à l'action |
+| `/` | Porte tout : offre, prix, délai, déroulement, forfait Suivi, questions, preuve, appel à l'action |
 | `/contact` | Formulaire de demande de devis |
 | `/mentions-legales` | Obligations légales |
 | `/merci`, `/404` | Techniques, `noindex` |
@@ -176,15 +176,27 @@ deux booléens de `FONCTIONS` dans `src/config/site.js` les éteignent, et
 `getStaticPaths` renvoie une liste vide. Les rallumer après le premier ou le
 deuxième vrai client est une ligne à changer, pas un chantier à refaire.
 
-**Le forfait Suivi est chiffré dans la Q&R et dans le devis, pas dans la
-section Offre.** Depuis le 30 août 2026, `offreMensuelle` est actif :
-25 €/mois ou 250 €/an, à partir de la fin de la première année. Le prix
-n'apparaît qu'à un seul endroit de la page — la réponse « Et après la mise en
-ligne, il se passe quoi ? » — et il y est lu depuis `src/data/offres.js`.
+**Le forfait Suivi a sa propre section en vitrine.** Depuis le 30 août 2026,
+`offreMensuelle` est actif : 25 €/mois ou 250 €/an, à partir de la fin de la
+première année. `Suivi.astro` le présente en entier — les deux montants, les
+cinq prestations, les deux délais d'engagement, les conditions de sortie et
+l'alternative à ~30 €/an.
 
-Deux tarifs affichés côte à côte dans la section Offre sans règle qui les relie
-feraient croire que le prix se négocie, ce qui est déjà l'objet du point 2.2 de
-la tasklist pour le tarif de lancement.
+Un second prix sur la même page est le risque décrit au point 2.2 de la
+tasklist : deux tarifs sans règle qui les relie, et le prospect n'en retient
+qu'une chose — que le prix se négocie. **La règle est donc écrite à deux
+endroits, et retirer l'un des deux rouvre le problème :**
+
+1. `Offre.astro`, sous le prix du site, annonce le forfait et pointe vers
+   `#suivi` — comme il annonce déjà le tarif de lancement. Un prix récurrent
+   découvert trois sections plus bas se lit sinon comme un supplément caché.
+2. `Suivi.astro` rappelle que la première année est comprise dans le prix du
+   site. Les deux montants ne portant pas sur la même période, ils ne sont
+   jamais en concurrence.
+
+Les montants ne sont écrits qu'une fois, dans `src/data/offres.js`, et lus par
+les trois endroits qui les affichent — section, section Offre et Q&R. Un prix
+qui vit à trois endroits finit par diverger, et c'est le devis qui fait foi.
 
 Le forfait a été ouvert **avant** la mesure du rythme mensuel réel sur un premier
 client, contrairement à ce qui était prévu. Ce qui borne le risque n'est donc pas
@@ -362,9 +374,11 @@ Sur le build de production, CSP active :
 - 5 pages, une seule balise `h1` par page, aucun script ni style inline
 - Le script d'effets se charge et déclenche les 30 révélations de l'accueil
 - Aucun lien mort, toutes les ancres de la navbar résolvent
-- Prix, tarif de lancement et délai présents dans le HTML statique ; le forfait
-  Suivi n'est chiffré que dans la Q&R, une occurrence de « 25 €/mois » et une
-  de « 250 €/an » dans toute la page
+- Prix, tarif de lancement et délai présents dans le HTML statique
+- Forfait Suivi : section `#suivi` rendue, « 25 €/mois » trois fois (section
+  Offre, section Suivi, Q&R) et « 250 €/an » deux fois. Tous lus depuis
+  `offres.js` — si un seul de ces nombres diverge, c'est qu'un texte a été
+  écrit en dur quelque part
 - Contenu intégralement lisible sans exécuter de JavaScript
 - `canonical` et `og:url` sur l'URL propre, alignés sur le sitemap
 - Sitemap réduit à `/` et `/contact` ; pages `noindex` exclues

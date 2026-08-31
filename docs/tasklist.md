@@ -271,9 +271,13 @@ réponds sous 48 heures. »
   dimensionnés par un calcul de marge, pas par une mesure. C'est un pari
   assumé, à vérifier sur le premier chantier ; le premier signal à surveiller
   est le temps réel du relevé mensuel, budgété à 15 minutes.
-  Le prix n'est affiché que dans la Q&R et dans le devis, pas dans la section
-  Offre : le voisinage de deux tarifs est précisément ce que 2.2 cherche à
-  éviter.
+  Le forfait a d'abord été tenu hors de la vitrine, pour la raison même de 2.2,
+  puis mis en section pleine le 31/08 sur demande — « que le prix et toutes les
+  informations soient plus explicites et visibles ». Le risque de 2.2 est donc
+  réel et traité autrement : la règle qui relie les deux tarifs est écrite sous
+  le prix du site (`Offre.astro`) et rappelée dans la section (`Suivi.astro`),
+  parce que la première année est comprise et que les deux montants ne portent
+  pas sur la même période. **Si l'une des deux mentions saute, 2.2 se rouvre.**
 
 - [x] **2.4 — Aucune section « Comment ça se passe ? »** ✅ *Confirmé, et facile.*
 

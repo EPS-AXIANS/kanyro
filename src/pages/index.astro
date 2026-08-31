@@ -4,6 +4,7 @@ import Hero from '../components/sections/Hero.astro';
 import Showcase from '../components/sections/Showcase.astro';
 import Offre from '../components/sections/Offre.astro';
 import Processus from '../components/sections/Processus.astro';
+import Suivi from '../components/sections/Suivi.astro';
 import QandA from '../components/sections/QandA.astro';
 import QuoteBanner from '../components/sections/QuoteBanner.astro';
 import { agenceJsonLd } from '../config/schema.js';
@@ -29,6 +30,10 @@ const jsonLd = agenceJsonLd(communes);
   {/* Placé après l'offre et avant les questions : on ne se demande « comment ça
       se passe ? » qu'une fois qu'on sait ce qu'on achète et combien ça coûte. */}
   <Processus />
+  {/* Après le déroulement, jamais avant : « et ensuite ? » n'est une question
+      qu'une fois qu'on sait ce qu'on achète et comment ça se passe. Posée plus
+      haut, elle ajouterait un coût récurrent à une décision pas encore prise. */}
+  <Suivi />
   <QandA />
   <QuoteBanner />
 </Base>
