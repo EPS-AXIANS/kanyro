@@ -40,19 +40,11 @@ import { offreMensuelle } from '../../data/offres.js';
  * était grande de passer un abonnement en sans-serif grasse — c'est le registre
  * des grilles tarifaires SaaS, et c'est exactement ce que la note de Offre.astro
  * interdit. Un abonnement facturé comme un artisan doit s'afficher comme tel.
+ *
+ * Et les prestations sont une liste à filets, pas une grille de cartes : la
+ * raison est détaillée au-dessus de la liste elle-même.
  */
 
-/*
- * Littéraux, jamais assemblés : Tailwind lit les sources comme du texte et ne
- * génèrerait pas une classe construite à l'exécution.
- */
-const delais = [
-  '[animation-delay:80ms]',
-  '[animation-delay:160ms]',
-  '[animation-delay:240ms]',
-  '[animation-delay:320ms]',
-  '[animation-delay:400ms]',
-];
 ---
 
 {
@@ -109,24 +101,41 @@ const delais = [
           moment-là.
         </p>
 
-        <ul class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2">
-          {offreMensuelle.inclus.map((bloc, i) => (
-            <li class:list={['reveal bg-surface-haute p-8', delais[i]]}>
-              <h3 class="font-titre text-[1.75rem] leading-snug tracking-wide">{bloc.titre}</h3>
-              <p class="font-texte mt-3 text-sm leading-relaxed text-texte-doux">{bloc.detail}</p>
+        {/*
+          Une liste, pas une seconde grille de cartes.
+
+          Première version : la grille de `Offre.astro` recopiée telle quelle —
+          même `gap-px`, même fond translucide, même rayon, cinq cartes au lieu
+          de quatre. Deux grilles jumelles à trois écrans d'intervalle sur la
+          même page, c'est la répétition qui fait le plus « gabarit », et elle
+          mettait surtout les deux offres au même rang visuel alors que celle-ci
+          est facultative et démarre dans un an.
+
+          Une liste à filets convient mieux à ce qu'on lit ici : on parcourt des
+          prestations pour vérifier ce qui est couvert, on ne compare pas des
+          formules. Elle est aussi plus légère à l'écran, ce qui est exactement
+          le rapport que cette section doit entretenir avec l'offre principale.
+        */}
+        <ul class="reveal mt-16 border-t border-trait">
+          {offreMensuelle.inclus.map((bloc) => (
+            <li class="grid gap-2 border-b border-trait py-6 md:grid-cols-[minmax(0,17rem)_1fr] md:gap-10 md:py-7">
+              <h3 class="font-titre text-xl leading-snug tracking-wide md:text-2xl">
+                {bloc.titre}
+              </h3>
+              <p class="font-texte text-sm leading-relaxed text-texte-doux">{bloc.detail}</p>
             </li>
           ))}
         </ul>
 
         <div class="mt-16 grid gap-12 md:grid-cols-2">
-          <div>
-            <h3 class="font-titre reveal text-[1.75rem] tracking-wide">Ce sur quoi je m'engage</h3>
+          <div class="reveal">
+            <h3 class="font-titre text-[1.75rem] tracking-wide">Ce sur quoi je m'engage</h3>
             {/* En orange, et seuls de la section à l'être. C'est ce qui sépare
                 ce forfait d'une revente d'hébergement avec marge : le reste,
                 n'importe quel hébergeur le fait pour trente euros par an. */}
             <ul class="mt-5 space-y-3">
               {offreMensuelle.engagement.map((e) => (
-                <li class="font-texte reveal flex gap-3 text-sm text-texte-doux">
+                <li class="font-texte flex gap-3 text-sm text-texte-doux">
                   <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                   <span>{e}</span>
                 </li>
@@ -134,11 +143,11 @@ const delais = [
             </ul>
           </div>
 
-          <div>
-            <h3 class="font-titre reveal text-[1.75rem] tracking-wide">Ce qui n'est pas compris</h3>
+          <div class="reveal">
+            <h3 class="font-titre text-[1.75rem] tracking-wide">Ce qui n'est pas compris</h3>
             <ul class="mt-5 space-y-3">
               {offreMensuelle.horsPerimetre.map((h) => (
-                <li class="font-texte reveal flex gap-3 text-sm text-texte-faible">
+                <li class="font-texte flex gap-3 text-sm text-texte-faible">
                   <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
                   <span>{h}</span>
                 </li>

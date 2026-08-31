@@ -3,13 +3,6 @@ import { offre, tarifReference, offreMensuelle } from '../../data/offres.js';
 import metiers from '../../data/metiers.json';
 import communes from '../../data/communes.json';
 
-const delais = [
-  '[animation-delay:80ms]',
-  '[animation-delay:160ms]',
-  '[animation-delay:240ms]',
-  '[animation-delay:320ms]',
-];
-
 /*
  * Communes regroupées par secteur, dans l'ordre du fichier de données —
  * Arrageois, bassin minier, métropole lilloise. L'ordre compte : il annonce la
@@ -104,10 +97,19 @@ const secteurs = [
       </div>
     </div>
 
-    <ul class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2">
+    {/*
+      La grille se révèle d'un bloc, plus carte par carte.
+
+      Les quatre cartes portaient une cascade de délais — 80, 160, 240, 320 ms —
+      et la même mécanique existait dans trois autres sections. Un décalage
+      régulier appliqué à tout ce qui est en grille ne raconte rien : il signale
+      seulement qu'une boucle a distribué un index. À l'usage, il retarde surtout
+      la lecture de la dernière carte.
+    */}
+    <ul class="reveal mt-16 grid gap-px overflow-hidden rounded-panneau bg-white/10 sm:grid-cols-2">
       {
-        offre.contenu.map((bloc, i) => (
-          <li class:list={['reveal bg-brique p-8', delais[i]]}>
+        offre.contenu.map((bloc) => (
+          <li class="bg-brique p-8">
             <h3 class="font-titre text-[1.75rem] leading-snug tracking-wide">{bloc.titre}</h3>
             <p class="font-texte mt-3 text-sm leading-relaxed text-white/60">
               {bloc.detail}
@@ -118,12 +120,12 @@ const secteurs = [
     </ul>
 
     <div class="mt-16 grid gap-12 md:grid-cols-2">
-      <div>
-        <h3 class="font-titre reveal text-[1.75rem] tracking-wide">C'est pour vous si</h3>
+      <div class="reveal">
+        <h3 class="font-titre text-[1.75rem] tracking-wide">C'est pour vous si</h3>
         <ul class="mt-5 space-y-3">
           {
             offre.pour.map((p) => (
-              <li class="font-texte reveal flex gap-3 text-sm text-white/70">
+              <li class="font-texte flex gap-3 text-sm text-white/70">
                 <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                 <span>{p}</span>
               </li>
@@ -132,12 +134,12 @@ const secteurs = [
         </ul>
       </div>
 
-      <div>
-        <h3 class="font-titre reveal text-[1.75rem] tracking-wide">Ce que je ne fais pas</h3>
+      <div class="reveal">
+        <h3 class="font-titre text-[1.75rem] tracking-wide">Ce que je ne fais pas</h3>
         <ul class="mt-5 space-y-3">
           {
             offre.horsPerimetre.map((h) => (
-              <li class="font-texte reveal flex gap-3 text-sm text-white/50">
+              <li class="font-texte flex gap-3 text-sm text-white/50">
                 <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
                 <span>{h}</span>
               </li>

@@ -86,9 +86,18 @@ import { offre } from '../../data/offres.js';
 
         Toute reprise du `tracking` ou du corps impose de refaire cette mesure,
         sur 1 280 en premier. */}
-    <h1
-      class="hero-fade-up mt-8 leading-[1.05] drop-shadow-[0_2px_24px_rgba(0,0,0,0.25)] [animation-delay:250ms]"
-    >
+    {/*
+      Plus d'ombre portée sur le titre.
+
+      Le voile noir posé sur la vidéo, juste au-dessus, existe pour garantir le
+      contraste — c'est lui qui fait le travail, et il le fait quelle que soit
+      l'image du moment. Doubler la mise avec une ombre par élément revient à
+      tenir deux fois la même promesse, et c'est cette accumulation qui donne
+      aux titres cet aspect détouré au néon qu'on voit sur les gabarits.
+
+      Une seule protection de contraste, au bon endroit.
+    */}
+    <h1 class="hero-fade-up mt-8 leading-[1.05] [animation-delay:250ms]">
       <span
         class="font-titre block text-2xl tracking-wide sm:text-4xl md:text-5xl lg:text-6xl"
       >
@@ -102,14 +111,24 @@ import { offre } from '../../data/offres.js';
     </h1>
 
     <p
-      class="hero-fade-up font-titre mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [animation-delay:400ms] sm:text-lg md:text-xl"
+      class="hero-fade-up font-titre mt-8 max-w-xl text-sm text-white [animation-delay:400ms] sm:text-lg md:text-xl"
     >
       {offre.promesse}
     </p>
 
+    {/*
+      Le bouton reprend `bouton-secondaire`, comme partout ailleurs, au lieu de
+      redéclarer sa propre forme. Il avait sa chaîne d'utilitaires — une ellipse,
+      un halo au survol, un grossissement, une transition d'une demi-seconde sur
+      `all` — et il était donc le seul bouton du site à ne ressembler à aucun
+      autre tout en prétendant au même rôle.
+
+      `verre` ajoute le flou, et lui seul : cet appel à l'action passe sur une
+      vidéo, pas sur un fond plat.
+    */}
     <a
       href="/contact"
-      class="liquid-glass font-texte hero-fade-up mt-10 inline-block rounded-[50%] px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:550ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
+      class="bouton-secondaire verre hero-fade-up mt-10 [animation-delay:550ms]"
     >
       Demander un devis
     </a>

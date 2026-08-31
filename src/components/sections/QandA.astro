@@ -88,26 +88,6 @@ const colonneDroite = [
  * premier, avant les grands titres qui, eux, pardonnent tout.
  */
 
-/*
- * Décalages en cascade, continus d'une colonne à l'autre pour que les dix
- * entrées ne montent pas par paires.
- *
- * Ce sont des littéraux et pas des chaînes construites : Tailwind analyse les
- * fichiers source comme du texte, une classe assemblée à l'exécution ne serait
- * jamais générée.
- */
-const delais = [
-  '[animation-delay:120ms]',
-  '[animation-delay:240ms]',
-  '[animation-delay:360ms]',
-  '[animation-delay:480ms]',
-  '[animation-delay:600ms]',
-  '[animation-delay:720ms]',
-  '[animation-delay:840ms]',
-  '[animation-delay:960ms]',
-  '[animation-delay:1080ms]',
-  '[animation-delay:1200ms]',
-];
 ---
 
 <div class="relative">
@@ -128,8 +108,8 @@ const delais = [
     <div class="relative z-20 mx-auto mt-16 grid max-w-6xl gap-10 md:grid-cols-2 md:gap-16 lg:gap-20">
       <div class="space-y-10 lg:space-y-14">
         {
-          colonneGauche.map((item, i) => (
-            <article class:list={['reveal', delais[i]]}>
+          colonneGauche.map((item) => (
+            <article class="reveal">
               <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                 {item.q}
               </h3>
@@ -143,8 +123,8 @@ const delais = [
 
       <div class="space-y-10 md:mt-24 lg:space-y-14">
         {
-          colonneDroite.map((item, i) => (
-            <article class:list={['reveal', delais[i + 5]]}>
+          colonneDroite.map((item) => (
+            <article class="reveal">
               <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                 {item.q}
               </h3>

@@ -66,6 +66,9 @@
   --text-sous-titre: clamp(1.25rem, 1rem + 1.1vw, 2.25rem);
 
   --ease-rideau: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Rayon des panneaux — voir .carte plus bas. */
+  --radius-panneau: 0.75rem;
 }
 
 @layer base {
@@ -152,9 +155,20 @@
      chaînes utilitaires de 200 caractères. Un changement de registre se fait
      ici, pas dans sept fichiers. */
 
+  /*
+   * ⚠ `border-radius` en pixels, jamais en pourcentage.
+   *
+   * Ces deux boutons ont porté `border-radius: 50%` pendant toute la reprise du
+   * template. Sur une boîte large et basse, 50 % ne donne pas une pilule : il
+   * donne une ELLIPSE, dont les flancs bombent et rognent le texte aux extrémités.
+   * C'est la forme qu'on obtient en écrivant la règle sans regarder le rendu.
+   *
+   * Un rayon fixe supérieur à la demi-hauteur donne la pilule attendue, et reste
+   * stable quelle que soit la longueur du libellé.
+   */
   .bouton-primaire {
     display: inline-block;
-    border-radius: 50%;
+    border-radius: 999px;
     background: var(--color-texte);
     color: var(--color-fond);
     padding: 1rem 2.5rem;
@@ -163,20 +177,25 @@
     letter-spacing: 0.25em;
     text-transform: uppercase;
     text-decoration: none;
-    transition: all 0.5s var(--ease-rideau);
+    transition: background-color 0.18s ease;
   }
+  /*
+   * Le survol change la matière du bouton, pas sa taille.
+   *
+   * Il grossissait de 3 % et s'entourait d'un halo blanc de 30 px. Le halo est
+   * l'effet qui date le plus un site — il ne décrit aucun état réel, il éclaire —
+   * et un bouton qui grandit sous le curseur pousse le contenu voisin du regard.
+   * Un léger retrait de blanc suffit à confirmer la cible, et se lit aussi bien
+   * au clavier qu'à la souris.
+   */
   .bouton-primaire:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.18);
-  }
-  .bouton-primaire:active {
-    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.86);
   }
 
   .bouton-secondaire {
     display: inline-block;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
     color: var(--color-texte);
     padding: 1rem 2.5rem;
     font-size: 0.625rem;
@@ -184,12 +203,13 @@
     letter-spacing: 0.25em;
     text-transform: uppercase;
     text-decoration: none;
-    transition: all 0.5s var(--ease-rideau);
+    transition:
+      border-color 0.18s ease,
+      background-color 0.18s ease;
   }
   .bouton-secondaire:hover {
-    transform: scale(1.03);
     border-color: var(--color-texte);
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
   }
 
   @media (min-width: 640px) {
@@ -216,9 +236,19 @@
     color: var(--color-texte-faible);
   }
 
+  /*
+   * Rayon unique pour tout ce qui est un panneau — cartes, champs de formulaire,
+   * bandeaux d'erreur, grilles. La page en comptait quatre différents (0,75 rem,
+   * 1 rem, 1,5 rem et l'ellipse des boutons), ce qui ne se remarque pas élément
+   * par élément mais se voit quand deux blocs se suivent.
+   *
+   * Un seul rayon se règle ici. Le prendre en variable plutôt qu'en valeur
+   * permet aux utilitaires Tailwind de le reprendre là où `.carte` ne s'applique
+   * pas — champs de formulaire, notamment.
+   */
   .carte {
     border: 1px solid var(--color-trait);
-    border-radius: 1rem;
+    border-radius: var(--radius-panneau);
     background: var(--color-surface);
   }
 
@@ -232,39 +262,61 @@
     }
   }
 
-  /* ---- Liquid glass ---- */
-  .liquid-glass {
-    background: rgba(255, 255, 255, 0.01);
-    background-blend-mode: luminosity;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: none;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
+  /*
+   * ---- Verre ----
+   *
+   * Le flou sert à quelque chose : cet élément passe au-dessus de la vidéo du
+   * hero, dont les plans clairs avalent un texte blanc. C'est la seule raison
+   * pour laquelle il existe, et elle est fonctionnelle.
+   *
+   * Ce qui l'entourait ne servait à rien : un anneau de 1,4 px peint par un
+   * pseudo-élément, avec un dégradé à six arrêts et un masque composite, pour
+   * simuler un reflet sur une tranche de verre. C'est l'ornement le plus
+   * reconnaissable des gabarits récents, il coûtait un `overflow: hidden` et un
+   * `::before` par occurrence, et sur un filet d'un pixel et demi personne ne
+   * distingue un dégradé d'une couleur unie.
+   *
+   * La classe s'appelait `liquid-glass`. Tout le reste du vocabulaire de ce
+   * fichier est en français et nommé par rôle — `surtitre`, `carte`,
+   * `bouton-primaire` : un nom de fonctionnalité commerciale anglophone au
+   * milieu détonnait autant dans le code que l'anneau à l'écran.
+   */
+  /*
+   * Matière seulement : fond et flou, aucune bordure.
+   *
+   * Une bordure ici écraserait celle de `bouton-secondaire` sur le bouton du
+   * hero, qui porte les deux classes — et la remplacerait par un filet plus
+   * pâle, précisément là où il doit tenir au-dessus d'une vidéo. Le cadre
+   * appartient au composant, la matière à cette classe.
+   */
+  .verre {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
   }
 
-  .liquid-glass::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1.4px;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.45) 0%,
-      rgba(255, 255, 255, 0.15) 20%,
-      rgba(255, 255, 255, 0) 40%,
-      rgba(255, 255, 255, 0) 60%,
-      rgba(255, 255, 255, 0.15) 80%,
-      rgba(255, 255, 255, 0.45) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+  /*
+   * ⚠ Le préfixe est dans une règle SÉPARÉE, et il doit y rester.
+   *
+   * Écrits l'un sous l'autre dans le même bloc, `backdrop-filter` et
+   * `-webkit-backdrop-filter` sont vus comme deux déclarations de la même
+   * propriété : le minifieur en supprime une et ne garde que la dernière. Le
+   * site a donc livré pendant toute la reprise du template la seule version
+   * `-webkit-` — le flou de la barre de navigation n'a jamais fonctionné sous
+   * Firefox, qui n'accepte que la forme sans préfixe.
+   *
+   * Vérification après tout changement ici : les DEUX doivent se retrouver dans
+   * le CSS de `dist/`.
+   *
+   *   grep -o '[-a-z]*backdrop-filter:[^;}]*' dist/_astro/*.css
+   *
+   * Le préfixe reste nécessaire : Safari ne comprend la forme sans préfixe que
+   * depuis sa version 18. Sans lui, la barre redevient un simple voile blanc
+   * au-dessus de la vidéo du hero sur les iPhone un peu anciens.
+   */
+  @supports (-webkit-backdrop-filter: blur(1px)) {
+    .verre {
+      -webkit-backdrop-filter: blur(6px);
+    }
   }
 }
 
