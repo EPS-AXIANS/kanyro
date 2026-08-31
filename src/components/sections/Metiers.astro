@@ -1,0 +1,76 @@
+---
+import metiers from '../../data/metiers.json';
+import communes from '../../data/communes.json';
+
+/*
+ * Section absente du template de référence, ajoutée parce qu'elle porte le
+ * maillage interne vers les pages « métier × commune ». Sans lien depuis
+ * l'accueil, ces pages sont plus lentes à être explorées — et elles sont tout
+ * l'intérêt du dispositif.
+ *
+ * Même registre sombre que le reste, sur le brun de la section suivante pour
+ * que l'enchaînement reste sans couture.
+ */
+/*
+ * Ce composant n'est importé nulle part : il attend l'activation des pages
+ * métier (point 4.1 de la tasklist), dont il porte le maillage interne. Il est
+ * conservé pour cette raison, pas par oubli — voir 7.2.
+ *
+ * Sa cascade de six délais d'animation a été retirée en même temps que celles
+ * des sections en service, pour qu'il ne réintroduise pas le jour où on
+ * l'allume ce qui vient d'en être ôté.
+ */
+---
+
+<section class="relative bg-[#410C01] px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
+  <div class="mx-auto max-w-6xl">
+    <h2
+      class="reveal font-titre text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+    >
+      Chaque métier se cherche autrement
+    </h2>
+    <p
+      class="reveal font-texte mx-auto mt-6 max-w-xl text-center text-xs leading-relaxed text-white/60 [animation-delay:120ms] sm:text-sm"
+    >
+      Une fuite se cherche à 22 h sur un téléphone. Une pompe à chaleur se compare
+      pendant trois semaines. Un site qui ignore cette différence rate la moitié de
+      ses visiteurs.
+    </p>
+
+    <ul class="reveal mt-16 grid gap-px overflow-hidden rounded-panneau bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        metiers.map((m) => (
+          <li>
+            <a
+              href={`/metiers/${m.slug}`}
+              class="group flex h-full flex-col bg-[#410C01] p-8 no-underline transition-colors duration-200 hover:bg-[#4d1002]"
+            >
+              <h3 class="font-titre text-2xl tracking-wide text-white">{m.nom}</h3>
+              <p class="font-texte mt-3 flex-1 text-xs leading-relaxed text-white/55">
+                {m.accroche}
+              </p>
+              <span class="font-texte mt-6 text-[10px] font-medium tracking-[0.25em] text-white/70 uppercase transition-colors group-hover:text-white">
+                Voir la page →
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="reveal mt-16 text-center">
+      <p class="font-texte text-[10px] font-medium tracking-[0.25em] text-white/40 uppercase">
+        Zone d'intervention
+      </p>
+      <ul class="mt-5 flex flex-wrap justify-center gap-2.5">
+        {
+          communes.map((c) => (
+            <li class="font-texte rounded-full border border-white/15 px-4 py-2 text-[11px] text-white/70">
+              {c.nom}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
