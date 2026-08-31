@@ -29,142 +29,134 @@ import { offreMensuelle } from '../../data/offres.js';
  * chose. Affichée, elle transforme le forfait en choix — et quelqu'un qui a le
  * choix et qui reste, reste.
  *
- * ---- Ce que la mise en forme doit dire ----
+ * ---- Mise en page : deux colonnes, et rien de centré ----
  *
- * Fond `surface` et non `brique`. La brique est la couleur de l'offre
- * principale ; la reprendre ici mettrait les deux offres au même rang, alors
- * que celle-ci est facultative et ne démarre que dans un an. Le fond plus
- * sombre la pose comme une suite, pas comme une seconde porte d'entrée.
+ * Première version : tout centré, et surtout les deux montants côte à côte
+ * séparés d'un filet vertical. C'est, au pixel près, la mise en page du prix et
+ * du délai de la section Offre. Une reprise aussi littérale ne se lisait pas
+ * comme une citation mais comme un doublon : la section paraissait être une
+ * seconde offre principale, alors qu'elle est facultative et démarre dans un an.
+ *
+ * D'où l'asymétrie. La colonne étroite tient tout ce qui engage — le prix, la
+ * date de départ, les délais promis, les conditions de sortie — et reste à
+ * l'écran pendant qu'on parcourt l'autre. Les prestations défilent à droite.
+ * C'est la disposition d'une fiche de conditions, pas d'une grille tarifaire,
+ * et c'est aussi ce que fait le lecteur ici : il vérifie une couverture en
+ * gardant le prix sous les yeux.
+ *
+ * Le fond reste `surface` et non `brique` : la brique est la couleur de l'offre
+ * principale, la reprendre remettrait les deux au même rang.
  *
  * Les chiffres sont en Cormorant Light, comme le prix du site. La tentation
  * était grande de passer un abonnement en sans-serif grasse — c'est le registre
  * des grilles tarifaires SaaS, et c'est exactement ce que la note de Offre.astro
  * interdit. Un abonnement facturé comme un artisan doit s'afficher comme tel.
- *
- * Et les prestations sont une liste à filets, pas une grille de cartes : la
- * raison est détaillée au-dessus de la liste elle-même.
  */
-
 ---
 
 {
   offreMensuelle.actif && (
     <section id="suivi" class="bg-surface px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
-      <div class="mx-auto max-w-5xl">
-        <p class="surtitre reveal text-center">Une fois le site en ligne</p>
-        <h2
-          class="font-titre reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
-        >
+      <div class="mx-auto max-w-6xl">
+        <p class="surtitre reveal">Une fois le site en ligne</p>
+        <h2 class="font-titre reveal mt-6 max-w-2xl text-4xl tracking-wide sm:text-5xl">
           Le forfait {offreMensuelle.nom}
         </h2>
-        <p
-          class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [animation-delay:120ms] sm:text-base"
-        >
+        <p class="font-texte reveal mt-6 max-w-xl text-sm leading-relaxed text-texte-doux sm:text-base">
           {offreMensuelle.promesse}
         </p>
 
-        {/* Les deux montants côte à côte, comme le prix et le délai de l'offre
-            principale : ce sont les deux seules questions posées ici. */}
-        <div class="reveal mt-12 flex flex-col items-center gap-8 sm:flex-row sm:justify-center sm:gap-16">
-          <div class="text-center">
-            <p class="font-texte text-[10px] tracking-[0.25em] text-texte-faible uppercase">
-              Au mois
-            </p>
-            <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
+        <div class="mt-16 grid gap-12 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-20">
+          {/*
+            Colonne collante : elle porte tout ce qui engage, et doit rester
+            lisible pendant qu'on parcourt les prestations. `self-start` est
+            indispensable — sans lui, l'élément d'une grille s'étire sur toute la
+            hauteur de la rangée et `sticky` n'a plus de course pour glisser.
+
+            Le décalage haut dégage la barre de navigation flottante.
+          */}
+          <div class="reveal lg:sticky lg:top-32 lg:self-start">
+            <p class="font-titre text-5xl leading-none font-light tracking-[0.01em]">
               {offreMensuelle.prix}
             </p>
-            <p class="font-texte mt-2 text-xs text-texte-faible">sans engagement de durée</p>
-          </div>
-
-          <div class="pointer-events-none hidden h-16 w-px bg-white/15 sm:block" aria-hidden="true" />
-
-          <div class="text-center">
-            <p class="font-texte text-[10px] tracking-[0.25em] text-texte-faible uppercase">
-              Ou à l'année
+            <p class="font-texte mt-4 text-sm text-texte-doux">
+              ou <span class="text-texte">{offreMensuelle.prixAnnuel}</span> réglés
+              en une fois — <span class="text-signal-vif">{offreMensuelle.mentionAnnuel}</span>
             </p>
-            <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
-              {offreMensuelle.prixAnnuel}
+
+            {/*
+              La phrase qui empêche les deux prix de la page de se concurrencer.
+              Elle répond au « donc le site coûte 2 900 € PLUS 25 € par mois ? »
+              qui se pose sinon en silence, et qu'on n'entendra jamais poser.
+            */}
+            <p class="font-texte mt-8 text-xs leading-relaxed text-texte-doux">
+              Rien à régler aujourd'hui, et rien à signer. Le forfait démarre{' '}
+              {offreMensuelle.demarrage}, et seulement si vous le décidez à ce
+              moment-là.
             </p>
-            <p class="font-texte mt-2 text-xs text-signal-vif">{offreMensuelle.mentionAnnuel}</p>
-          </div>
-        </div>
 
-        {/* La phrase qui empêche les deux prix de la page de se concurrencer.
-            Elle est encadrée parce qu'elle doit être lue, pas parcourue : c'est
-            elle qui répond au « donc le site coûte 2 900 € PLUS 25 € par mois ? »
-            qui se pose sinon en silence, et qu'on n'entendra jamais poser. */}
-        <p
-          class="carte font-texte reveal mx-auto mt-12 max-w-2xl p-6 text-center text-sm leading-relaxed text-texte-doux"
-        >
-          Rien à régler aujourd'hui, et rien à signer. Le forfait démarre{' '}
-          {offreMensuelle.demarrage}, et seulement si vous le décidez à ce
-          moment-là.
-        </p>
-
-        {/*
-          Une liste, pas une seconde grille de cartes.
-
-          Première version : la grille de `Offre.astro` recopiée telle quelle —
-          même `gap-px`, même fond translucide, même rayon, cinq cartes au lieu
-          de quatre. Deux grilles jumelles à trois écrans d'intervalle sur la
-          même page, c'est la répétition qui fait le plus « gabarit », et elle
-          mettait surtout les deux offres au même rang visuel alors que celle-ci
-          est facultative et démarre dans un an.
-
-          Une liste à filets convient mieux à ce qu'on lit ici : on parcourt des
-          prestations pour vérifier ce qui est couvert, on ne compare pas des
-          formules. Elle est aussi plus légère à l'écran, ce qui est exactement
-          le rapport que cette section doit entretenir avec l'offre principale.
-        */}
-        <ul class="reveal mt-16 border-t border-trait">
-          {offreMensuelle.inclus.map((bloc) => (
-            <li class="grid gap-2 border-b border-trait py-6 md:grid-cols-[minmax(0,17rem)_1fr] md:gap-10 md:py-7">
-              <h3 class="font-titre text-xl leading-snug tracking-wide md:text-2xl">
-                {bloc.titre}
-              </h3>
-              <p class="font-texte text-sm leading-relaxed text-texte-doux">{bloc.detail}</p>
-            </li>
-          ))}
-        </ul>
-
-        <div class="mt-16 grid gap-12 md:grid-cols-2">
-          <div class="reveal">
-            <h3 class="font-titre text-[1.75rem] tracking-wide">Ce sur quoi je m'engage</h3>
-            {/* En orange, et seuls de la section à l'être. C'est ce qui sépare
-                ce forfait d'une revente d'hébergement avec marge : le reste,
-                n'importe quel hébergeur le fait pour trente euros par an. */}
-            <ul class="mt-5 space-y-3">
+            <p class="font-texte mt-10 text-[10px] tracking-[0.25em] text-texte-faible uppercase">
+              Ce sur quoi je m'engage
+            </p>
+            {/*
+              En orange, et seuls de la section à l'être. C'est ce qui sépare ce
+              forfait d'une revente d'hébergement avec marge : le reste, n'importe
+              quel hébergeur le fait pour trente euros par an.
+            */}
+            <ul class="mt-4 space-y-3">
               {offreMensuelle.engagement.map((e) => (
-                <li class="font-texte flex gap-3 text-sm text-texte-doux">
-                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
+                <li class="font-texte flex gap-3 text-xs leading-relaxed text-texte-doux">
+                  <span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                   <span>{e}</span>
                 </li>
               ))}
             </ul>
+
+            <p class="font-texte mt-10 border-t border-trait pt-6 text-xs leading-relaxed text-texte-faible">
+              {offreMensuelle.sortie}
+            </p>
           </div>
 
+          {/*
+            Une liste à filets, pas une grille de cartes : la section Offre en a
+            déjà une, et deux grilles jumelles sur la même page se lisent comme
+            un gabarit. On parcourt ici des prestations pour vérifier ce qui est
+            couvert, on ne compare pas des formules.
+          */}
           <div class="reveal">
-            <h3 class="font-titre text-[1.75rem] tracking-wide">Ce qui n'est pas compris</h3>
-            <ul class="mt-5 space-y-3">
-              {offreMensuelle.horsPerimetre.map((h) => (
-                <li class="font-texte flex gap-3 text-sm text-texte-faible">
-                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
-                  <span>{h}</span>
+            <ul class="border-t border-trait">
+              {offreMensuelle.inclus.map((bloc) => (
+                <li class="border-b border-trait py-7">
+                  <h3 class="font-titre text-xl leading-snug tracking-wide sm:text-2xl">
+                    {bloc.titre}
+                  </h3>
+                  <p class="font-texte mt-2 max-w-xl text-sm leading-relaxed text-texte-doux">
+                    {bloc.detail}
+                  </p>
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
 
-        <div class="reveal mt-16 border-t border-trait pt-10">
-          <p class="font-texte mx-auto max-w-2xl text-center text-sm leading-relaxed text-texte-doux">
-            {offreMensuelle.sortie}
-          </p>
-          <p class="font-texte mx-auto mt-4 max-w-2xl text-center text-xs leading-relaxed text-texte-faible">
-            Et si vous préférez ne rien prendre, comptez{' '}
-            {offreMensuelle.alternative}. Le site continue de tourner, il est à
-            vous.
-          </p>
+            <div class="mt-12">
+              <p class="font-texte text-[10px] tracking-[0.25em] text-texte-faible uppercase">
+                Ce qui n'est pas compris
+              </p>
+              <ul class="mt-4 space-y-3">
+                {offreMensuelle.horsPerimetre.map((h) => (
+                  <li class="font-texte flex gap-3 text-sm text-texte-faible">
+                    <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p class="font-texte mt-12 max-w-xl text-xs leading-relaxed text-texte-faible">
+              Et si vous préférez ne rien prendre, comptez{' '}
+              {offreMensuelle.alternative}. Le site continue de tourner, il est à
+              vous.
+            </p>
+          </div>
         </div>
       </div>
     </section>
