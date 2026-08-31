@@ -372,7 +372,15 @@ rapporte.
 Sur le build de production, CSP active :
 
 - 5 pages, une seule balise `h1` par page, aucun script ni style inline
-- Le script d'effets se charge et déclenche les 30 révélations de l'accueil
+- Le script d'effets se charge et déclenche les 45 révélations de l'accueil.
+  Elles étaient 63 avant le nettoyage des effets : les puces de liste et les
+  cartes de grille ne se révèlent plus une par une, mais d'un bloc.
+- **7 délais d'animation dans la page, contre 30 auparavant.** Les 7 restants
+  sont des séquences écrites à la main — les quatre lignes du hero, deux
+  sous-titres de section. Un délai distribué par index de boucle
+  (`delais[i]`) est ce qui a été retiré : il ne signalait rien d'autre que la
+  présence d'une boucle. **Voir réapparaître ce compte grimper, c'est le signe
+  qu'une cascade est revenue.**
 - Aucun lien mort, toutes les ancres de la navbar résolvent
 - Prix, tarif de lancement et délai présents dans le HTML statique
 - Forfait Suivi : section `#suivi` rendue, « 25 €/mois » trois fois (section

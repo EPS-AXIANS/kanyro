@@ -512,6 +512,13 @@ réponds sous 48 heures. »
   → **Fait le 23/08/2026.** `Tarif.astro` supprimé, confirmé sans référence
   nulle part dans le dépôt ni dans le build. `Metiers.astro` conservé en
   l'état, dans l'attente de la décision du point 4.1.
+  → **31/08/2026 — `Metiers.astro` a été supprimé par erreur, puis restauré.**
+  Un audit visuel l'a repéré comme composant mort et l'a retiré ; il ne l'est
+  pas, c'est un composant en attente, et la distinction n'est lisible que
+  depuis cette entrée. Elle est répétée en tête du fichier concerné pour que la
+  prochaine lecture n'ait pas à passer par ici. Il a en revanche reçu le même
+  nettoyage d'effets que les sections en service, pour ne pas les réintroduire
+  le jour où 4.1 l'allumera.
 
 - [x] **7.3 — Commentaires périmés** — `site.js:105` explique le comportement de
 
