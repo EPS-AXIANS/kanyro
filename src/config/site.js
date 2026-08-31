@@ -78,10 +78,22 @@ export const SITE = {
     pays: 'FR',
   },
 
+  /*
+   * ⚠ Une URL vide, jamais '#'.
+   *
+   * Ces deux entrées valaient '#'. Le filtre de Footer.astro ne garde que les
+   * réseaux renseignés — mais '#' est une chaîne non vide, donc vrai : les deux
+   * icônes étaient rendues et pointaient sur la page elle-même. Le site livrait
+   * deux liens sociaux morts, exactement ce que le commentaire du filtre dit de
+   * ne pas faire.
+   *
+   * Chaîne vide pour un compte qui n'existe pas encore. Le filtre l'écarte, et
+   * l'icône réapparaîtra le jour où l'adresse sera écrite ici.
+   */
   reseaux: {
     linkedin: 'https://www.linkedin.com/in/elio-pallois/',
-    instagram: '#',
-    facebook: '#',
+    instagram: '',
+    facebook: '',
   },
 
   /** Renseigner après immatriculation — sert aussi aux mentions légales. */

@@ -1,5 +1,5 @@
 ---
-import { Facebook, Instagram, Linkedin, Mail, Aperture } from 'lucide-astro';
+import { Facebook, Instagram, Linkedin, Mail } from 'lucide-astro';
 import { SITE } from '../config/site.js';
 
 const { variante = 'standard' } = Astro.props;
@@ -13,7 +13,13 @@ const reseaux = [
   { url: SITE.reseaux.linkedin, Icone: Linkedin, nom: 'LinkedIn' },
   { url: SITE.reseaux.instagram, Icone: Instagram, nom: 'Instagram' },
   { url: SITE.reseaux.facebook, Icone: Facebook, nom: 'Facebook' },
-].filter((r) => r.url);
+  /*
+   * `'#'` est écarté au même titre qu'une chaîne vide : c'est la valeur qu'on
+   * écrit machinalement en attendant la vraie adresse, et elle est passée en
+   * production ici même. Le filtre ne doit pas dépendre de la discipline de
+   * celui qui remplit site.js.
+   */
+].filter((r) => r.url && r.url !== '#');
 
 const classeTexte =
   'text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.15em] sm:tracking-[0.25em] text-white/80 transition-colors hover:text-white no-underline';
@@ -109,9 +115,16 @@ const annee = new Date().getFullYear();
       <a href="/#offre" class:list={[classeTexte, 'hidden sm:inline']}>
         Offre & tarif
       </a>
-      <a href="/contact" aria-label="Demander un devis" class={classeIcone}>
-        <Aperture class="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
-      </a>
+      {/*
+        Ce lien était une icône « Aperture » — le diaphragme d'un appareil
+        photo — pour dire « demander un devis ». Aucun rapport, et rien à
+        deviner : c'est le symptôme d'une icône choisie pour meubler un coin de
+        barre. Elle était de surcroît le seul repère vers le devis sur mobile,
+        où les libellés voisins sont masqués.
+
+        Un mot le dit mieux, et tient dans la même place.
+      */}
+      <a href="/contact" class={classeTexte}>Devis</a>
     </div>
   </div>
 </div>
