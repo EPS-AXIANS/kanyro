@@ -16,8 +16,8 @@ const reseaux = [
 ].filter((r) => r.url);
 
 const classeTexte =
-  'text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.15em] sm:tracking-[0.25em] text-white/80 transition-colors hover:text-white no-underline';
-const classeIcone = 'text-white/80 transition-colors hover:text-white';
+  'text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.15em] sm:tracking-[0.25em] text-white/90 transition-colors hover:text-white no-underline';
+const classeIcone = 'text-white/90 transition-colors hover:text-white';
 const annee = new Date().getFullYear();
 ---
 
@@ -78,13 +78,50 @@ const annee = new Date().getFullYear();
   )
 }
 
+{/*
+  ---- Le dégradé n'est pas décoratif, il porte la lisibilité ----
+
+  Cette barre passe devant TOUS les fonds de l'accueil, et l'un d'eux est clair :
+  le ciel de la citation. Le dégradé valait `from-black/40`, ce qui laisse au
+  niveau du texte un fond composite d'environ 0,36 de luminance ; du blanc à
+  80 % par-dessus donne un contraste de 2,2:1, là où 4,5:1 sont exigés pour du
+  texte de neuf pixels. Autrement dit, une mention légale illisible sur le
+  dernier écran du site.
+
+  Même parti que pour la barre de navigation : c'est l'état LISIBLE qui devient
+  le défaut, plutôt qu'une correction conditionnelle qui dépendrait d'un script.
+
+  ---- Pourquoi plus HAUT plutôt que plus SOMBRE ----
+
+  Assombrir le dégradé sur sa hauteur actuelle — une cinquantaine de pixels —
+  aurait posé une bande franche en bas de l'écran, bien visible sur le brun de
+  l'offre et des questions. Le `pt-20` étire la même course sur 128 px : la
+  valeur sous le texte monte à 0,71 d'opacité, ce qui donne 5,3:1, et la sortie
+  se fait sur 90 px, donc sans arête. Sur les fonds sombres, l'ensemble se lit
+  comme un vignettage de bas de cadre, pas comme un bandeau.
+
+  ⚠ `pointer-events-none` sur le conteneur, `auto` sur la rangée. Les 80 px de
+  rembourrage sont un calque transparent en travers du bas de l'écran : sans
+  ça, il avalerait tous les clics qui tombent dedans. Le navigateur teste la
+  boîte, pas les pixels peints — c'est la même règle qui avait fait perdre les
+  clics du bouton du hero.
+
+  ⚠ Le rembourrage ne vaut QUE pour la variante cinéma. En `sticky`, la barre
+  est dans le flux et ces 80 px ajouteraient un vide en pied de chaque page
+  interne — pages dont le fond est de toute façon uniformément sombre, donc sans
+  problème de lisibilité à régler.
+*/}
 <div
   class:list={[
-    'right-0 bottom-0 left-0 z-40 bg-gradient-to-t from-black/40 to-transparent',
-    variante === 'cinema' ? 'fixed' : 'sticky',
+    'pointer-events-none right-0 bottom-0 left-0 z-40 bg-gradient-to-t',
+    variante === 'cinema'
+      ? 'fixed from-black/90 via-black/40 to-transparent pt-20'
+      : 'sticky from-black/60 to-transparent',
   ]}
 >
-  <div class="flex items-center justify-between px-3 py-2.5 sm:px-10 sm:py-4">
+  <div
+    class="pointer-events-auto flex items-center justify-between px-3 py-2.5 sm:px-10 sm:py-4"
+  >
     <div class="flex items-center gap-4 sm:gap-6">
       {
         reseaux.map(({ url, Icone, nom }) => (
