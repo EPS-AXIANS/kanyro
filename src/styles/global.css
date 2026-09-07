@@ -65,6 +65,23 @@
   --text-titre: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
   --text-sous-titre: clamp(1.25rem, 1rem + 1.1vw, 2.25rem);
 
+  /*
+   * Rayon des boutons. Il valait 50 %, ce qui ne donne pas une pastille mais une
+   * ELLIPSE : à cette valeur, les bords haut et bas sont bombés eux aussi, et le
+   * bouton n'a plus une seule ligne droite. C'est joli et c'est un parti pris de
+   * gabarit ; ça n'est pas sérieux.
+   *
+   * 2,5 em donne un stadium — extrémités pleinement arrondies, dessus et dessous
+   * parfaitement droits. La valeur vient de la ressource dont l'échange de
+   * lettres est repris, et elle est en `em` : elle suit donc le corps du texte,
+   * qui monte d'un cran au-delà de 640 px, sans qu'il y ait deux valeurs à tenir.
+   *
+   * Déclaré ici en `--radius-*` : Tailwind en tire l'utilitaire `rounded-bouton`,
+   * ce qui évite de répéter la valeur dans les deux boutons composés à la main
+   * (celui du hero, celui du showcase).
+   */
+  --radius-bouton: 2.5em;
+
   --ease-rideau: cubic-bezier(0.22, 1, 0.36, 1);
 
   /*
@@ -173,7 +190,7 @@
      */
     display: inline-grid;
     justify-items: center;
-    border-radius: 50%;
+    border-radius: var(--radius-bouton);
     background: var(--color-texte);
     color: var(--color-fond);
     padding: 1rem 2.5rem;
@@ -194,7 +211,7 @@
 
   .bouton-secondaire {
     display: inline-block;
-    border-radius: 50%;
+    border-radius: var(--radius-bouton);
     border: 1px solid rgba(255, 255, 255, 0.5);
     color: var(--color-texte);
     padding: 1rem 2.5rem;
