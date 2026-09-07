@@ -572,6 +572,72 @@
   }
 }
 
+/* ---- Le passage d'une page à l'autre ---- */
+
+/*
+ * `<ClientRouter />` fait le travail de navigation, mais il n'apporte AUCUNE
+ * animation par lui-même : Astro ne joint sa feuille `viewtransitions.css` que
+ * si une directive `transition:animate` figure quelque part, ce qui n'est pas le
+ * cas ici. Sans les règles ci-dessous, le navigateur applique son fondu par
+ * défaut — 250 ms entre deux pages sombres qui partagent la même barre et le
+ * même pied. Mesuré : la page d'arrivée est intégralement affichée 180 ms après
+ * le clic. Techniquement une transition, visuellement rien.
+ *
+ * La forme reprend celle du reste du site plutôt que le fondu croisé
+ * symétrique : la page qui part s'efface, celle qui arrive s'efface ET monte,
+ * comme un `.reveal`. C'est le même geste à l'échelle de la page.
+ *
+ * ⚠ `::view-transition-new` est une représentation VIVANTE du nouveau contenu,
+ * pas une capture figée — contrairement à `::view-transition-old`. Les
+ * révélations de la page d'arrivée jouent donc À L'INTÉRIEUR de ce calque
+ * pendant qu'il monte, ce qui donne la profondeur sans rien coordonner.
+ *
+ * Les durées ne sont pas symétriques, et c'est délibéré : une page qui s'efface
+ * plus vite qu'elle n'arrive laisse l'attention sur la destination. L'inverse
+ * donne l'impression d'attendre.
+ */
+@keyframes page-sortie {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-entree {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+::view-transition-old(root) {
+  animation: page-sortie 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: page-entree 0.55s var(--ease-rideau) 0.08s both;
+}
+
+/*
+ * Repli pour les navigateurs sans View Transitions natives. Astro pose alors
+ * `data-astro-transition-fallback` sur <html>, à « old » puis à « new », et
+ * attend la fin des animations déclenchées avant de passer à la suite.
+ *
+ * ⚠ Les deux phases sont SÉQUENTIELLES ici, là où les pseudo-éléments natifs se
+ * recouvrent. Pas de délai sur l'entrée, donc : il s'ajouterait à l'attente au
+ * lieu de créer un recouvrement qui, dans ce mode, ne peut pas exister.
+ */
+[data-astro-transition-fallback='old'] {
+  animation: page-sortie 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+[data-astro-transition-fallback='new'] {
+  animation: page-entree 0.55s var(--ease-rideau) both;
+}
+
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -596,6 +662,19 @@
     animation: none !important;
     transform: none !important;
   }
+  /*
+   * ⚠ Les pseudo-éléments de transition de page ne sont PAS atteints par la
+   * règle universelle ci-dessous : ils vivent dans un arbre à part, où `*` ne
+   * descend pas. Sans ces trois sélecteurs, le passage d'une page à l'autre
+   * continuerait de bouger pour quelqu'un qui a demandé le contraire.
+   */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  [data-astro-transition-fallback] {
+    animation: none !important;
+  }
+
   *,
   *::before,
   *::after {
