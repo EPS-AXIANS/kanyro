@@ -21,10 +21,11 @@ import { offre } from '../../data/offres.js';
 ---
 
 <section class="relative h-screen w-full overflow-hidden">
-  {/* ⚠ Vidéo hébergée chez un tiers — à rapatrier avant mise en ligne. */}
+  {/* `hero-poussee` : 4 % d'échelle sur 22 s. Voir global.css — c'est sous le
+      seuil où l'œil identifie un mouvement, mais le plan cesse d'être fixe. */}
   <video
     id="video-hero"
-    class="absolute inset-0 h-full w-full object-cover"
+    class="hero-poussee absolute inset-0 h-full w-full object-cover"
     src={MEDIAS.heroVideo}
     autoplay
     muted
@@ -44,16 +45,34 @@ import { offre } from '../../data/offres.js';
   >
   </div>
 
+  {/* `hero-sortie` efface le bloc pendant qu'on quitte le premier écran. C'est
+      une timeline de défilement CSS, donc hors du fil principal — le seul
+      endroit de la page où une saccade se verrait vraiment. Là où
+      `animation-timeline` n'existe pas, le bloc reste simplement fixe. */}
   <div
-    class="relative z-10 flex h-full flex-col items-center justify-center px-5 text-center text-white"
+    class="hero-sortie relative z-10 flex h-full flex-col items-center justify-center px-5 text-center text-white"
   >
+    {/*
+      ⚠ UN DÉLAI SE POSE DANS LA VARIABLE `--retard`, ET NULLE PART AILLEURS.
+
+      Les délais de ce hero étaient écrits en utilitaire `animation-delay` et
+      n'ont jamais rien fait : la règle `.hero-fade-up` vit hors `@layer`, son
+      raccourci `animation:` remet le délai à zéro, et une déclaration hors
+      couche l'emporte sur `@layer utilities`. Les quatre blocs montaient donc
+      ensemble. La démonstration complète est en tête du bloc « Animations » de
+      global.css.
+
+      (Le nom de la variable n'est pas écrit ici entre crochets : Tailwind lit
+      ce fichier comme du texte brut, commentaires compris, et fabriquerait une
+      classe à partir de l'exemple.)
+    */}
     <p
-      class="hero-fade-up text-xs font-medium tracking-[0.35em] text-white/90 uppercase [animation-delay:100ms] sm:text-sm"
+      class="hero-fade-up text-xs font-medium tracking-[0.35em] text-white/90 uppercase [--retard:100ms] sm:text-sm"
     >
       Kanyro
     </p>
     <p
-      class="hero-fade-up mt-3 text-[10px] font-light tracking-[0.4em] text-white/70 uppercase [animation-delay:100ms] sm:text-xs"
+      class="hero-fade-up mt-3 text-[10px] font-light tracking-[0.4em] text-white/70 uppercase [--retard:170ms] sm:text-xs"
     >
       Arrageois · Bassin minier · Lille
     </p>
@@ -86,30 +105,40 @@ import { offre } from '../../data/offres.js';
 
         Toute reprise du `tracking` ou du corps impose de refaire cette mesure,
         sur 1 280 en premier. */}
-    <h1
-      class="hero-fade-up mt-8 leading-[1.05] drop-shadow-[0_2px_24px_rgba(0,0,0,0.25)] [animation-delay:250ms]"
-    >
+    {/*
+      Le rideau est posé sur CHAQUE LIGNE, pas sur le h1.
+
+      Les deux lignes se découvrent l'une après l'autre, ce qui est tout
+      l'intérêt : un rideau sur le h1 entier ferait remonter le bloc d'un seul
+      tenant, soit exactement l'effet du `hero-fade-up` qu'il remplace.
+
+      ⚠ Le `drop-shadow` reste sur le h1, au-dessus du découpage. L'ombre est
+      donc calculée à partir des lignes déjà découpées et suit le rideau, ce
+      qu'on veut ; l'inverse — un `drop-shadow` sur les spans — la ferait couper
+      par leur propre `clip-path`.
+    */}
+    <h1 class="mt-8 leading-[1.05] drop-shadow-[0_2px_24px_rgba(0,0,0,0.25)]">
       <span
-        class="font-titre block text-2xl tracking-wide sm:text-4xl md:text-5xl lg:text-6xl"
+        class="rideau-charge font-titre block text-2xl tracking-wide [--retard:280ms] sm:text-4xl md:text-5xl lg:text-6xl"
       >
         Sites internet pour
       </span>
       <span
-        class="font-titre mt-2 block text-5xl font-light tracking-[0.08em] text-balance uppercase italic sm:text-7xl xl:text-[5.25rem] 2xl:text-8xl"
+        class="rideau-charge font-titre mt-2 block text-5xl font-light tracking-[0.08em] text-balance uppercase italic [--retard:420ms] sm:text-7xl xl:text-[5.25rem] 2xl:text-8xl"
       >
         artisans du bâtiment
       </span>
     </h1>
 
     <p
-      class="hero-fade-up font-titre mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [animation-delay:400ms] sm:text-lg md:text-xl"
+      class="hero-fade-up font-titre mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [--retard:600ms] sm:text-lg md:text-xl"
     >
       {offre.promesse}
     </p>
 
     <a
       href="/contact"
-      class="liquid-glass font-texte hero-fade-up mt-10 inline-block rounded-[50%] px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [animation-delay:550ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
+      class="liquid-glass font-texte hero-fade-up mt-10 inline-block rounded-[50%] px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [--retard:740ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
     >
       Demander un devis
     </a>

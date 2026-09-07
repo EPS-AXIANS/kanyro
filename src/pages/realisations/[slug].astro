@@ -43,9 +43,9 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
 
   <article class="contenu max-w-3xl pb-20">
     <p class="surtitre reveal">{fiche.data.metier} · {fiche.data.commune}</p>
-    <h1 class="titre-page reveal mt-6 [animation-delay:80ms]">{fiche.data.titre}</h1>
+    <h1 class="titre-page reveal mt-6 [--retard:80ms]">{fiche.data.titre}</h1>
     <p
-      class="font-texte reveal mt-6 text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      class="font-texte reveal mt-6 text-sm leading-relaxed text-texte-doux [--retard:160ms]"
     >
       {fiche.data.resume}
     </p>

@@ -87,17 +87,17 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
 
   <section class="contenu pb-20">
     <p class="surtitre reveal">{commune.secteur} · {commune.codePostal}</p>
-    <h1 class="titre-page reveal mt-6 max-w-4xl [animation-delay:80ms]">
+    <h1 class="titre-page reveal mt-6 max-w-4xl [--retard:80ms]">
       {metier.nom} à {commune.nom} : être trouvé par vos voisins
     </h1>
     <p
-      class="font-texte reveal mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+      class="font-texte reveal mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [--retard:160ms]"
     >
       Quand un habitant de {commune.nom} cherche {metier.article}
       {metier.nom.toLowerCase()}, il tape le métier et le nom de sa commune, puis
       appelle un des trois premiers. Le reste de la liste n'existe pas.
     </p>
-    <a href="/contact" class="bouton-primaire reveal mt-10 [animation-delay:240ms]">
+    <a href="/contact" class="bouton-primaire reveal mt-10 [--retard:240ms]">
       Demander un devis
     </a>
   </section>

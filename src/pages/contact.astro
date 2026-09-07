@@ -25,11 +25,11 @@ const classesErreur =
   <section class="contenu sous-navbar grid gap-16 pb-24 lg:grid-cols-[1.25fr_1fr]">
     <div>
       <p class="surtitre reveal">Contact</p>
-      <h1 class="titre-page reveal mt-6 [animation-delay:80ms]">
+      <h1 class="titre-page reveal mt-6 [--retard:80ms]">
         Parlons de votre activité
       </h1>
       <p
-        class="font-texte reveal mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [animation-delay:160ms]"
+        class="font-texte reveal mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [--retard:160ms]"
       >
         Quelques lignes suffisent. Je réponds sous 48 heures, et je vous dis
         franchement si un site vous rapportera quelque chose.
@@ -47,7 +47,7 @@ const classesErreur =
         name="devis"
         method="POST"
         action="/contact.php"
-        class="reveal mt-12 max-w-xl [animation-delay:240ms]"
+        class="reveal mt-12 max-w-xl [--retard:240ms]"
       >
         {/*
           Trois bandeaux, un par motif d'échec renvoyé par contact.php via

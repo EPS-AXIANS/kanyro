@@ -240,9 +240,19 @@ fichier à éditer.
 
 ## Décisions structurantes
 
-**Sortie statique, un seul script de 2,8 Ko.** Le site vend du référencement
-local : il ne peut pas dépendre du client pour afficher son contenu. Le seul
-JavaScript gère les révélations au scroll et la parallaxe — purement décoratif.
+**Sortie statique, deux scripts, 14 Ko gzip en tout.** Le site vend du
+référencement local : il ne peut pas dépendre du client pour afficher son
+contenu. `public/js/effets.js` (8,3 Ko — il n'est pas minifié, voir plus bas,
+et c'est surtout du commentaire) porte les révélations, la frise du déroulement,
+la parallaxe et la barre de navigation ; `<ClientRouter />` d'Astro (5,6 Ko)
+enchaîne les pages en fondu. Tout est décoratif, à une exception près : la
+densité de la barre de navigation, qui relève de la lisibilité — d'où un CSS qui
+part de l'état lisible et un script qui ne fait que l'éclaircir.
+
+Aucune dépendance d'animation. GSAP, ScrollTrigger, Lenis et Barba ont été
+regardés puis écartés : ~40 Ko pour la première paire, un `<head>` à recoller à
+la main pour la seconde, et un scroll à inertie qui se paie cher sur les
+téléphones de la cible.
 
 **Le contenu ne dépend jamais du script.** `.reveal { opacity: 0 }` n'est appliqué
 que sous `@media (scripting: enabled)`. Sans JavaScript, sans
@@ -272,9 +282,17 @@ Les classes s'appellent `font-titre` et `font-texte`, pas `font-cormorant` : le
 rôle survit au changement de fonte, comme pour la palette. Ce site en a déjà
 changé deux fois sans toucher à un seul composant.
 
-**Zéro style inline.** Les délais d'animation passent par des classes Tailwind
-littérales, les fonds par des `<img>` positionnées. Ça permet de garder
-`style-src` sans `'unsafe-inline'` malgré la richesse visuelle.
+**Zéro style inline dans le balisage.** Les délais d'animation passent par la
+variable `--retard`, les fonds par des `<img>` positionnées. Ça permet de garder
+`style-src` sans `'unsafe-inline'` malgré la richesse visuelle — `style-src`
+régit les attributs `style` écrits dans le HTML, pas les écritures par le CSSOM,
+dont vivent la parallaxe, les cascades et la frise.
+
+⚠ Un délai ne s'écrit JAMAIS en `animation-delay`. Les règles d'animation vivent
+hors `@layer`, leur raccourci `animation:` remet le délai à zéro, et le hors
+couche l'emporte sur `@layer utilities` : les 46 `[animation-delay:…]` du site
+étaient silencieusement écrasés, et aucune des cascades n'a jamais existé. Le
+détail est en tête du bloc « Animations » de `global.css`.
 
 **Le script d'effets est servi depuis `public/`, pas bundlé.** Astro inline les
 petits scripts, et un script inline est bloqué par `script-src 'self'` : en
@@ -341,7 +359,7 @@ rapporte.
 Sur le build de production, CSP active :
 
 - 5 pages, une seule balise `h1` par page, aucun script ni style inline
-- Le script d'effets se charge et déclenche les 30 révélations de l'accueil
+- Le script d'effets se charge et déclenche les 49 révélations de l'accueil
 - Aucun lien mort, toutes les ancres de la navbar résolvent
 - Prix, tarif de lancement et délai présents dans le HTML statique ; offre
   mensuelle absente

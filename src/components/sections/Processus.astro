@@ -28,6 +28,32 @@ import { offre } from '../../data/offres.js';
  * D'où la frise chronologique : un axe, six nœuds numérotés, et rien d'autre
  * comme décor.
  *
+ * ---- La progression liée au défilement ----
+ *
+ * La barre claire qui remplit l'axe, et les nœuds qui s'allument à son passage,
+ * ne sont pas une animation d'entrée : ils suivent le défilement. La différence
+ * n'est pas d'ambition. Une frise qui se dessine une fois dit « il y a une
+ * animation ici » ; une frise qui suit le défilement dit « vous en êtes là », ce
+ * qui est précisément le propos de la section.
+ *
+ * Le mécanisme est dans effets.js, `initFrise`. Ce fichier ne fournit que les
+ * prises : `data-frise` sur la liste, `data-frise-axe` sur le trait,
+ * `data-frise-remplissage` sur la barre, `data-frise-etape` et
+ * `data-frise-noeud` sur chaque étape. Les centres des nœuds sont MESURÉS, pas
+ * déduits d'un espacement régulier — ils ne le sont qu'en horizontal.
+ *
+ * ⚠ La barre est blanche, pas orange, et ça n'est pas un détail : l'orange de
+ * cette section veut dire « vous intervenez à cette étape ». S'il sert aussi à
+ * colorer la progression, il ne veut plus rien dire.
+ *
+ * ⚠ Aucune baisse d'opacité sur les étapes non atteintes, contrairement à ce que
+ * font la plupart des frises de ce genre. Le texte est déjà à 62 % d'alpha sur
+ * un fond quasi noir : l'assombrir passerait sous le seuil de contraste, et un
+ * visiteur qui arrive au milieu de la section verrait cinq étapes sur six en
+ * fantômes. Seul le nœud change d'état.
+ *
+ * ---- L'alternance ----
+ *
  * `champClient` est ce qui fait que l'alternance dit quelque chose au lieu de
  * décorer. L'intro promet « vous n'intervenez qu'à trois moments » : ce sont les
  * étapes 1, 3 et 5. Elles passent AU-DESSUS de l'axe, en orange ; les trois
@@ -109,12 +135,12 @@ const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
   <div class="mx-auto max-w-6xl">
     <p class="surtitre reveal text-center">Le déroulement</p>
     <h2
-      class="font-titre reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="font-titre rideau mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
       Comment ça se passe
     </h2>
     <p
-      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [animation-delay:120ms]"
+      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [--retard:120ms]"
     >
       {offre.delai} entre le premier rendez-vous et la mise en ligne. Vous
       n’intervenez qu’à trois moments, en orange ci-dessous. Le reste, c’est mon
@@ -132,28 +158,56 @@ const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
       < lg : axe vertical à gauche, étapes empilées à droite.
       ≥ lg : axe horizontal, étapes alternées de part et d'autre.
     */}
-    <ol class="relative mt-20 lg:mt-28 lg:grid lg:grid-cols-6">
+    {/*
+      `data-cascade` décale les six étapes à l'entrée de la liste ; la barre de
+      progression, elle, suit le défilement indépendamment.
+
+      ⚠ Le pas s'applique aux ENFANTS DIRECTS, et le premier est le trait — il
+      consomme donc le cran 0, et l'étape 01 part à 110 ms. C'est voulu : la
+      barre a une longueur d'avance sur les nœuds qu'elle allume.
+
+      ⚠ Sur mobile la liste fait plusieurs écrans de haut, donc les dernières
+      étapes se révèlent avant d'être visibles. Ce n'est pas gênant ici,
+      contrairement à la Q&R : c'est la barre de progression qui porte la
+      lecture en vertical, et elle, elle suit bien le regard.
+    */}
+    <ol
+      data-frise
+      data-cascade="110"
+      class="relative mt-20 lg:mt-28 lg:grid lg:grid-cols-6"
+    >
       {/*
         8,3333 % = une demi-colonne sur six. L'axe s'arrête donc au centre du
         premier et du dernier nœud, au lieu de déborder dans le vide : une frise
         chronologique a un début et une fin, c'est tout son propos.
       */}
       <div
+        data-frise-axe
         class="absolute top-2 bottom-2 left-[21px] w-px bg-trait lg:top-1/2 lg:right-[8.3333%] lg:bottom-auto lg:left-[8.3333%] lg:h-px lg:w-auto"
         aria-hidden="true"
       >
+        {/* La barre de progression, à l'intérieur du trait pour en épouser
+            exactement la course. effets.js n'écrit qu'un nombre entre 0 et 1
+            dans `--progression` ; c'est global.css qui choisit l'axe, la frise
+            étant verticale sous 1 024 px et horizontale au-dessus. */}
+        <div data-frise-remplissage class="remplissage-frise absolute inset-0"></div>
       </div>
 
       {
         etapes.map((etape, i) => (
-          <li class="relative pb-12 pl-16 last:pb-0 lg:h-[25rem] lg:px-3 lg:pb-0 lg:pl-3">
+          <li
+            data-frise-etape
+            data-client={etape.champClient ? '' : undefined}
+            class="etape-frise relative pb-12 pl-16 last:pb-0 lg:h-[25rem] lg:px-3 lg:pb-0 lg:pl-3"
+          >
             {/*
               Le nœud est opaque et au-dessus de l'axe : c'est lui qui coupe le
               trait, sinon la ligne traverse le chiffre.
             */}
             <span
+              data-frise-noeud
               class:list={[
-                'absolute top-0 left-0 z-10 flex h-11 w-11 items-center justify-center rounded-full border bg-fond lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2',
+                'noeud-frise absolute top-0 left-0 z-10 flex h-11 w-11 items-center justify-center rounded-full border bg-fond lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2',
                 etape.champClient ? 'border-signal-vif/60' : 'border-trait',
               ]}
               aria-hidden="true"

@@ -3,13 +3,6 @@ import { offre, tarifReference } from '../../data/offres.js';
 import metiers from '../../data/metiers.json';
 import communes from '../../data/communes.json';
 
-const delais = [
-  '[animation-delay:80ms]',
-  '[animation-delay:160ms]',
-  '[animation-delay:240ms]',
-  '[animation-delay:320ms]',
-];
-
 /*
  * Communes regroupées par secteur, dans l'ordre du fichier de données —
  * Arrageois, bassin minier, métropole lilloise. L'ordre compte : il annonce la
@@ -27,12 +20,12 @@ const secteurs = [
   <div class="mx-auto max-w-5xl">
     <p class="surtitre reveal text-center text-white/40">L'offre</p>
     <h2
-      class="font-titre reveal mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="font-titre rideau mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
       {offre.nom}
     </h2>
     <p
-      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-white/70 [animation-delay:120ms] sm:text-base"
+      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-white/70 [--retard:120ms] sm:text-base"
     >
       {offre.promesse}
     </p>
@@ -87,10 +80,24 @@ const secteurs = [
       </div>
     </div>
 
-    <ul class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2">
+    {/*
+      `data-cascade` remplace le tableau de délais littéraux qui vivait en tête
+      de ce fichier. effets.js observe la GRILLE, puis décale ses enfants
+      directs de 90 ms les uns après les autres à partir du moment où elle
+      entre — ce qui est la seule façon d'obtenir une cascade, un délai posé sur
+      un enfant observé pour lui-même n'étant qu'une attente.
+
+      Quatre blocs qui tiennent à l'écran d'un seul coup : c'est le cas où une
+      cascade a du sens. La Q&R, haute de deux écrans, est le contre-exemple —
+      voir le bloc de tête de QandA.astro.
+    */}
+    <ul
+      data-cascade
+      class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2"
+    >
       {
-        offre.contenu.map((bloc, i) => (
-          <li class:list={['reveal bg-brique p-8', delais[i]]}>
+        offre.contenu.map((bloc) => (
+          <li class="reveal bg-brique p-8">
             <h3 class="font-titre text-[1.75rem] leading-snug tracking-wide">{bloc.titre}</h3>
             <p class="font-texte mt-3 text-sm leading-relaxed text-white/60">
               {bloc.detail}
@@ -103,7 +110,7 @@ const secteurs = [
     <div class="mt-16 grid gap-12 md:grid-cols-2">
       <div>
         <h3 class="font-titre reveal text-[1.75rem] tracking-wide">C'est pour vous si</h3>
-        <ul class="mt-5 space-y-3">
+        <ul data-cascade="70" class="mt-5 space-y-3">
           {
             offre.pour.map((p) => (
               <li class="font-texte reveal flex gap-3 text-sm text-white/70">
@@ -117,7 +124,7 @@ const secteurs = [
 
       <div>
         <h3 class="font-titre reveal text-[1.75rem] tracking-wide">Ce que je ne fais pas</h3>
-        <ul class="mt-5 space-y-3">
+        <ul data-cascade="70" class="mt-5 space-y-3">
           {
             offre.horsPerimetre.map((h) => (
               <li class="font-texte reveal flex gap-3 text-sm text-white/50">
@@ -133,15 +140,15 @@ const secteurs = [
     {/* Les métiers et les communes en texte, sans lien : la cible se reconnaît
         sans qu'on génère des pages qu'il est trop tôt pour tenir à jour.
         Groupé par secteur — douze noms à la file ne se lisent pas. */}
-    <div class="reveal mt-16 text-center">
-      <p class="font-texte text-xs leading-relaxed text-white/45">
+    <div class="mt-16 text-center">
+      <p class="reveal font-texte text-xs leading-relaxed text-white/45">
         Pensé pour les {metiers.map((m) => m.nom.toLowerCase()).join(', ')}.
       </p>
 
-      <dl class="mt-8 grid gap-6 sm:grid-cols-3">
+      <dl data-cascade class="mt-8 grid gap-6 sm:grid-cols-3">
         {
           secteurs.map(([secteur, villes]) => (
-            <div>
+            <div class="reveal">
               <dt class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
                 {secteur}
               </dt>

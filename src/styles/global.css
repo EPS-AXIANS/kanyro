@@ -233,11 +233,24 @@
   }
 
   /* ---- Liquid glass ---- */
+  /*
+   * ⚠ NE PAS RAJOUTER `-webkit-backdrop-filter` ICI. Il y était, et il ANNULAIT
+   * le flou au lieu de l'élargir.
+   *
+   * Lightning CSS, qui minifie la feuille, normalise les paires
+   * préfixée/standard selon ses cibles : voyant les deux, il ne gardait que
+   * `-webkit-backdrop-filter`. Or Chrome a cessé d'honorer cet alias — vérifié
+   * au navigateur : posé seul, il donne `backdrop-filter: none`. La pastille de
+   * navigation et le bouton du hero n'ont donc jamais rien flouté en
+   * production, alors que le développement, non minifié, le montrait.
+   *
+   * En n'écrivant que la propriété standard, c'est le minifieur qui ajoute le
+   * préfixe s'il le juge nécessaire — et il garde alors les deux.
+   */
   .liquid-glass {
     background: rgba(255, 255, 255, 0.01);
     background-blend-mode: luminosity;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     border: none;
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
     position: relative;
@@ -269,6 +282,30 @@
 }
 
 /* ---- Animations ---- */
+
+/*
+ * ⚠ LE DÉLAI SE MET DANS `--retard`, JAMAIS EN `animation-delay` À CÔTÉ.
+ *
+ * Ce bloc est écrit hors `@layer`, et les utilitaires Tailwind vivent dans
+ * `@layer utilities`. En CSS, une déclaration hors couche l'emporte sur une
+ * déclaration en couche, quelle que soit la spécificité. Or le raccourci
+ * `animation:` remet implicitement `animation-delay` à `0s`.
+ *
+ * Conséquence, mesurée au navigateur avant d'être corrigée : les 46 classes
+ * `[animation-delay:120ms]` du site étaient toutes écrasées à l'instant précis
+ * où `.revealed` arrivait. Les cascades de la Q&R, de l'offre, des métiers et
+ * du hero n'ont jamais existé — tout montait d'un bloc. Le symptôme est
+ * invisible à l'œil : ça ressemble à une animation qui fonctionne.
+ *
+ * D'où `var(--retard, 0ms)` À L'INTÉRIEUR du raccourci. `--retard` est une
+ * propriété personnalisée : rien d'autre ne la déclare, donc aucune couche ne
+ * peut l'écraser. Elle se pose soit dans le balisage — `[--retard:250ms]`,
+ * utilitaire de propriété arbitraire — soit par effets.js pour les cascades.
+ *
+ * Elle HÉRITE, et c'est ce qui fait tenir les cascades : poser `--retard` sur
+ * un `<li>` décale du même temps tout ce qu'il contient, sans le répéter.
+ */
+
 @keyframes hero-fade-up {
   from {
     opacity: 0;
@@ -291,39 +328,253 @@
   }
 }
 
-@keyframes reveal-scale {
+/*
+ * Le rideau — ce que `--ease-rideau` annonçait depuis le début sans que rien ne
+ * le fasse. Le texte se découvre du haut vers le bas pendant qu'il monte, comme
+ * s'il remontait de derrière une règle.
+ *
+ * ⚠ LES INSETS NÉGATIFS NE SONT PAS DE LA COQUETTERIE.
+ *
+ * `inset()` découpe sur la boîte de l'élément. Trois choses dépassent de cette
+ * boîte sur ce site, et un `inset(0 0 0 0)` en fin d'animation les couperait
+ * définitivement, `forwards` aidant :
+ *
+ *   — les `drop-shadow` des titres du hero et du showcase ;
+ *   — le débord de l'italique de Cormorant, sur « ARTISANS DU BÂTIMENT » ;
+ *   — les jambages descendants, sur à peu près tout.
+ *
+ * D'où -40 % en haut et en bas, -20 % à gauche et à droite : la zone visible
+ * finale est plus grande que l'élément, donc elle ne coupe rien. Les mêmes
+ * valeurs figurent dans les deux images-clés pour que seule la valeur du bas
+ * soit interpolée — c'est elle qui fait le rideau.
+ */
+@keyframes rideau {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    clip-path: inset(-40% -20% 100% -20%);
+    transform: translateY(0.3em);
+  }
+  60% {
+    opacity: 1;
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    clip-path: inset(-40% -20% -40% -20%);
+    transform: translateY(0);
   }
 }
 
+/* Déclenchées au chargement : le premier écran, qu'on ne peut pas attendre. */
 .hero-fade-up {
-  animation: hero-fade-up 0.9s var(--ease-rideau) both;
+  animation: hero-fade-up 0.9s var(--ease-rideau) var(--retard, 0ms) both;
+}
+.rideau-charge {
+  animation: rideau 1.1s var(--ease-rideau) var(--retard, 0ms) both;
 }
 
+/* Déclenchées par effets.js quand l'élément entre dans le champ. */
 .reveal.revealed {
-  animation: reveal-up 0.8s var(--ease-rideau) forwards;
+  animation: reveal-up 0.8s var(--ease-rideau) var(--retard, 0ms) forwards;
 }
-
-.reveal-scale.revealed {
-  animation: reveal-scale 1s var(--ease-rideau) forwards;
+.rideau.revealed {
+  animation: rideau 1.1s var(--ease-rideau) var(--retard, 0ms) forwards;
 }
 
 /*
- * Point important : `.reveal { opacity: 0 }` n'est appliqué QUE si le navigateur
- * peut exécuter du script. Sans ce garde-fou, un visiteur sans JavaScript — ou un
+ * Point important : l'état masqué n'est appliqué QUE si le navigateur peut
+ * exécuter du script. Sans ce garde-fou, un visiteur sans JavaScript — ou un
  * robot d'indexation qui n'exécute pas le script — verrait une page entièrement
  * vide. Le contenu prime toujours sur l'effet.
+ *
+ * `.rideau-charge` n'y figure pas : c'est une animation de chargement, son
+ * `both` pose lui-même l'état de départ, et elle part sans rien attendre.
+ *
+ * ⚠⚠ NE JAMAIS METTRE LE `clip-path` DU RIDEAU DANS CE BLOC. C'EST UN BLOCAGE
+ * CIRCULAIRE, ET IL EST SILENCIEUX.
+ *
+ * `.rideau` a d'abord été masqué par son découpage de départ, ce qui semblait
+ * plus juste que de doubler avec une opacité. Résultat : les six titres au
+ * rideau du site — TROIS, CHANTIERS, « Site orienté devis », « Comment ça se
+ * passe », Q&R, la citation — ne sont jamais apparus.
+ *
+ * La raison tient en une phrase : Chrome applique le `clip-path` de l'élément
+ * quand il calcule son intersection avec la fenêtre. Vérifié au navigateur, sur
+ * un carré rouge de 200 px posé en plein écran :
+ *
+ *     sans clip-path                     → isIntersecting: true,  ratio: 1
+ *     clip-path: inset(0 0 100% 0)       → isIntersecting: false, ratio: 0
+ *
+ * Un élément découpé à zéro est donc invisible POUR L'OBSERVATEUR qui devait le
+ * dévoiler. Il attend d'entrer dans le champ pour se découvrir, et il ne peut
+ * pas y entrer tant qu'il est découvert : le titre reste masqué pour toujours.
+ *
+ * Rien ne le signale — pas d'erreur, pas d'avertissement, et le développement
+ * comme la production se comportent pareil. Seul un relevé des éléments restés
+ * sans `.revealed` après un défilement complet le montre.
+ *
+ * D'où la répartition : l'OPACITÉ masque au repos, le DÉCOUPAGE n'existe que
+ * pendant l'animation, posé par son image-clé de départ. L'observateur voit
+ * donc toujours une boîte normale — une opacité nulle, elle, ne le gêne pas.
  */
 @media (scripting: enabled) {
   .reveal,
-  .reveal-scale {
+  .rideau {
     opacity: 0;
+  }
+}
+
+/* ---- La frise du déroulement ---- */
+
+/*
+ * La barre de progression est liée au défilement, pas jouée une fois : elle dit
+ * où on en est dans le processus, pas « il y a une animation ici ». effets.js
+ * n'écrit qu'un nombre entre 0 et 1 dans `--progression` ; c'est le CSS qui
+ * choisit sur quel axe l'appliquer, parce que la frise est verticale sous
+ * 1 024 px et horizontale au-dessus.
+ *
+ * ⚠ Elle est volontairement BLANCHE et pas orange. L'orange de la section a un
+ * sens précis — « vous intervenez à cette étape » — et il n'en reste rien s'il
+ * sert aussi à colorer la progression.
+ */
+.remplissage-frise {
+  transform: scaleY(var(--progression, 0));
+  transform-origin: top;
+  /* 0,75 et pas 0,55 : l'axe ne fait qu'un pixel d'épaisseur, et à cette
+     finesse un blanc à demi transparent ne se distingue pas assez du trait
+     de fond (`--color-trait`, blanc à 14 %). */
+  background: rgba(255, 255, 255, 0.75);
+}
+
+@media (min-width: 1024px) {
+  .remplissage-frise {
+    transform: scaleX(var(--progression, 0));
+    transform-origin: left;
+  }
+}
+
+/*
+ * L'allumage des nœuds. `data-atteint` est posé par effets.js quand la barre
+ * dépasse le centre du nœud.
+ *
+ * ⚠ Aucune baisse d'opacité sur le texte des étapes, contrairement à ce que
+ * font la plupart des frises de ce genre. Les paragraphes sont déjà à 62 %
+ * d'alpha sur un fond quasi noir : les assombrir encore les ferait passer sous
+ * le seuil de contraste, et un visiteur qui arrive au milieu de la section
+ * verrait cinq étapes sur six en fantômes. Seul le nœud change d'état.
+ */
+.noeud-frise {
+  transition:
+    border-color 0.55s var(--ease-rideau),
+    box-shadow 0.55s var(--ease-rideau);
+}
+
+.etape-frise[data-atteint] .noeud-frise {
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.etape-frise[data-client][data-atteint] .noeud-frise {
+  box-shadow: 0 0 0 5px rgba(242, 106, 27, 0.12);
+  border-color: var(--color-signal-vif);
+}
+
+/* ---- La barre de navigation ---- */
+
+/*
+ * ⚠ L'ÉTAT DENSE EST LE DÉFAUT, ET L'ÉTAT TRANSPARENT EST L'EXCEPTION.
+ *
+ * C'est l'inverse de ce qu'on écrit d'habitude, et c'est délibéré. La pastille
+ * était à 1 % d'opacité et 4 px de flou : magnifique sur la vidéo sombre du
+ * premier écran, illisible partout ailleurs. Sur le fond brique, le texte des
+ * sections passe littéralement au travers ; sur le ciel clair de la citation,
+ * les libellés blancs se noient dans les nuages.
+ *
+ * Si l'état lisible dépendait d'une classe ajoutée par effets.js, une panne de
+ * script rendrait la navigation illisible sur les trois quarts du site. En
+ * partant du dense, le pire cas est une barre un peu moins jolie sur le hero.
+ * Le script n'a plus qu'à retirer de l'opacité là où le fond est sûr.
+ */
+.barre {
+  /*
+   * ⚠ LA LISIBILITÉ NE DOIT PAS DÉPENDRE DU FLOU. 88 % d'opacité suffisent à
+   * eux seuls à arrêter le texte des sections ; le `backdrop-filter` n'ajoute
+   * que l'aspect verre par-dessus.
+   *
+   * 88 et pas 78 : à 78, le flou brouillait bien les questions de la Q&R mais
+   * en laissait une trace grise sous les libellés. Un fond de barre se juge sur
+   * le pire fond du site, pas sur le plus flatteur.
+   *
+   * Ce n'est pas de la prudence gratuite : le flou avait purement et simplement
+   * disparu à la minification (voir le bloc `.liquid-glass`), et le défaut ne se
+   * voyait qu'en production. Un fond à 55 %, qui comptait sur le flou pour finir
+   * le travail, laissait passer les questions de la Q&R au travers de la
+   * pastille.
+   */
+  background: rgba(8, 7, 6, 0.88);
+  backdrop-filter: blur(16px) saturate(1.4);
+  transition:
+    background-color 0.6s var(--ease-rideau),
+    backdrop-filter 0.6s var(--ease-rideau);
+}
+
+.barre.barre-claire {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(4px);
+}
+
+/* ---- Le premier écran ---- */
+
+/*
+ * Poussée lente sur la vidéo. 22 s pour 4 % d'échelle : c'est sous le seuil où
+ * l'œil identifie un mouvement, mais le plan cesse d'être une image fixe.
+ * `both` et une seule itération — au-delà, ça devient un zoom, pas une
+ * respiration.
+ */
+@keyframes hero-poussee {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+
+.hero-poussee {
+  animation: hero-poussee 22s linear both;
+  transform-origin: center;
+}
+
+/*
+ * Le bloc de texte s'efface pendant qu'on quitte le premier écran.
+ *
+ * Écrit avec une timeline de défilement CSS plutôt qu'en JavaScript, pour une
+ * raison précise : l'animation tourne alors hors du fil principal. C'est le
+ * seul endroit de la page où une saccade se verrait vraiment — plein écran,
+ * au tout premier geste du visiteur.
+ *
+ * ⚠ Le `@supports` n'est pas une politesse. Là où `animation-timeline` n'existe
+ * pas, la règle entière est ignorée et le hero reste simplement fixe, ce qui
+ * est le comportement d'aujourd'hui. Sans le garde, un navigateur qui
+ * comprendrait `animation` mais pas `animation-timeline` jouerait l'animation
+ * comme une animation normale — c'est-à-dire ferait disparaître le titre du
+ * site en une seconde, au chargement.
+ */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-sortie {
+      animation-name: hero-sortie;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 80vh;
+    }
+  }
+}
+
+@keyframes hero-sortie {
+  to {
+    opacity: 0;
+    transform: translateY(-12%);
   }
 }
 
@@ -333,9 +584,21 @@
     scroll-behavior: auto;
   }
   .reveal,
-  .reveal-scale,
-  .hero-fade-up {
+  .rideau,
+  .rideau-charge,
+  .hero-fade-up,
+  .hero-sortie {
     opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  /*
+   * La poussée de la vidéo est neutralisée à part : la règle générique
+   * ci-dessous ramènerait sa durée à 0,01 ms, ce qui la ferait sauter d'un coup
+   * à son échelle finale au lieu de ne rien faire.
+   */
+  .hero-poussee {
     animation: none !important;
     transform: none !important;
   }

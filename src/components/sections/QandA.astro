@@ -77,25 +77,26 @@ const colonneDroite = [
  */
 
 /*
- * Décalages en cascade, continus d'une colonne à l'autre pour que les dix
- * entrées ne montent pas par paires.
+ * ⚠ PAS DE CASCADE ICI, ET C'EST LE CORRECTIF D'UN DÉFAUT RÉEL.
  *
- * Ce sont des littéraux et pas des chaînes construites : Tailwind analyse les
- * fichiers source comme du texte, une classe assemblée à l'exécution ne serait
- * jamais générée.
+ * Les dix articles portaient un décalage croissant, de 120 à 1 200 ms, pour que
+ * les entrées ne montent pas par paires. L'intention était bonne, le résultat
+ * ne pouvait pas suivre : chaque article est observé POUR LUI-MÊME, donc son
+ * délai était décompté à partir de SON entrée dans le champ, pas de celle du
+ * groupe. La dixième question laissait un trou d'une seconde et deux dixièmes à
+ * l'écran avant d'apparaître.
+ *
+ * Une cascade suppose que tout le groupe entre d'un coup. Cette grille fait deux
+ * écrans de haut : c'est exactement le cas où elle n'a pas de sens.
+ *
+ * Les paires ne montent pas ensemble pour autant, et ce n'est pas un hasard : la
+ * colonne de droite porte `md:mt-24`, donc ses articles sont décalés de six rem
+ * vers le bas et entrent après leurs voisins de gauche. C'est la mise en page
+ * qui produit l'alternance, gratuitement et à toutes les vitesses de défilement.
+ *
+ * (Le décalage n'a d'ailleurs jamais eu lieu : `[animation-delay:…]` était
+ * écrasé par le raccourci `animation:` de `.reveal.revealed`. Voir global.css.)
  */
-const delais = [
-  '[animation-delay:120ms]',
-  '[animation-delay:240ms]',
-  '[animation-delay:360ms]',
-  '[animation-delay:480ms]',
-  '[animation-delay:600ms]',
-  '[animation-delay:720ms]',
-  '[animation-delay:840ms]',
-  '[animation-delay:960ms]',
-  '[animation-delay:1080ms]',
-  '[animation-delay:1200ms]',
-];
 ---
 
 <div class="relative">
@@ -104,7 +105,7 @@ const delais = [
     class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[50vh] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
   >
     <h2
-      class="reveal font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
+      class="rideau font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
     >
       <span>Q</span>
       <span class="text-xl italic text-white/80 sm:text-2xl md:text-3xl lg:text-4xl">
@@ -116,8 +117,8 @@ const delais = [
     <div class="relative z-20 mx-auto mt-16 grid max-w-6xl gap-10 md:grid-cols-2 md:gap-16 lg:gap-20">
       <div class="space-y-10 lg:space-y-14">
         {
-          colonneGauche.map((item, i) => (
-            <article class:list={['reveal', delais[i]]}>
+          colonneGauche.map((item) => (
+            <article class="reveal">
               <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                 {item.q}
               </h3>
@@ -131,8 +132,8 @@ const delais = [
 
       <div class="space-y-10 md:mt-24 lg:space-y-14">
         {
-          colonneDroite.map((item, i) => (
-            <article class:list={['reveal', delais[i + 5]]}>
+          colonneDroite.map((item) => (
+            <article class="reveal">
               <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                 {item.q}
               </h3>
