@@ -572,6 +572,29 @@
   }
 }
 
+/* ---- Survol directionnel ---- */
+
+/*
+ * La tuile entre par le bord d'où vient le curseur et ressort par celui où il
+ * s'en va. C'est ce qui distingue l'effet d'un simple fond au survol : le
+ * mouvement suit la main au lieu de la contredire.
+ *
+ * effets.js pose le point de départ (`initSurvolDirectionnel`) ; le CSS ne
+ * fournit que l'état de repos et la course. Le point de départ écrit ici,
+ * `translateY(-100%)`, ne sert qu'avant le premier survol — ensuite c'est le
+ * script qui le repose à chaque fois, selon le bord franchi.
+ *
+ * L'assouplissement est `--ease-rideau` et non le `cubic-bezier(.16,1,.3,1)` de
+ * la ressource d'origine : les deux courbes sont des sorties exponentielles
+ * quasi superposables, et le site a déjà son jeton.
+ */
+.survol-tuile {
+  background: var(--color-brique-haute);
+  transform: translateY(-100%);
+  transition: transform 0.5s var(--ease-rideau);
+  will-change: transform;
+}
+
 /* ---- Le passage d'une page à l'autre ---- */
 
 /*
@@ -673,6 +696,25 @@
   ::view-transition-new(*),
   [data-astro-transition-fallback] {
     animation: none !important;
+  }
+
+  /*
+   * La tuile de survol garde un retour visuel, mais en fondu : effets.js ne
+   * s'attache pas sous mouvement réduit, donc plus aucun style en ligne ne vient
+   * la déplacer, et c'est `:hover` seul qui la fait apparaître.
+   *
+   * ⚠ La durée survit à la règle universelle ci-dessous parce que ce sélecteur
+   * est plus spécifique qu'elle : entre deux déclarations `!important`, c'est la
+   * spécificité qui tranche. Un fondu d'opacité ne relève pas de ce que
+   * `prefers-reduced-motion` cherche à éviter, contrairement au glissement.
+   */
+  .survol-tuile {
+    opacity: 0;
+    transform: none !important;
+    transition: opacity 0.2s !important;
+  }
+  [data-survol-item]:hover .survol-tuile {
+    opacity: 1;
   }
 
   *,

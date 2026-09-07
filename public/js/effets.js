@@ -459,6 +459,106 @@ function initBarre() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Survol directionnel                                                        */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Où poser la tuile avant qu'elle n'entre, selon le bord franchi par le
+ * curseur. Elle sort ensuite par le bord où la main s'en va, ce qui est tout
+ * l'intérêt : un fond au survol qui apparaît toujours du même côté contredit le
+ * geste une fois sur deux.
+ */
+const DEPARTS_TUILE = {
+  haut: 'translateY(-100%)',
+  bas: 'translateY(100%)',
+  gauche: 'translateX(-100%)',
+  droite: 'translateX(100%)',
+};
+
+/*
+ * ⚠ DEUX GARDES AVANT DE S'ATTACHER, ET LE SECOND N'EST PAS DANS LA RESSOURCE
+ * D'ORIGINE.
+ *
+ * `(hover: hover)` écarte les appareils sans survol réel. Sur un téléphone,
+ * `mouseenter` est bien émis à la première touche — mais `mouseleave` ne vient
+ * qu'au tap suivant, ailleurs. La tuile resterait donc allumée sous le doigt,
+ * puis sous la question d'à côté. Sur une cible qui lit ce site au téléphone,
+ * ça ne pouvait pas rester.
+ */
+function initSurvolDirectionnel() {
+  if (MOUVEMENT_DOUX.matches) return null;
+  if (!window.matchMedia('(hover: hover)').matches) return null;
+
+  const conteneurs = [...document.querySelectorAll('[data-survol-directionnel]')];
+  if (!conteneurs.length) return null;
+
+  const detacher = [];
+
+  /** Le bord le plus proche du point où le curseur a franchi la boîte. */
+  const bord = (evenement, item, axe) => {
+    const { left, top, width, height } = item.getBoundingClientRect();
+    const x = evenement.clientX - left;
+    const y = evenement.clientY - top;
+
+    if (axe === 'y') return y < height / 2 ? 'haut' : 'bas';
+    if (axe === 'x') return x < width / 2 ? 'gauche' : 'droite';
+
+    const distances = { haut: y, droite: width - x, bas: height - y, gauche: x };
+    return Object.entries(distances).reduce((a, b) => (a[1] < b[1] ? a : b))[0];
+  };
+
+  for (const conteneur of conteneurs) {
+    const axe = conteneur.dataset.survolDirectionnel || 'tout';
+
+    for (const item of conteneur.querySelectorAll('[data-survol-item]')) {
+      const tuile = item.querySelector('[data-survol-tuile]');
+      if (!tuile) continue;
+
+      const entrer = (evenement) => {
+        const cote = bord(evenement, item, axe);
+
+        /*
+         * ⚠ `void tuile.offsetHeight` N'EST PAS UNE LIGNE MORTE.
+         *
+         * Lire une propriété de disposition force le navigateur à recalculer
+         * sur-le-champ. Sans elle, il regrouperait les deux écritures de
+         * `transform` dans le même cycle, ne verrait que la dernière, et la
+         * tuile apparaîtrait à sa place finale sans jamais glisser.
+         *
+         * La transition est coupée le temps de poser le départ, pour que ce
+         * repositionnement ne s'anime pas lui aussi.
+         */
+        tuile.style.transition = 'none';
+        tuile.style.transform = DEPARTS_TUILE[cote];
+        void tuile.offsetHeight;
+        tuile.style.transition = '';
+        tuile.style.transform = 'translate(0, 0)';
+
+        item.dataset.survolEtat = `entree-${cote}`;
+      };
+
+      const sortir = (evenement) => {
+        const cote = bord(evenement, item, axe);
+        item.dataset.survolEtat = `sortie-${cote}`;
+        tuile.style.transform = DEPARTS_TUILE[cote];
+      };
+
+      item.addEventListener('mouseenter', entrer);
+      item.addEventListener('mouseleave', sortir);
+
+      detacher.push(() => {
+        item.removeEventListener('mouseenter', entrer);
+        item.removeEventListener('mouseleave', sortir);
+      });
+    }
+  }
+
+  return () => {
+    for (const f of detacher) f();
+  };
+}
+
+/* ------------------------------------------------------------------------- */
 /* Parallaxe                                                                  */
 /* ------------------------------------------------------------------------- */
 
@@ -563,6 +663,7 @@ function initialiser() {
     initRevelations(),
     initFrise(),
     initBarre(),
+    initSurvolDirectionnel(),
     initParallaxe(),
     initVideoHero(),
   ].filter(Boolean);
