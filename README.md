@@ -271,12 +271,13 @@ fichier à éditer.
 
 ## Décisions structurantes
 
-**Sortie statique, deux scripts, 18 Ko gzip en tout.** Le site vend du
+**Sortie statique, deux scripts, 20,5 Ko gzip en tout.** Le site vend du
 référencement local : il ne peut pas dépendre du client pour afficher son
-contenu. `public/js/effets.js` (12,5 Ko gzip — il n'est pas minifié, voir
+contenu. `public/js/effets.js` (14,9 Ko gzip — il n'est pas minifié, voir
 plus bas, et c'est surtout du commentaire) porte les révélations, la frise du
-déroulement, la parallaxe, la barre de navigation et la validation du
-formulaire ; `<ClientRouter />` d'Astro (5,6 Ko) enchaîne les pages en fondu. Tout est décoratif, à une exception près : la
+déroulement, la parallaxe, la barre de navigation, le curseur magnétique et la
+validation du formulaire ; `<ClientRouter />` d'Astro (5,6 Ko) enchaîne les
+pages en fondu. Tout est décoratif, à une exception près : la
 densité de la barre de navigation, qui relève de la lisibilité — d'où un CSS qui
 part de l'état lisible et un script qui ne fait que l'éclaircir.
 
@@ -284,6 +285,15 @@ Aucune dépendance d'animation. GSAP, ScrollTrigger, Lenis et Barba ont été
 regardés puis écartés : ~40 Ko pour la première paire, un `<head>` à recoller à
 la main pour la seconde, et un scroll à inertie qui se paie cher sur les
 téléphones de la cible.
+
+Trois ressources Osmo ont été reprises, et les trois ont dû être remotorisées
+pour la même raison — leurs dépendances sont servies par un CDN, que
+`script-src 'self'` refuse. Le libellé des boutons (« Button 004 ») se passe de
+SplitText, la validation du formulaire n'a jamais eu besoin de JavaScript tiers,
+et le curseur magnétique remplace GSAP et son greffon Flip par une boucle
+amortie et un FLIP écrit à la main : mesurer avant, déplacer, mesurer après,
+animer l'écart. Dans les trois cas, la ressource servait de plan, pas de
+bibliothèque.
 
 **Le contenu ne dépend jamais du script.** `.reveal { opacity: 0 }` n'est appliqué
 que sous `@media (scripting: enabled)`. Sans JavaScript, sans

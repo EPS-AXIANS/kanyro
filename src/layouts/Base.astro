@@ -232,6 +232,21 @@ const csp = [
     <Footer variante={variante} />
 
     {/*
+      Le point du curseur magnétique.
+
+      En fin de <body>, hors du <main> : il passe ainsi au-dessus du reste sans
+      qu'aucun z-index ait à grimper. `aria-hidden` parce que c'est un ornement,
+      et il ne remplace jamais le curseur natif — il s'y ajoute.
+
+      Sans script, sans souris, ou sous `prefers-reduced-motion`, le CSS le
+      laisse invisible et il ne coûte rien. Voir `initCurseurMagnetique` dans
+      effets.js.
+    */}
+    <div class="curseur" data-curseur aria-hidden="true">
+      <div class="curseur-fond" data-curseur-fond></div>
+    </div>
+
+    {/*
       Servi depuis public/ et chargé par `src`, volontairement.
 
       Astro inline les petits scripts dans le HTML, et un script inline est
