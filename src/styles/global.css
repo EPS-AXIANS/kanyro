@@ -26,6 +26,18 @@
   --color-trait: rgba(255, 255, 255, 0.14);
 
   /*
+   * Le seul vert de la maison, et il n'a qu'un emploi : la coche de validation
+   * d'un champ du formulaire.
+   *
+   * Il a fallu l'introduire parce que `--color-signal` porte déjà l'erreur — et
+   * signaler « c'est bon » avec la couleur qui dit « ça ne va pas » deux lignes
+   * plus haut ne se rattrape pas par la forme de l'icône. Volontairement rabattu
+   * vers le gris : un vert saturé sur ce fond chaud aurait l'air d'être tombé
+   * d'un autre site.
+   */
+  --color-valide: #5fbd88;
+
+  /*
    * Typographie — nommée par rôle, comme la palette juste au-dessus. Une classe
    * `font-inter` qui ne pointe plus sur Inter est un piège à six mois ; un
    * changement de fonte se fait ici et nulle part ailleurs.
@@ -65,7 +77,31 @@
   --text-titre: clamp(2.25rem, 1.2rem + 4.2vw, 4.5rem);
   --text-sous-titre: clamp(1.25rem, 1rem + 1.1vw, 2.25rem);
 
+  /*
+   * Rayon des boutons. Il valait 50 %, ce qui ne donne pas une pastille mais une
+   * ELLIPSE : à cette valeur, les bords haut et bas sont bombés eux aussi, et le
+   * bouton n'a plus une seule ligne droite. C'est joli et c'est un parti pris de
+   * gabarit ; ça n'est pas sérieux.
+   *
+   * 2,5 em donne un stadium — extrémités pleinement arrondies, dessus et dessous
+   * parfaitement droits. La valeur vient de la ressource dont l'échange de
+   * lettres est repris, et elle est en `em` : elle suit donc le corps du texte,
+   * qui monte d'un cran au-delà de 640 px, sans qu'il y ait deux valeurs à tenir.
+   *
+   * Déclaré ici en `--radius-*` : Tailwind en tire l'utilitaire `rounded-bouton`,
+   * ce qui évite de répéter la valeur dans les deux boutons composés à la main
+   * (celui du hero, celui du showcase).
+   */
+  --radius-bouton: 2.5em;
+
   --ease-rideau: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /*
+   * Assouplissement des lettres du bouton. Départ plus mordant que
+   * `--ease-rideau` et arrivée aussi calme : c'est ce qui donne l'impression
+   * que les lettres sont chassées plutôt que déplacées.
+   */
+  --ease-bouton: cubic-bezier(0.675, 0.15, 0.1, 1);
 }
 
 @layer base {
@@ -153,8 +189,20 @@
      ici, pas dans sept fichiers. */
 
   .bouton-primaire {
-    display: inline-block;
-    border-radius: 50%;
+    /*
+     * `inline-grid` et non `inline-block` : les deux copies du libellé — celle
+     * qu'on voit et celle qui la remplace au survol — occupent la MÊME cellule
+     * de grille et se superposent donc exactement, sans positionnement absolu
+     * ni hauteur à deviner. C'est ce qui permet à l'échange de se faire sans
+     * que le bouton change de taille.
+     *
+     * Sans script le bouton n'a qu'un seul enfant, un nœud de texte, qui
+     * devient l'unique élément de grille : le rendu est identique à celui de
+     * `inline-block`.
+     */
+    display: inline-grid;
+    justify-items: center;
+    border-radius: var(--radius-bouton);
     background: var(--color-texte);
     color: var(--color-fond);
     padding: 1rem 2.5rem;
@@ -175,7 +223,7 @@
 
   .bouton-secondaire {
     display: inline-block;
-    border-radius: 50%;
+    border-radius: var(--radius-bouton);
     border: 1px solid rgba(255, 255, 255, 0.5);
     color: var(--color-texte);
     padding: 1rem 2.5rem;
@@ -233,11 +281,24 @@
   }
 
   /* ---- Liquid glass ---- */
+  /*
+   * ⚠ NE PAS RAJOUTER `-webkit-backdrop-filter` ICI. Il y était, et il ANNULAIT
+   * le flou au lieu de l'élargir.
+   *
+   * Lightning CSS, qui minifie la feuille, normalise les paires
+   * préfixée/standard selon ses cibles : voyant les deux, il ne gardait que
+   * `-webkit-backdrop-filter`. Or Chrome a cessé d'honorer cet alias — vérifié
+   * au navigateur : posé seul, il donne `backdrop-filter: none`. La pastille de
+   * navigation et le bouton du hero n'ont donc jamais rien flouté en
+   * production, alors que le développement, non minifié, le montrait.
+   *
+   * En n'écrivant que la propriété standard, c'est le minifieur qui ajoute le
+   * préfixe s'il le juge nécessaire — et il garde alors les deux.
+   */
   .liquid-glass {
     background: rgba(255, 255, 255, 0.01);
     background-blend-mode: luminosity;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     border: none;
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
     position: relative;
@@ -269,6 +330,30 @@
 }
 
 /* ---- Animations ---- */
+
+/*
+ * ⚠ LE DÉLAI SE MET DANS `--retard`, JAMAIS EN `animation-delay` À CÔTÉ.
+ *
+ * Ce bloc est écrit hors `@layer`, et les utilitaires Tailwind vivent dans
+ * `@layer utilities`. En CSS, une déclaration hors couche l'emporte sur une
+ * déclaration en couche, quelle que soit la spécificité. Or le raccourci
+ * `animation:` remet implicitement `animation-delay` à `0s`.
+ *
+ * Conséquence, mesurée au navigateur avant d'être corrigée : les 46 classes
+ * `[animation-delay:120ms]` du site étaient toutes écrasées à l'instant précis
+ * où `.revealed` arrivait. Les cascades de la Q&R, de l'offre, des métiers et
+ * du hero n'ont jamais existé — tout montait d'un bloc. Le symptôme est
+ * invisible à l'œil : ça ressemble à une animation qui fonctionne.
+ *
+ * D'où `var(--retard, 0ms)` À L'INTÉRIEUR du raccourci. `--retard` est une
+ * propriété personnalisée : rien d'autre ne la déclare, donc aucune couche ne
+ * peut l'écraser. Elle se pose soit dans le balisage — `[--retard:250ms]`,
+ * utilitaire de propriété arbitraire — soit par effets.js pour les cascades.
+ *
+ * Elle HÉRITE, et c'est ce qui fait tenir les cascades : poser `--retard` sur
+ * un `<li>` décale du même temps tout ce qu'il contient, sans le répéter.
+ */
+
 @keyframes hero-fade-up {
   from {
     opacity: 0;
@@ -291,40 +376,729 @@
   }
 }
 
-@keyframes reveal-scale {
+/*
+ * Le rideau — ce que `--ease-rideau` annonçait depuis le début sans que rien ne
+ * le fasse. Le texte se découvre du haut vers le bas pendant qu'il monte, comme
+ * s'il remontait de derrière une règle.
+ *
+ * ⚠ LES INSETS NÉGATIFS NE SONT PAS DE LA COQUETTERIE.
+ *
+ * `inset()` découpe sur la boîte de l'élément. Trois choses dépassent de cette
+ * boîte sur ce site, et un `inset(0 0 0 0)` en fin d'animation les couperait
+ * définitivement, `forwards` aidant :
+ *
+ *   — les `drop-shadow` des titres du hero et du showcase ;
+ *   — le débord de l'italique de Cormorant, sur « ARTISANS DU BÂTIMENT » ;
+ *   — les jambages descendants, sur à peu près tout.
+ *
+ * D'où -40 % en haut et en bas, -20 % à gauche et à droite : la zone visible
+ * finale est plus grande que l'élément, donc elle ne coupe rien. Les mêmes
+ * valeurs figurent dans les deux images-clés pour que seule la valeur du bas
+ * soit interpolée — c'est elle qui fait le rideau.
+ */
+@keyframes rideau {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    clip-path: inset(-40% -20% 100% -20%);
+    transform: translateY(0.3em);
+  }
+  60% {
+    opacity: 1;
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    clip-path: inset(-40% -20% -40% -20%);
+    transform: translateY(0);
   }
 }
 
+/* Déclenchées au chargement : le premier écran, qu'on ne peut pas attendre. */
 .hero-fade-up {
-  animation: hero-fade-up 0.9s var(--ease-rideau) both;
+  animation: hero-fade-up 0.9s var(--ease-rideau) var(--retard, 0ms) both;
+}
+.rideau-charge {
+  animation: rideau 1.1s var(--ease-rideau) var(--retard, 0ms) both;
 }
 
+/* Déclenchées par effets.js quand l'élément entre dans le champ. */
 .reveal.revealed {
-  animation: reveal-up 0.8s var(--ease-rideau) forwards;
+  animation: reveal-up 0.8s var(--ease-rideau) var(--retard, 0ms) forwards;
 }
-
-.reveal-scale.revealed {
-  animation: reveal-scale 1s var(--ease-rideau) forwards;
+.rideau.revealed {
+  animation: rideau 1.1s var(--ease-rideau) var(--retard, 0ms) forwards;
 }
 
 /*
- * Point important : `.reveal { opacity: 0 }` n'est appliqué QUE si le navigateur
- * peut exécuter du script. Sans ce garde-fou, un visiteur sans JavaScript — ou un
+ * Point important : l'état masqué n'est appliqué QUE si le navigateur peut
+ * exécuter du script. Sans ce garde-fou, un visiteur sans JavaScript — ou un
  * robot d'indexation qui n'exécute pas le script — verrait une page entièrement
  * vide. Le contenu prime toujours sur l'effet.
+ *
+ * `.rideau-charge` n'y figure pas : c'est une animation de chargement, son
+ * `both` pose lui-même l'état de départ, et elle part sans rien attendre.
+ *
+ * ⚠⚠ NE JAMAIS METTRE LE `clip-path` DU RIDEAU DANS CE BLOC. C'EST UN BLOCAGE
+ * CIRCULAIRE, ET IL EST SILENCIEUX.
+ *
+ * `.rideau` a d'abord été masqué par son découpage de départ, ce qui semblait
+ * plus juste que de doubler avec une opacité. Résultat : les six titres au
+ * rideau du site — TROIS, CHANTIERS, « Site orienté devis », « Comment ça se
+ * passe », Q&R, la citation — ne sont jamais apparus.
+ *
+ * La raison tient en une phrase : Chrome applique le `clip-path` de l'élément
+ * quand il calcule son intersection avec la fenêtre. Vérifié au navigateur, sur
+ * un carré rouge de 200 px posé en plein écran :
+ *
+ *     sans clip-path                     → isIntersecting: true,  ratio: 1
+ *     clip-path: inset(0 0 100% 0)       → isIntersecting: false, ratio: 0
+ *
+ * Un élément découpé à zéro est donc invisible POUR L'OBSERVATEUR qui devait le
+ * dévoiler. Il attend d'entrer dans le champ pour se découvrir, et il ne peut
+ * pas y entrer tant qu'il est découvert : le titre reste masqué pour toujours.
+ *
+ * Rien ne le signale — pas d'erreur, pas d'avertissement, et le développement
+ * comme la production se comportent pareil. Seul un relevé des éléments restés
+ * sans `.revealed` après un défilement complet le montre.
+ *
+ * D'où la répartition : l'OPACITÉ masque au repos, le DÉCOUPAGE n'existe que
+ * pendant l'animation, posé par son image-clé de départ. L'observateur voit
+ * donc toujours une boîte normale — une opacité nulle, elle, ne le gêne pas.
  */
 @media (scripting: enabled) {
   .reveal,
-  .reveal-scale {
+  .rideau {
     opacity: 0;
   }
+}
+
+/* ---- La frise du déroulement ---- */
+
+/*
+ * La barre de progression est liée au défilement, pas jouée une fois : elle dit
+ * où on en est dans le processus, pas « il y a une animation ici ». effets.js
+ * n'écrit qu'un nombre entre 0 et 1 dans `--progression`.
+ *
+ * ⚠ Elle est volontairement BLANCHE et pas orange. L'orange de la section a un
+ * sens précis — « vous intervenez à cette étape » — et il n'en reste rien s'il
+ * sert aussi à colorer la progression. C'est d'autant plus vrai depuis que la
+ * frise est verticale : la couleur y porte SEULE cette information, la position
+ * ne la double plus.
+ */
+.remplissage-frise {
+  transform: scaleY(var(--progression, 0));
+  transform-origin: top;
+  /* 0,75 et pas 0,55 : l'axe ne fait qu'un pixel d'épaisseur, et à cette
+     finesse un blanc à demi transparent ne se distingue pas assez du trait
+     de fond (`--color-trait`, blanc à 14 %). */
+  background: rgba(255, 255, 255, 0.75);
+}
+
+
+/*
+ * L'allumage des nœuds. `data-atteint` est posé par effets.js quand la barre
+ * dépasse le centre du nœud.
+ *
+ * ⚠ Aucune baisse d'opacité sur le texte des étapes, contrairement à ce que
+ * font la plupart des frises de ce genre. Les paragraphes sont déjà à 62 %
+ * d'alpha sur un fond quasi noir : les assombrir encore les ferait passer sous
+ * le seuil de contraste, et un visiteur qui arrive au milieu de la section
+ * verrait cinq étapes sur six en fantômes. Seul le nœud change d'état.
+ */
+.noeud-frise {
+  transition:
+    border-color 0.55s var(--ease-rideau),
+    box-shadow 0.55s var(--ease-rideau);
+}
+
+.etape-frise[data-atteint] .noeud-frise {
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.etape-frise[data-client][data-atteint] .noeud-frise {
+  box-shadow: 0 0 0 5px rgba(242, 106, 27, 0.12);
+  border-color: var(--color-signal-vif);
+}
+
+/* ---- La barre de navigation ---- */
+
+/*
+ * ⚠ L'ÉTAT DENSE EST LE DÉFAUT, ET L'ÉTAT TRANSPARENT EST L'EXCEPTION.
+ *
+ * C'est l'inverse de ce qu'on écrit d'habitude, et c'est délibéré. La pastille
+ * était à 1 % d'opacité et 4 px de flou : magnifique sur la vidéo sombre du
+ * premier écran, illisible partout ailleurs. Sur le fond brique, le texte des
+ * sections passe littéralement au travers ; sur le ciel clair de la citation,
+ * les libellés blancs se noient dans les nuages.
+ *
+ * Si l'état lisible dépendait d'une classe ajoutée par effets.js, une panne de
+ * script rendrait la navigation illisible sur les trois quarts du site. En
+ * partant du dense, le pire cas est une barre un peu moins jolie sur le hero.
+ * Le script n'a plus qu'à retirer de l'opacité là où le fond est sûr.
+ */
+.barre {
+  /*
+   * ⚠ LA LISIBILITÉ NE DOIT PAS DÉPENDRE DU FLOU. 88 % d'opacité suffisent à
+   * eux seuls à arrêter le texte des sections ; le `backdrop-filter` n'ajoute
+   * que l'aspect verre par-dessus.
+   *
+   * 88 et pas 78 : à 78, le flou brouillait bien les questions de la Q&R mais
+   * en laissait une trace grise sous les libellés. Un fond de barre se juge sur
+   * le pire fond du site, pas sur le plus flatteur.
+   *
+   * Ce n'est pas de la prudence gratuite : le flou avait purement et simplement
+   * disparu à la minification (voir le bloc `.liquid-glass`), et le défaut ne se
+   * voyait qu'en production. Un fond à 55 %, qui comptait sur le flou pour finir
+   * le travail, laissait passer les questions de la Q&R au travers de la
+   * pastille.
+   */
+  background: rgba(8, 7, 6, 0.88);
+  backdrop-filter: blur(16px) saturate(1.4);
+  transition:
+    background-color 0.6s var(--ease-rideau),
+    backdrop-filter 0.6s var(--ease-rideau);
+}
+
+.barre.barre-claire {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(4px);
+}
+
+/* ---- Le premier écran ---- */
+
+/*
+ * Poussée lente sur la vidéo. 22 s pour 4 % d'échelle : c'est sous le seuil où
+ * l'œil identifie un mouvement, mais le plan cesse d'être une image fixe.
+ * `both` et une seule itération — au-delà, ça devient un zoom, pas une
+ * respiration.
+ */
+@keyframes hero-poussee {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.04);
+  }
+}
+
+.hero-poussee {
+  animation: hero-poussee 22s linear both;
+  transform-origin: center;
+}
+
+/*
+ * Le bloc de texte s'efface pendant qu'on quitte le premier écran.
+ *
+ * Écrit avec une timeline de défilement CSS plutôt qu'en JavaScript, pour une
+ * raison précise : l'animation tourne alors hors du fil principal. C'est le
+ * seul endroit de la page où une saccade se verrait vraiment — plein écran,
+ * au tout premier geste du visiteur.
+ *
+ * ⚠ Le `@supports` n'est pas une politesse. Là où `animation-timeline` n'existe
+ * pas, la règle entière est ignorée et le hero reste simplement fixe, ce qui
+ * est le comportement d'aujourd'hui. Sans le garde, un navigateur qui
+ * comprendrait `animation` mais pas `animation-timeline` jouerait l'animation
+ * comme une animation normale — c'est-à-dire ferait disparaître le titre du
+ * site en une seconde, au chargement.
+ */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-sortie {
+      animation-name: hero-sortie;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 80vh;
+    }
+  }
+}
+
+@keyframes hero-sortie {
+  to {
+    opacity: 0;
+    transform: translateY(-12%);
+  }
+}
+
+/* ---- Le libellé des boutons ---- */
+
+/*
+ * Au survol, chaque lettre du libellé bascule vers le haut et disparaît pendant
+ * qu'une seconde copie arrive par le bas. Les lettres ne partent pas ensemble :
+ * leur retard et leur inclinaison suivent une courbe sinusoïdale calculée sur
+ * leur distance au centre du mot, si bien que le milieu part le premier et les
+ * extrémités s'envolent en dernier, penchées vers l'extérieur.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * L'animation est reprise telle quelle de la ressource Osmo « Button 004 » :
+ * elle est ENTIÈREMENT en CSS, y compris la courbe de retard, qui se calcule
+ * ici avec `sin()`.
+ *
+ * Ce qui a été refait, c'est le découpage du texte. La ressource le confie à
+ * GSAP et à son greffon SplitText, dont elle n'utilise QUE la capacité à
+ * envelopper chaque caractère dans un span et à y poser deux variables. Environ
+ * 40 Ko de dépendance — bloqués de toute façon par `script-src 'self'`, puisque
+ * servis par un CDN — pour une quinzaine de lignes. C'est `initBoutonsAnimes`
+ * dans effets.js qui s'en charge.
+ *
+ * ---- Les deux variables, et ce qu'elles veulent dire ----
+ *
+ *   --index  distance de la lettre au centre du mot, 0 au milieu.
+ *   --signe  la même distance, POSITIVE à gauche du centre et NÉGATIVE à
+ *            droite. C'est elle qui fait pencher et dériver les deux moitiés du
+ *            mot en sens opposés, comme si le libellé s'ouvrait.
+ *
+ * Les deux ont une valeur de repli, et ce n'est pas de la coquetterie : sans
+ * script, aucune n'est posée. `var(--index, 0)` fait alors basculer toutes les
+ * lettres ensemble, sans retard ni inclinaison. L'échange de texte a donc bien
+ * lieu, en plus sage. Une variable sans repli aurait rendu tout le calcul
+ * invalide, et les transitions avec.
+ *
+ * ⚠ NE PAS RENOMMER `--retard-lettre` EN `--retard`. `--retard` existe déjà
+ * dans ce fichier pour les délais de révélation, et il HÉRITE : le bouton du
+ * hero porte `[--retard:740ms]`, que les lettres capteraient au passage.
+ */
+.bouton-texte {
+  display: inline-grid;
+  /* Les espaces du libellé sont des lettres comme les autres, et un espace dans
+     une boîte `inline-block` s'effondre sans ceci. */
+  white-space: pre;
+}
+
+.bouton-texte > span {
+  grid-area: 1 / 1;
+  perspective: 10em;
+  transform-style: preserve-3d;
+}
+
+.bouton-lettre {
+  --t: calc(var(--index, 0) / max(var(--index-max, 1), 1));
+  --retard-lettre: calc(0.05s + sin(calc(var(--t) * 1.5deg)) * 2.9s);
+  --inclinaison: calc(
+    clamp(-1, var(--signe, 0), 1) * sin(calc(var(--t) * 30deg)) * -36deg
+  );
+  display: inline-block;
+}
+
+/*
+ * Position de départ de la copie qui attend : sous le bouton, couchée.
+ *
+ * ⚠ LES QUATRE VALEURS PASSENT PAR DES VARIABLES, ET CE N'EST PAS UN CAPRICE.
+ *
+ * La règle de survol plus bas doit ramener la copie à sa position neutre —
+ * `translate: 0 0 0` et `rotate: 1 0 0 0deg`. Écrites en clair, ces deux
+ * déclarations ÉTAIENT SUPPRIMÉES à la minification : Lightning CSS les
+ * reconnaît comme égales à la valeur initiale et les juge inutiles. Elles ne
+ * l'étaient pas du tout, puisqu'elles servaient à écraser la règle de repos
+ * ci-dessous. Symptôme mesuré : au survol, la copie devenait bien opaque mais
+ * restait 15 px sous le bouton, couchée à -72°.
+ *
+ * En ne changeant que des variables, la règle de survol ne contient plus aucune
+ * valeur que le minifieur puisse juger neutre, et les déclarations qui les
+ * consomment vivent ici, dans une seule règle qu'il ne touche pas.
+ *
+ * (Troisième fois que ce minifieur retire quelque chose de porteur : voir aussi
+ * `.liquid-glass` pour `backdrop-filter`, et `.hero-sortie` pour
+ * `animation-timeline` replié dans le raccourci.)
+ */
+.bouton-texte__survol .bouton-lettre {
+  --derive: 1;
+  --montee: 1.25em;
+  --bascule: -72deg;
+  --echelle: 0.65;
+  --tourne: var(--inclinaison);
+
+  translate: calc(var(--signe, 0) * var(--derive) * 0.125em) var(--montee) 0;
+  rotate: 1 0 0 var(--bascule);
+  transform: rotateZ(var(--tourne)) scale(var(--echelle));
+  opacity: 0;
+  transition:
+    transform 0.35s var(--ease-bouton),
+    translate 0.35s var(--ease-bouton),
+    rotate 0.35s var(--ease-bouton),
+    opacity 0.15s 0.1s ease-out;
+}
+
+.bouton-texte__defaut .bouton-lettre {
+  transition:
+    transform 0.325s var(--ease-bouton),
+    translate 0.425s var(--ease-bouton),
+    rotate 0.45s var(--ease-bouton),
+    opacity 0.15s ease-out;
+}
+
+/*
+ * ⚠ Les trois conditions sont celles de la ressource, et chacune sert.
+ * `hover`/`pointer` écartent le tactile, où la bascule resterait figée après une
+ * touche ; `prefers-reduced-motion` parle de lui-même. Hors de ces conditions,
+ * la copie de survol garde simplement sa position de repos et ne se voit jamais.
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .bouton-lettre {
+    will-change: transform, translate, rotate, opacity;
+  }
+
+  :is(.bouton-primaire, [data-bouton-anime]):is(:hover, :focus-visible)
+    .bouton-texte__defaut
+    .bouton-lettre {
+    translate: calc(var(--signe, 0) * 0.125em) -1.25em 0;
+    rotate: 1 0 0 72deg;
+    transform: rotateZ(var(--inclinaison)) scale(0.65);
+    opacity: 0;
+    transition:
+      transform 0.35s var(--retard-lettre) var(--ease-bouton),
+      translate 0.35s var(--retard-lettre) var(--ease-bouton),
+      rotate 0.35s var(--retard-lettre) var(--ease-bouton),
+      opacity 0.15s calc(var(--retard-lettre) + 0.1s) ease-out;
+  }
+
+  /* Ne flippe que des variables — voir le bloc de repos pour la raison. */
+  :is(.bouton-primaire, [data-bouton-anime]):is(:hover, :focus-visible)
+    .bouton-texte__survol
+    .bouton-lettre {
+    --derive: 0;
+    --montee: 0em;
+    --bascule: 0deg;
+    --echelle: 1;
+    --tourne: 0deg;
+    opacity: 1;
+    transition:
+      transform 0.325s calc(var(--retard-lettre) + 0.05s) var(--ease-bouton),
+      translate 0.425s calc(var(--retard-lettre) + 0.05s) var(--ease-bouton),
+      rotate 0.45s calc(var(--retard-lettre) + 0.05s) var(--ease-bouton),
+      opacity 0.15s calc(var(--retard-lettre) + 0.075s) ease-out;
+  }
+}
+
+/* ---- Survol directionnel ---- */
+
+/*
+ * La tuile entre par le bord d'où vient le curseur et ressort par celui où il
+ * s'en va. C'est ce qui distingue l'effet d'un simple fond au survol : le
+ * mouvement suit la main au lieu de la contredire.
+ *
+ * effets.js pose le point de départ (`initSurvolDirectionnel`) ; le CSS ne
+ * fournit que l'état de repos et la course. Le point de départ écrit ici,
+ * `translateY(-100%)`, ne sert qu'avant le premier survol — ensuite c'est le
+ * script qui le repose à chaque fois, selon le bord franchi.
+ *
+ * L'assouplissement est `--ease-rideau` et non le `cubic-bezier(.16,1,.3,1)` de
+ * la ressource d'origine : les deux courbes sont des sorties exponentielles
+ * quasi superposables, et le site a déjà son jeton.
+ */
+.survol-tuile {
+  background: var(--color-brique-haute);
+  transform: translateY(-100%);
+  transition: transform 0.5s var(--ease-rideau);
+  will-change: transform;
+}
+
+/* ---- Le passage d'une page à l'autre ---- */
+
+/*
+ * `<ClientRouter />` fait le travail de navigation, mais il n'apporte AUCUNE
+ * animation par lui-même : Astro ne joint sa feuille `viewtransitions.css` que
+ * si une directive `transition:animate` figure quelque part, ce qui n'est pas le
+ * cas ici. Sans les règles ci-dessous, le navigateur applique son fondu par
+ * défaut — 250 ms entre deux pages sombres qui partagent la même barre et le
+ * même pied. Mesuré : la page d'arrivée est intégralement affichée 180 ms après
+ * le clic. Techniquement une transition, visuellement rien.
+ *
+ * La forme reprend celle du reste du site plutôt que le fondu croisé
+ * symétrique : la page qui part s'efface, celle qui arrive s'efface ET monte,
+ * comme un `.reveal`. C'est le même geste à l'échelle de la page.
+ *
+ * ⚠ `::view-transition-new` est une représentation VIVANTE du nouveau contenu,
+ * pas une capture figée — contrairement à `::view-transition-old`. Les
+ * révélations de la page d'arrivée jouent donc À L'INTÉRIEUR de ce calque
+ * pendant qu'il monte, ce qui donne la profondeur sans rien coordonner.
+ *
+ * Les durées ne sont pas symétriques, et c'est délibéré : une page qui s'efface
+ * plus vite qu'elle n'arrive laisse l'attention sur la destination. L'inverse
+ * donne l'impression d'attendre.
+ */
+@keyframes page-sortie {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-entree {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+::view-transition-old(root) {
+  animation: page-sortie 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: page-entree 0.55s var(--ease-rideau) 0.08s both;
+}
+
+/*
+ * Repli pour les navigateurs sans View Transitions natives. Astro pose alors
+ * `data-astro-transition-fallback` sur <html>, à « old » puis à « new », et
+ * attend la fin des animations déclenchées avant de passer à la suite.
+ *
+ * ⚠ Les deux phases sont SÉQUENTIELLES ici, là où les pseudo-éléments natifs se
+ * recouvrent. Pas de délai sur l'entrée, donc : il s'ajouterait à l'attente au
+ * lieu de créer un recouvrement qui, dans ce mode, ne peut pas exister.
+ */
+[data-astro-transition-fallback='old'] {
+  animation: page-sortie 0.3s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+[data-astro-transition-fallback='new'] {
+  animation: page-entree 0.55s var(--ease-rideau) both;
+}
+
+/* ---- Le formulaire ---- */
+
+/*
+ * Validation vivante : chaque champ dit lui-même où il en est pendant la
+ * saisie, au lieu de laisser le visiteur découvrir sa faute après l'aller-retour
+ * vers contact.php.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * La structure est reprise de la ressource Osmo « Live Form Validation
+ * (Advanced) » : un groupe `[data-validate]` par champ, les classes d'état
+ * posées sur le GROUPE et non sur la saisie — c'est ce qui permet à l'étiquette,
+ * à la bordure, aux icônes et au message de réagir ensemble sans qu'aucun n'ait
+ * à connaître les autres.
+ *
+ * Ce qui a été refait :
+ *
+ *   — La palette. La ressource est claire, ce site est sombre, et il a fallu
+ *     ajouter un vert à une palette qui n'en avait pas (voir --color-valide).
+ *   — Le bouton d'envoi. La ressource cache le vrai `<input type="submit">`
+ *     derrière un faux bouton et n'envoie QUE depuis JavaScript : script en
+ *     échec, formulaire mort. Ici le bouton reste un vrai bouton d'envoi, et la
+ *     validation ne fait que s'interposer quand elle est là.
+ *   — Le délai anti-robot de cinq secondes, qui refuse l'envoi par une `alert()`
+ *     et punit d'abord le visiteur pressé. Le pot de miel, le contrôle
+ *     d'origine et le quota par IP de contact.php tiennent ce rôle sans rien
+ *     demander à personne.
+ *   — Les cases et boutons radio de la ressource : ce formulaire n'en a aucun,
+ *     et du code d'état pour des champs qui n'existent pas se périme sur place.
+ */
+
+.champ-etiquette {
+  display: block;
+  font-family: var(--font-texte);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-texte-faible);
+  transition: color 0.3s var(--ease-rideau);
+}
+
+[data-validate].is--erreur .champ-etiquette {
+  color: var(--color-signal-vif);
+}
+
+.champ-requis {
+  margin-left: 0.35em;
+  color: var(--color-signal-vif);
+}
+
+.champ {
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.champ-saisie {
+  /*
+   * `appearance: none` d'abord pour la flèche native du <select>, qu'on remplace
+   * par la nôtre — mais elle emporte aussi, sur iOS, les coins arrondis et
+   * l'ombre interne que Safari impose aux champs.
+   */
+  appearance: none;
+  width: 100%;
+  border: 1px solid var(--color-trait);
+  border-radius: 0.75rem;
+  background-color: var(--color-surface);
+  color: var(--color-texte);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* La marge de droite réserve la place des icônes d'état, qui se superposent. */
+  padding: 0.875rem 3.25rem 0.875rem 1rem;
+  transition:
+    border-color 0.3s var(--ease-rideau),
+    background-color 0.3s var(--ease-rideau);
+}
+
+.champ-saisie::placeholder {
+  color: var(--color-texte-faible);
+}
+
+.champ-saisie:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: var(--color-surface-haute);
+}
+
+/*
+ * Le menu déroulant d'un <select> est dessiné par le système, pas par la page :
+ * sans ces deux déclarations, la liste s'ouvre en noir sur blanc au milieu d'un
+ * site sombre sous Windows, et les options restent illisibles sur certains
+ * thèmes Linux.
+ */
+.champ-saisie option {
+  background-color: var(--color-surface);
+  color: var(--color-texte);
+}
+
+/*
+ * Première option à valeur vide : c'est un libellé d'attente, pas un choix. Le
+ * texte reste en retrait tant qu'elle est sélectionnée, ce que la couleur du
+ * `placeholder` fait déjà pour les champs de texte.
+ */
+.champ-saisie:has(option[value='']:checked) {
+  color: var(--color-texte-faible);
+}
+
+.champ-saisie.is--zone {
+  resize: vertical;
+  min-height: 9rem;
+}
+
+[data-validate].is--erreur .champ-saisie {
+  border-color: var(--color-signal);
+}
+
+[data-validate].is--succes .champ-saisie {
+  border-color: rgba(95, 189, 136, 0.45);
+}
+
+/* ---- Icônes d'état ---- */
+
+/*
+ * Les deux icônes sont posées dans le balisage et se recouvrent : seule celle
+ * qui correspond à l'état du groupe devient visible. Les afficher ainsi plutôt
+ * que de les créer depuis JavaScript garde le rendu identique au premier cadre,
+ * et ne demande rien au script en dehors d'une classe.
+ */
+.champ-icone,
+.champ-chevron {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.champ-chevron {
+  color: var(--color-texte-faible);
+}
+
+.champ-icone {
+  /*
+   * ⚠ `--echelle-icone` PLUTÔT QU'UN `scale: 1` ÉCRIT EN CLAIR dans la règle
+   * d'état. Lightning CSS supprime les déclarations qu'il juge égales à la
+   * valeur initiale, et `scale: 1` en est une : l'icône serait apparue à 72 % de
+   * sa taille, sans que rien ne le montre en développement. Même piège, et même
+   * parade, que pour les lettres du bouton plus haut.
+   */
+  scale: var(--echelle-icone, 0.72);
+  opacity: var(--opacite-icone, 0);
+  transition:
+    opacity 0.35s var(--ease-rideau),
+    scale 0.35s var(--ease-rideau);
+}
+
+.champ-icone.is--succes {
+  color: var(--color-valide);
+}
+
+.champ-icone.is--erreur {
+  color: var(--color-signal-vif);
+}
+
+[data-validate].is--succes .champ-icone.is--succes,
+[data-validate].is--erreur .champ-icone.is--erreur {
+  --echelle-icone: 1;
+  --opacite-icone: 1;
+}
+
+/*
+ * Le <select> garde sa flèche : les icônes d'état se rangent à sa gauche plutôt
+ * que par-dessus. La saisie recule d'autant.
+ */
+.champ.is--select .champ-icone {
+  right: 2.75rem;
+}
+
+.champ.is--select .champ-saisie {
+  padding-right: 5rem;
+}
+
+/*
+ * Dans une zone de texte, une icône centrée verticalement flotterait au milieu
+ * du vide, et se retrouverait ailleurs à chaque ligne ajoutée. Elle s'aligne
+ * donc sur la première ligne, à hauteur du texte.
+ */
+.champ.is--zone .champ-icone {
+  top: 1.25rem;
+  translate: 0 0;
+}
+
+/* ---- Le message d'erreur ---- */
+
+/*
+ * Absent de la ressource, qui s'en tient à l'icône. Une pastille orange dit
+ * qu'un champ ne va pas, elle ne dit pas pourquoi : sur un champ d'adresse email
+ * ça se devine, sur les autres non.
+ *
+ * Le texte vit dans le balisage et non dans le script : il est traduit, relu et
+ * modifiable là où il se lit, et il s'affiche par la seule classe du groupe —
+ * JavaScript n'a donc rien à écrire dedans.
+ */
+.champ-message {
+  display: none;
+  margin-top: 0.5rem;
+  font-family: var(--font-texte);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-signal-vif);
+}
+
+[data-validate].is--erreur .champ-message {
+  display: block;
+}
+
+/* ---- Les bandeaux d'échec ---- */
+
+.bandeau-alerte {
+  position: relative;
+  border: 1px solid var(--color-signal);
+  border-radius: 0.75rem;
+  background-color: var(--color-brique);
+  font-family: var(--font-texte);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  /* Place réservée à droite pour l'icône, comme dans les champs. */
+  padding: 1.25rem 3.5rem 1.25rem 1.25rem;
+}
+
+.bandeau-alerte-icone {
+  position: absolute;
+  top: 1.35rem;
+  right: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-signal-vif);
 }
 
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
@@ -333,12 +1107,56 @@
     scroll-behavior: auto;
   }
   .reveal,
-  .reveal-scale,
-  .hero-fade-up {
+  .rideau,
+  .rideau-charge,
+  .hero-fade-up,
+  .hero-sortie {
     opacity: 1 !important;
     animation: none !important;
     transform: none !important;
+    clip-path: none !important;
   }
+  /*
+   * La poussée de la vidéo est neutralisée à part : la règle générique
+   * ci-dessous ramènerait sa durée à 0,01 ms, ce qui la ferait sauter d'un coup
+   * à son échelle finale au lieu de ne rien faire.
+   */
+  .hero-poussee {
+    animation: none !important;
+    transform: none !important;
+  }
+  /*
+   * ⚠ Les pseudo-éléments de transition de page ne sont PAS atteints par la
+   * règle universelle ci-dessous : ils vivent dans un arbre à part, où `*` ne
+   * descend pas. Sans ces trois sélecteurs, le passage d'une page à l'autre
+   * continuerait de bouger pour quelqu'un qui a demandé le contraire.
+   */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  [data-astro-transition-fallback] {
+    animation: none !important;
+  }
+
+  /*
+   * La tuile de survol garde un retour visuel, mais en fondu : effets.js ne
+   * s'attache pas sous mouvement réduit, donc plus aucun style en ligne ne vient
+   * la déplacer, et c'est `:hover` seul qui la fait apparaître.
+   *
+   * ⚠ La durée survit à la règle universelle ci-dessous parce que ce sélecteur
+   * est plus spécifique qu'elle : entre deux déclarations `!important`, c'est la
+   * spécificité qui tranche. Un fondu d'opacité ne relève pas de ce que
+   * `prefers-reduced-motion` cherche à éviter, contrairement au glissement.
+   */
+  .survol-tuile {
+    opacity: 0;
+    transform: none !important;
+    transition: opacity 0.2s !important;
+  }
+  [data-survol-item]:hover .survol-tuile {
+    opacity: 1;
+  }
+
   *,
   *::before,
   *::after {

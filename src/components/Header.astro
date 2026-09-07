@@ -31,8 +31,16 @@ const classeLien =
   class="fixed top-4 left-1/2 z-50 -translate-x-1/2 sm:top-6"
   aria-label="Navigation principale"
 >
+  {/*
+    `data-barre` est la prise de effets.js, `barre` porte l'état dense.
+
+    ⚠ L'état LISIBLE est celui du CSS, et le script ne fait que l'éclaircir sur
+    le premier écran — jamais l'inverse. Le détail et la raison sont dans
+    global.css, section « barre de navigation ».
+  */}
   <nav
-    class="liquid-glass flex items-center gap-3 rounded-full px-4 py-2.5 sm:gap-12 sm:px-10 sm:py-3"
+    data-barre
+    class="liquid-glass barre flex items-center gap-3 rounded-full px-4 py-2.5 sm:gap-12 sm:px-10 sm:py-3"
   >
     {
       gauche.map((l) => (

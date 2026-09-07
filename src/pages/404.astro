@@ -18,7 +18,11 @@ import Base from '../layouts/Base.astro';
 
     <div class="mt-11 flex flex-wrap justify-center gap-4">
       <a href="/" class="bouton-primaire">Retour à l'accueil</a>
-      <a href="/contact" class="bouton-secondaire">Demander un devis</a>
+      {/* Marqué explicitement : c'est le seul « Demander un devis » du site qui ne
+          soit pas un bouton primaire, et l'effet suit le libellé. */}
+      <a href="/contact" data-bouton-anime class="bouton-secondaire inline-grid justify-items-center">
+        Demander un devis
+      </a>
     </div>
   </section>
 </Base>

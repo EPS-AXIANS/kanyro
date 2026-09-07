@@ -11,35 +11,31 @@ import communes from '../../data/communes.json';
  * Même registre sombre que le reste, sur le brun de la section suivante pour
  * que l'enchaînement reste sans couture.
  */
-const delais = [
-  '[animation-delay:80ms]',
-  '[animation-delay:160ms]',
-  '[animation-delay:240ms]',
-  '[animation-delay:320ms]',
-  '[animation-delay:400ms]',
-  '[animation-delay:480ms]',
-];
 ---
 
 <section class="relative bg-[#410C01] px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
   <div class="mx-auto max-w-6xl">
     <h2
-      class="reveal font-titre text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="rideau font-titre text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
       Chaque métier se cherche autrement
     </h2>
     <p
-      class="reveal font-texte mx-auto mt-6 max-w-xl text-center text-xs leading-relaxed text-white/60 [animation-delay:120ms] sm:text-sm"
+      class="reveal font-texte mx-auto mt-6 max-w-xl text-center text-xs leading-relaxed text-white/60 [--retard:120ms] sm:text-sm"
     >
       Une fuite se cherche à 22 h sur un téléphone. Une pompe à chaleur se compare
       pendant trois semaines. Un site qui ignore cette différence rate la moitié de
       ses visiteurs.
     </p>
 
-    <ul class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3">
+    {/* Cascade portée par la grille — voir Offre.astro pour le pourquoi. */}
+    <ul
+      data-cascade
+      class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-3"
+    >
       {
-        metiers.map((m, i) => (
-          <li class:list={['reveal', delais[i]]}>
+        metiers.map((m) => (
+          <li class="reveal">
             <a
               href={`/metiers/${m.slug}`}
               class="group flex h-full flex-col bg-[#410C01] p-8 no-underline transition-colors duration-500 hover:bg-[#4d1002]"

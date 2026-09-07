@@ -2,9 +2,10 @@
 /**
  * Socle de toutes les pages.
  *
- * Porte le SEO (canonical, JSON-LD, OpenGraph), la CSP, les fontes, et le
- * script unique de révélation au scroll.
+ * Porte le SEO (canonical, JSON-LD, OpenGraph), la CSP, les fontes, le routeur
+ * client et le script d'effets.
  */
+import { ClientRouter } from 'astro:transitions';
 import { SITE, BETA, urlAbsolue } from '../config/site.js';
 import { HOTES_MEDIAS } from '../config/medias.js';
 import Header from '../components/Header.astro';
@@ -90,9 +91,10 @@ const imageAbsolue = image ? urlAbsolue(image) : null;
  * template. Une fois les assets rapatriés, `HOTES_MEDIAS` se vide et la
  * politique se resserre d'elle-même, sans toucher à ce fichier.
  *
- * Aucun style inline n'est utilisé dans le site (les délais d'animation passent
- * par des classes utilitaires, les fonds par des <img>), ce qui permet de garder
- * style-src sans 'unsafe-inline' malgré la richesse visuelle.
+ * Aucun style inline n'est écrit dans le balisage (les délais d'animation passent
+ * par la variable `--retard`, les fonds par des <img>), ce qui permet de garder
+ * style-src sans 'unsafe-inline' malgré la richesse visuelle. Les écritures de
+ * style faites par effets.js passent par le CSSOM, que style-src ne régit pas.
  */
 /*
  * Assemble une directive sans espace parasite quand la liste d'hôtes est vide —
@@ -156,6 +158,29 @@ const csp = [
     <title>{titreComplet}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+
+    {/*
+      Navigation sans rechargement, avec fondu croisé entre les pages.
+
+      Barba.js a été écarté pour ça : Astro embarque déjà le routeur, il pèse
+      zéro dépendance de plus, et surtout il ÉCHANGE LE <head>. Un routeur tiers
+      ne remplace que le conteneur déclaré — le <title>, la description, le
+      canonical et le JSON-LD resteraient donc ceux de la page de départ. Sur un
+      site dont le produit est le référencement, c'est le pire défaut possible,
+      et il est invisible à l'œil.
+
+      ⚠ La contrepartie est réelle : le document n'est plus rechargé, donc
+      public/js/effets.js ne s'exécute plus qu'une fois. Tout ce qu'il fait est
+      rangé dans des fonctions rejouées sur `astro:page-load` — sans quoi la
+      restauration de saisie et les bandeaux d'erreur de /contact cesseraient de
+      fonctionner après la première navigation, silencieusement. Toute
+      initialisation ajoutée ici doit suivre la même règle.
+
+      Aucun `transition:persist` sur l'en-tête, volontairement : il porte
+      `aria-current`, qui dépend de l'URL et resterait figé sur l'ancienne page.
+      Le fondu croisé entre deux barres identiques ne se voit pas de toute façon.
+    */}
+    <ClientRouter />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
