@@ -56,19 +56,11 @@ const SELECTEUR_ANIME = '.reveal, .rideau';
 const PAS_CASCADE = 90;
 
 /**
- * Hauteur, en fraction de la fenêtre, de la ligne où une étape s'allume quand la
- * frise est VERTICALE. 0 est le haut de l'écran, 1 le bas. À 0,6 le nœud
- * s'allume un peu sous le milieu, juste au moment où le regard l'atteint.
+ * Hauteur, en fraction de la fenêtre, de la ligne où une étape s'allume. 0 est
+ * le haut de l'écran, 1 le bas. À 0,6 le nœud s'allume un peu sous le milieu,
+ * juste au moment où le regard l'atteint.
  */
 const ACTIVATION_FRISE = 0.6;
-
-/**
- * Les deux lignes entre lesquelles la frise HORIZONTALE se remplit : la barre
- * démarre quand le haut de la frise atteint 85 % de la hauteur d'écran, et
- * finit quand son bas remonte à 35 %.
- */
-const DEPART_FRISE_H = 0.85;
-const ARRIVEE_FRISE_H = 0.35;
 
 /* ------------------------------------------------------------------------- */
 /* Défilement : une seule boucle pour tout le monde                           */
@@ -310,28 +302,31 @@ function initRevelations() {
  * « il y a une animation ici », une frise qui suit le défilement dit « vous en
  * êtes là dans le processus ». C'est la seule des deux qui ajoute du sens.
  *
- * ── L'horloge n'est pas la même dans les deux orientations ──
+ * ── L'axe est sa propre règle ──
  *
- * Sous 1 024 px la frise est verticale : défiler avance le long de son axe, la
- * progression est directe. Au-dessus elle est HORIZONTALE, et défiler ne
- * déplace rien le long de sa longueur. Il faut donc une autre horloge, et c'est
- * le passage de la frise devant la fenêtre qui sert : elle se remplit de gauche
- * à droite pendant qu'elle traverse l'écran.
+ * La frise est verticale, donc défiler avance le long de son axe : la
+ * progression vaut exactement la position de la ligne d'activation le long du
+ * trait, et un nœud s'allume à l'instant précis où il la franchit. Rien à
+ * régler, rien à approcher.
  *
- * `course` est ce qui réconcilie les deux. C'est la distance de défilement sur
- * laquelle la barre se remplit entièrement. Une frise verticale est plus haute
- * qu'un demi-écran, donc c'est sa propre hauteur qui gagne et la progression
- * suit le regard. Une frise horizontale ne fait que 400 px de haut : le plancher
- * à 60 % de la hauteur de fenêtre lui donne une course confortable, sinon elle
- * se remplirait d'un coup.
+ * Ça n'a l'air de rien, mais c'est ce que la version horizontale interdisait.
+ * Un trait d'un pixel de haut ne se déplace pas le long de sa longueur quand on
+ * défile : il fallait lui inventer une horloge à partir de la traversée de la
+ * section, avec deux constantes de réglage et une formule qu'aucune mesure ne
+ * validait vraiment. Elles ont disparu avec la mise en page.
  *
- * ── Les fractions sont mesurées, pas déduites ──
+ * ── Ce qui est mesuré, et pourquoi ──
  *
- * On pourrait croire les six nœuds régulièrement espacés — c'est vrai sur la
- * grille de six colonnes du bureau, faux en vertical où la hauteur de chaque
- * étape dépend de la longueur de son texte. Les centres sont donc relevés
- * réellement, ce qui rend le code indifférent à l'orientation ET à toute
- * étape qu'on ajouterait.
+ * La hauteur d'une étape dépend de la longueur de son texte : les six nœuds ne
+ * sont jamais régulièrement espacés, et aucune valeur écrite à la main ne peut
+ * viser le centre du dernier. On relève donc les centres réellement, ce qui sert
+ * à deux choses d'un coup :
+ *
+ *   — poser `top` et `height` sur l'axe, pour qu'il s'arrête au centre du
+ *     premier et du dernier nœud plutôt que de déborder dans le vide ;
+ *   — savoir à quelle fraction de la course chaque nœud doit s'allumer.
+ *
+ * Et le code reste juste si on ajoute une étape.
  */
 function initFrise() {
   const frise = document.querySelector('[data-frise]');
@@ -346,17 +341,22 @@ function initFrise() {
   let fractions = etapes.map(() => 0);
 
   const mesurer = () => {
-    const rAxe = axe.getBoundingClientRect();
-    const horizontal = rAxe.width > rAxe.height;
-    const debut = horizontal ? rAxe.left : rAxe.top;
-    const longueur = horizontal ? rAxe.width : rAxe.height;
-
-    fractions = etapes.map((etape) => {
+    // Centres des nœuds, relatifs au haut de la liste — c'est le repère de
+    // l'axe, qui y est positionné en absolu.
+    const hautListe = frise.getBoundingClientRect().top;
+    const centres = etapes.map((etape) => {
       const noeud = etape.querySelector('[data-frise-noeud]') ?? etape;
       const r = noeud.getBoundingClientRect();
-      const centre = horizontal ? r.left + r.width / 2 : r.top + r.height / 2;
-      return longueur > 0 ? (centre - debut) / longueur : 0;
+      return r.top + r.height / 2 - hautListe;
     });
+
+    const premier = centres[0];
+    const portee = centres[centres.length - 1] - premier;
+
+    axe.style.top = `${premier}px`;
+    axe.style.height = `${portee}px`;
+
+    fractions = centres.map((c) => (portee > 0 ? (c - premier) / portee : 0));
   };
 
   const appliquer = (p) => {
@@ -379,29 +379,13 @@ function initFrise() {
 
   const placer = () => {
     const rAxe = axe.getBoundingClientRect();
-    const vh = window.innerHeight;
-    let brut;
 
-    if (rAxe.width > rAxe.height) {
-      /*
-       * Frise horizontale. Le trait fait un pixel de haut : défiler ne déplace
-       * rien le long de sa longueur, il faut donc une autre horloge, et c'est la
-       * traversée de la frise entière devant la fenêtre qui sert. La barre part
-       * quand le haut de la frise arrive au bas de l'écran et finit quand son bas
-       * en atteint le tiers supérieur.
-       */
-      const r = frise.getBoundingClientRect();
-      const course = vh * (DEPART_FRISE_H - ARRIVEE_FRISE_H) + r.height;
-      brut = (vh * DEPART_FRISE_H - r.top) / course;
-    } else {
-      /*
-       * Frise verticale. L'axe est sa propre règle : la progression vaut
-       * exactement la position de la ligne d'activation le long du trait. Un nœud
-       * s'allume donc à l'instant précis où il franchit cette ligne, sans réglage
-       * à faire — c'est la seule formule des deux qui soit exacte.
-       */
-      brut = (vh * ACTIVATION_FRISE - rAxe.top) / rAxe.height;
-    }
+    // Axe de hauteur nulle : la mesure n'a pas encore eu lieu, ou la liste est
+    // masquée. Diviser donnerait l'infini, donc une frise pleine d'un coup.
+    if (rAxe.height <= 0) return appliquer(0);
+
+    const brut =
+      (window.innerHeight * ACTIVATION_FRISE - rAxe.top) / rAxe.height;
 
     appliquer(Math.min(Math.max(brut, 0), 1));
   };

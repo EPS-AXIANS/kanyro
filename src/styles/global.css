@@ -428,13 +428,13 @@
 /*
  * La barre de progression est liée au défilement, pas jouée une fois : elle dit
  * où on en est dans le processus, pas « il y a une animation ici ». effets.js
- * n'écrit qu'un nombre entre 0 et 1 dans `--progression` ; c'est le CSS qui
- * choisit sur quel axe l'appliquer, parce que la frise est verticale sous
- * 1 024 px et horizontale au-dessus.
+ * n'écrit qu'un nombre entre 0 et 1 dans `--progression`.
  *
  * ⚠ Elle est volontairement BLANCHE et pas orange. L'orange de la section a un
  * sens précis — « vous intervenez à cette étape » — et il n'en reste rien s'il
- * sert aussi à colorer la progression.
+ * sert aussi à colorer la progression. C'est d'autant plus vrai depuis que la
+ * frise est verticale : la couleur y porte SEULE cette information, la position
+ * ne la double plus.
  */
 .remplissage-frise {
   transform: scaleY(var(--progression, 0));
@@ -445,12 +445,6 @@
   background: rgba(255, 255, 255, 0.75);
 }
 
-@media (min-width: 1024px) {
-  .remplissage-frise {
-    transform: scaleX(var(--progression, 0));
-    transform-origin: left;
-  }
-}
 
 /*
  * L'allumage des nœuds. `data-atteint` est posé par effets.js quand la barre

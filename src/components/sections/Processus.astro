@@ -26,7 +26,11 @@ import { offre } from '../../data/offres.js';
  * partout ailleurs — ça se lisait comme un tableau de bord.
  *
  * D'où la frise chronologique : un axe, six nœuds numérotés, et rien d'autre
- * comme décor.
+ * comme décor. Elle a d'abord été horizontale sur grand écran, avec les étapes
+ * alternées de part et d'autre de l'axe ; elle est aujourd'hui verticale à
+ * toutes les largeurs. Le balisage y a beaucoup gagné — plus de constantes de
+ * position à tenir, plus de hauteur de cellule à réserver à la main, et une
+ * seule forme à vérifier au lieu de deux.
  *
  * ---- La progression liée au défilement ----
  *
@@ -40,7 +44,14 @@ import { offre } from '../../data/offres.js';
  * prises : `data-frise` sur la liste, `data-frise-axe` sur le trait,
  * `data-frise-remplissage` sur la barre, `data-frise-etape` et
  * `data-frise-noeud` sur chaque étape. Les centres des nœuds sont MESURÉS, pas
- * déduits d'un espacement régulier — ils ne le sont qu'en horizontal.
+ * déduits d'un espacement régulier : la hauteur d'une étape dépend de la
+ * longueur de son texte, ils ne sont donc jamais régulièrement espacés.
+ *
+ * L'axe étant vertical, défiler avance le long de sa longueur : la progression
+ * vaut exactement la position de la ligne d'activation le long du trait, et un
+ * nœud s'allume à l'instant précis où il la franchit. Aucun réglage à faire.
+ * C'est ce que la version horizontale ne permettait pas — un trait d'un pixel de
+ * haut ne bouge pas quand on défile, il fallait lui inventer une horloge.
  *
  * ⚠ La barre est blanche, pas orange, et ça n'est pas un détail : l'orange de
  * cette section veut dire « vous intervenez à cette étape ». S'il sert aussi à
@@ -52,16 +63,24 @@ import { offre } from '../../data/offres.js';
  * visiteur qui arrive au milieu de la section verrait cinq étapes sur six en
  * fantômes. Seul le nœud change d'état.
  *
- * ---- L'alternance ----
+ * ---- `champClient`, et ce qu'il reste de l'alternance ----
  *
- * `champClient` est ce qui fait que l'alternance dit quelque chose au lieu de
- * décorer. L'intro promet « vous n'intervenez qu'à trois moments » : ce sont les
- * étapes 1, 3 et 5. Elles passent AU-DESSUS de l'axe, en orange ; les trois
- * autres passent en dessous, en gris. La forme porte donc l'argument — on voit
- * d'un coup d'œil que les deux tiers du travail se font sans vous.
+ * L'intro promet « vous n'intervenez qu'à trois moments » : ce sont les étapes
+ * 1, 3 et 5, marquées `champClient`. Leur nœud est orange, les trois autres
+ * gris — on voit d'un coup d'œil que les deux tiers du travail se font sans
+ * vous.
+ *
+ * Cette information était portée deux fois, avant : par la couleur ET par la
+ * position, les étapes du client passant au-dessus de l'axe horizontal et les
+ * miennes en dessous. La frise est passée en liste verticale à toutes les
+ * largeurs, sur préférence du propriétaire ; il ne reste donc que la couleur.
+ * La phrase de l'intro dit « en orange ci-dessous » et non « au-dessus de
+ * l'axe » : elle reste juste telle quelle.
  *
  * ⚠ La couleur ne peut pas porter seule cette information : un lecteur d'écran
- * n'y a pas accès, un daltonien non plus. D'où le libellé en `sr-only`.
+ * n'y a pas accès, un daltonien non plus. C'était déjà vrai quand la position la
+ * doublait, ça l'est deux fois plus maintenant qu'elle est seule. D'où le
+ * libellé en `sr-only`, qui n'est pas optionnel.
  */
 const etapes = [
   {
@@ -103,32 +122,10 @@ const etapes = [
 ];
 
 /*
- * Classes de position écrites en toutes lettres, jamais assemblées.
- *
- * Tailwind lit les fichiers source comme du texte : un `lg:mb-[54px]` construit
- * à l'exécution ne serait jamais généré, et le bloc se retrouverait collé à
- * l'axe. Les deux variantes existent donc en littéral, et le ternaire ne fait
- * que choisir laquelle poser.
- *
- * 54 px = le rayon du nœud (22) + la hauteur du raccord (32). Changer l'un
- * impose de reprendre l'autre, sinon le trait flotte ou déborde.
- *
- * Même chaîne pour la hauteur de cellule, `lg:h-[25rem]` plus bas : une frise
- * chronologique n'a pas de hauteur naturelle, puisque les blocs sont positionnés
- * par rapport à l'axe et non empilés. C'est donc la cellule qui doit réserver la
- * place, et sa moitié (200 px) doit tenir le décalage de 54 px plus le bloc le
- * plus haut.
- *
- * La valeur est donc liée à la fonte de titre, et deux changements l'ont déjà
- * bougée : 22 rem ne suffisaient plus quand les titres passaient sur deux
- * lignes, d'où 25 rem. Cormorant, plus étroit, les a ramenés sur une ligne — il
- * reste aujourd'hui 43 px de marge de chaque côté. C'est confortable et ça peut
- * rester tel quel ; à revérifier si la fonte de titre change encore.
+ * Le pas de la cascade des étapes est volontairement absent : voir le bloc de la
+ * liste plus bas. Il n'y a plus aucune constante de position à tenir depuis que
+ * la frise est verticale — c'est le principal bénéfice du changement de forme.
  */
-const POS_CONTENU_HAUT = 'lg:absolute lg:inset-x-0 lg:bottom-1/2 lg:mb-[54px]';
-const POS_CONTENU_BAS = 'lg:absolute lg:inset-x-0 lg:top-1/2 lg:mt-[54px]';
-const POS_RACCORD_HAUT = 'lg:bottom-1/2 lg:mb-[22px]';
-const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
 ---
 
 <section id="deroulement" class="bg-fond px-4 py-24 sm:px-8 md:px-16 lg:px-12 lg:py-32">
@@ -150,46 +147,51 @@ const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
     {/*
       Liste ordonnée : l'ordre porte du sens, ce n'est pas une énumération.
 
-      Une seule structure sert les deux orientations. Dupliquer le balisage en
-      « version mobile » + « version bureau » aurait sorti chaque étape deux fois
-      du DOM : deux fois le texte pour un lecteur d'écran, et deux fois pour
-      Google.
+      ---- Pourquoi il n'y a plus de cascade d'entrée ----
 
-      < lg : axe vertical à gauche, étapes empilées à droite.
-      ≥ lg : axe horizontal, étapes alternées de part et d'autre.
+      La liste fait plusieurs écrans de haut à toutes les largeurs. Un décalage
+      indexé n'a de sens que pour un groupe qui entre d'un bloc : ici il ferait
+      apparaître les dernières étapes bien avant qu'on les atteigne, ou pire, les
+      ferait attendre. Chaque bloc de texte se révèle donc pour lui-même, et
+      c'est la barre de progression qui porte la lecture d'ensemble. Même
+      raisonnement qu'en tête de QandA.astro.
+
+      ---- La largeur ----
+
+      `max-w-xl`, et la valeur se déduit du contenu plutôt qu'elle ne se choisit :
+      80 px de retrait pour le nœud, plus une mesure de lecture confortable pour
+      le texte. Une liste verticale étalée sur les 72 rem du conteneur donnerait
+      des lignes de 150 caractères.
+
+      ⚠ Une colonne plus large que son contenu ne se voit pas comme telle : elle
+      se voit comme un bloc décalé vers la gauche sous un titre centré. C'était
+      le cas à `max-w-3xl`, où le texte s'arrêtait 240 px avant le bord.
     */}
-    {/*
-      `data-cascade` décale les six étapes à l'entrée de la liste ; la barre de
-      progression, elle, suit le défilement indépendamment.
-
-      ⚠ Le pas s'applique aux ENFANTS DIRECTS, et le premier est le trait — il
-      consomme donc le cran 0, et l'étape 01 part à 110 ms. C'est voulu : la
-      barre a une longueur d'avance sur les nœuds qu'elle allume.
-
-      ⚠ Sur mobile la liste fait plusieurs écrans de haut, donc les dernières
-      étapes se révèlent avant d'être visibles. Ce n'est pas gênant ici,
-      contrairement à la Q&R : c'est la barre de progression qui porte la
-      lecture en vertical, et elle, elle suit bien le regard.
-    */}
-    <ol
-      data-frise
-      data-cascade="110"
-      class="relative mt-20 lg:mt-28 lg:grid lg:grid-cols-6"
-    >
+    <ol data-frise class="relative mx-auto mt-16 max-w-xl sm:mt-20">
       {/*
-        8,3333 % = une demi-colonne sur six. L'axe s'arrête donc au centre du
-        premier et du dernier nœud, au lieu de déborder dans le vide : une frise
-        chronologique a un début et une fin, c'est tout son propos.
+        L'axe s'arrête au centre du premier et du dernier nœud, au lieu de
+        déborder dans le vide : une frise chronologique a un début et une fin,
+        c'est tout son propos.
+
+        En horizontal, une demi-colonne de grille suffisait à le poser. En
+        vertical, la hauteur de chaque étape dépend de la longueur de son texte :
+        aucune valeur CSS ne peut viser le centre du dernier nœud. C'est donc
+        effets.js qui écrit `top` et `height`, à partir des centres qu'il mesure
+        déjà pour savoir quand allumer les nœuds.
+
+        Les `top-[22px] bottom-[22px]` ci-dessous sont le repli sans script : 22 px
+        est le rayon du nœud, donc le trait part bien du centre du premier. Il
+        dépasse alors sous le dernier, de la hauteur de son texte — visible, mais
+        sans commune mesure avec un axe absent.
       */}
       <div
         data-frise-axe
-        class="absolute top-2 bottom-2 left-[21px] w-px bg-trait lg:top-1/2 lg:right-[8.3333%] lg:bottom-auto lg:left-[8.3333%] lg:h-px lg:w-auto"
+        class="absolute top-[22px] bottom-[22px] left-[21px] w-px bg-trait"
         aria-hidden="true"
       >
         {/* La barre de progression, à l'intérieur du trait pour en épouser
-            exactement la course. effets.js n'écrit qu'un nombre entre 0 et 1
-            dans `--progression` ; c'est global.css qui choisit l'axe, la frise
-            étant verticale sous 1 024 px et horizontale au-dessus. */}
+            exactement la course. effets.js n'y écrit qu'un nombre entre 0 et 1,
+            dans `--progression`. */}
         <div data-frise-remplissage class="remplissage-frise absolute inset-0"></div>
       </div>
 
@@ -198,16 +200,20 @@ const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
           <li
             data-frise-etape
             data-client={etape.champClient ? '' : undefined}
-            class="etape-frise relative pb-12 pl-16 last:pb-0 lg:h-[25rem] lg:px-3 lg:pb-0 lg:pl-3"
+            class="etape-frise relative pb-14 pl-16 last:pb-0 sm:pb-20 sm:pl-20"
           >
             {/*
               Le nœud est opaque et au-dessus de l'axe : c'est lui qui coupe le
               trait, sinon la ligne traverse le chiffre.
+
+              ⚠ Sa taille (44 px) n'est pas libre : `left-[21px]` sur l'axe et
+              `top-[22px]` plus haut en dérivent, 22 étant son rayon. Changer le
+              diamètre impose de reprendre les deux.
             */}
             <span
               data-frise-noeud
               class:list={[
-                'noeud-frise absolute top-0 left-0 z-10 flex h-11 w-11 items-center justify-center rounded-full border bg-fond lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2',
+                'noeud-frise absolute top-0 left-0 z-10 flex h-11 w-11 items-center justify-center rounded-full border bg-fond',
                 etape.champClient ? 'border-signal-vif/60' : 'border-trait',
               ]}
               aria-hidden="true"
@@ -222,22 +228,8 @@ const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
               </span>
             </span>
 
-            {/* Raccord entre le nœud et le texte — sur l'axe horizontal seulement. */}
-            <span
-              class:list={[
-                'absolute left-1/2 hidden h-8 w-px bg-trait lg:block',
-                etape.champClient ? POS_RACCORD_HAUT : POS_RACCORD_BAS,
-              ]}
-              aria-hidden="true"
-            />
-
-            <div
-              class:list={[
-                'reveal lg:text-center',
-                etape.champClient ? POS_CONTENU_HAUT : POS_CONTENU_BAS,
-              ]}
-            >
-              <h3 class="font-titre text-2xl tracking-wide lg:text-xl">
+            <div class="reveal pt-1">
+              <h3 class="font-titre text-2xl tracking-wide sm:text-3xl">
                 {etape.titre}
                 {etape.champClient && (
                   <span class="sr-only"> — vous intervenez à cette étape.</span>
@@ -246,7 +238,7 @@ const POS_RACCORD_BAS = 'lg:top-1/2 lg:mt-[22px]';
               <p class="font-texte mt-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
                 {etape.duree}
               </p>
-              <p class="font-texte mt-3 text-xs leading-relaxed text-texte-doux">
+              <p class="font-texte mt-3 text-xs leading-relaxed text-texte-doux sm:text-sm">
                 {etape.detail}
               </p>
             </div>
