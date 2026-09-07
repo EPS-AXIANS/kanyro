@@ -66,6 +66,13 @@
   --text-sous-titre: clamp(1.25rem, 1rem + 1.1vw, 2.25rem);
 
   --ease-rideau: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /*
+   * Assouplissement des lettres du bouton. Départ plus mordant que
+   * `--ease-rideau` et arrivée aussi calme : c'est ce qui donne l'impression
+   * que les lettres sont chassées plutôt que déplacées.
+   */
+  --ease-bouton: cubic-bezier(0.675, 0.15, 0.1, 1);
 }
 
 @layer base {
@@ -153,7 +160,19 @@
      ici, pas dans sept fichiers. */
 
   .bouton-primaire {
-    display: inline-block;
+    /*
+     * `inline-grid` et non `inline-block` : les deux copies du libellé — celle
+     * qu'on voit et celle qui la remplace au survol — occupent la MÊME cellule
+     * de grille et se superposent donc exactement, sans positionnement absolu
+     * ni hauteur à deviner. C'est ce qui permet à l'échange de se faire sans
+     * que le bouton change de taille.
+     *
+     * Sans script le bouton n'a qu'un seul enfant, un nœud de texte, qui
+     * devient l'unique élément de grille : le rendu est identique à celui de
+     * `inline-block`.
+     */
+    display: inline-grid;
+    justify-items: center;
     border-radius: 50%;
     background: var(--color-texte);
     color: var(--color-fond);
@@ -569,6 +588,157 @@
   to {
     opacity: 0;
     transform: translateY(-12%);
+  }
+}
+
+/* ---- Le libellé des boutons ---- */
+
+/*
+ * Au survol, chaque lettre du libellé bascule vers le haut et disparaît pendant
+ * qu'une seconde copie arrive par le bas. Les lettres ne partent pas ensemble :
+ * leur retard et leur inclinaison suivent une courbe sinusoïdale calculée sur
+ * leur distance au centre du mot, si bien que le milieu part le premier et les
+ * extrémités s'envolent en dernier, penchées vers l'extérieur.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * L'animation est reprise telle quelle de la ressource Osmo « Button 004 » :
+ * elle est ENTIÈREMENT en CSS, y compris la courbe de retard, qui se calcule
+ * ici avec `sin()`.
+ *
+ * Ce qui a été refait, c'est le découpage du texte. La ressource le confie à
+ * GSAP et à son greffon SplitText, dont elle n'utilise QUE la capacité à
+ * envelopper chaque caractère dans un span et à y poser deux variables. Environ
+ * 40 Ko de dépendance — bloqués de toute façon par `script-src 'self'`, puisque
+ * servis par un CDN — pour une quinzaine de lignes. C'est `initBoutonsAnimes`
+ * dans effets.js qui s'en charge.
+ *
+ * ---- Les deux variables, et ce qu'elles veulent dire ----
+ *
+ *   --index  distance de la lettre au centre du mot, 0 au milieu.
+ *   --signe  la même distance, POSITIVE à gauche du centre et NÉGATIVE à
+ *            droite. C'est elle qui fait pencher et dériver les deux moitiés du
+ *            mot en sens opposés, comme si le libellé s'ouvrait.
+ *
+ * Les deux ont une valeur de repli, et ce n'est pas de la coquetterie : sans
+ * script, aucune n'est posée. `var(--index, 0)` fait alors basculer toutes les
+ * lettres ensemble, sans retard ni inclinaison. L'échange de texte a donc bien
+ * lieu, en plus sage. Une variable sans repli aurait rendu tout le calcul
+ * invalide, et les transitions avec.
+ *
+ * ⚠ NE PAS RENOMMER `--retard-lettre` EN `--retard`. `--retard` existe déjà
+ * dans ce fichier pour les délais de révélation, et il HÉRITE : le bouton du
+ * hero porte `[--retard:740ms]`, que les lettres capteraient au passage.
+ */
+.bouton-texte {
+  display: inline-grid;
+  /* Les espaces du libellé sont des lettres comme les autres, et un espace dans
+     une boîte `inline-block` s'effondre sans ceci. */
+  white-space: pre;
+}
+
+.bouton-texte > span {
+  grid-area: 1 / 1;
+  perspective: 10em;
+  transform-style: preserve-3d;
+}
+
+.bouton-lettre {
+  --t: calc(var(--index, 0) / max(var(--index-max, 1), 1));
+  --retard-lettre: calc(0.05s + sin(calc(var(--t) * 1.5deg)) * 2.9s);
+  --inclinaison: calc(
+    clamp(-1, var(--signe, 0), 1) * sin(calc(var(--t) * 30deg)) * -36deg
+  );
+  display: inline-block;
+}
+
+/*
+ * Position de départ de la copie qui attend : sous le bouton, couchée.
+ *
+ * ⚠ LES QUATRE VALEURS PASSENT PAR DES VARIABLES, ET CE N'EST PAS UN CAPRICE.
+ *
+ * La règle de survol plus bas doit ramener la copie à sa position neutre —
+ * `translate: 0 0 0` et `rotate: 1 0 0 0deg`. Écrites en clair, ces deux
+ * déclarations ÉTAIENT SUPPRIMÉES à la minification : Lightning CSS les
+ * reconnaît comme égales à la valeur initiale et les juge inutiles. Elles ne
+ * l'étaient pas du tout, puisqu'elles servaient à écraser la règle de repos
+ * ci-dessous. Symptôme mesuré : au survol, la copie devenait bien opaque mais
+ * restait 15 px sous le bouton, couchée à -72°.
+ *
+ * En ne changeant que des variables, la règle de survol ne contient plus aucune
+ * valeur que le minifieur puisse juger neutre, et les déclarations qui les
+ * consomment vivent ici, dans une seule règle qu'il ne touche pas.
+ *
+ * (Troisième fois que ce minifieur retire quelque chose de porteur : voir aussi
+ * `.liquid-glass` pour `backdrop-filter`, et `.hero-sortie` pour
+ * `animation-timeline` replié dans le raccourci.)
+ */
+.bouton-texte__survol .bouton-lettre {
+  --derive: 1;
+  --montee: 1.25em;
+  --bascule: -72deg;
+  --echelle: 0.65;
+  --tourne: var(--inclinaison);
+
+  translate: calc(var(--signe, 0) * var(--derive) * 0.125em) var(--montee) 0;
+  rotate: 1 0 0 var(--bascule);
+  transform: rotateZ(var(--tourne)) scale(var(--echelle));
+  opacity: 0;
+  transition:
+    transform 0.35s var(--ease-bouton),
+    translate 0.35s var(--ease-bouton),
+    rotate 0.35s var(--ease-bouton),
+    opacity 0.15s 0.1s ease-out;
+}
+
+.bouton-texte__defaut .bouton-lettre {
+  transition:
+    transform 0.325s var(--ease-bouton),
+    translate 0.425s var(--ease-bouton),
+    rotate 0.45s var(--ease-bouton),
+    opacity 0.15s ease-out;
+}
+
+/*
+ * ⚠ Les trois conditions sont celles de la ressource, et chacune sert.
+ * `hover`/`pointer` écartent le tactile, où la bascule resterait figée après une
+ * touche ; `prefers-reduced-motion` parle de lui-même. Hors de ces conditions,
+ * la copie de survol garde simplement sa position de repos et ne se voit jamais.
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .bouton-lettre {
+    will-change: transform, translate, rotate, opacity;
+  }
+
+  :is(.bouton-primaire, [data-bouton-anime]):is(:hover, :focus-visible)
+    .bouton-texte__defaut
+    .bouton-lettre {
+    translate: calc(var(--signe, 0) * 0.125em) -1.25em 0;
+    rotate: 1 0 0 72deg;
+    transform: rotateZ(var(--inclinaison)) scale(0.65);
+    opacity: 0;
+    transition:
+      transform 0.35s var(--retard-lettre) var(--ease-bouton),
+      translate 0.35s var(--retard-lettre) var(--ease-bouton),
+      rotate 0.35s var(--retard-lettre) var(--ease-bouton),
+      opacity 0.15s calc(var(--retard-lettre) + 0.1s) ease-out;
+  }
+
+  /* Ne flippe que des variables — voir le bloc de repos pour la raison. */
+  :is(.bouton-primaire, [data-bouton-anime]):is(:hover, :focus-visible)
+    .bouton-texte__survol
+    .bouton-lettre {
+    --derive: 0;
+    --montee: 0em;
+    --bascule: 0deg;
+    --echelle: 1;
+    --tourne: 0deg;
+    opacity: 1;
+    transition:
+      transform 0.325s calc(var(--retard-lettre) + 0.05s) var(--ease-bouton),
+      translate 0.425s calc(var(--retard-lettre) + 0.05s) var(--ease-bouton),
+      rotate 0.45s calc(var(--retard-lettre) + 0.05s) var(--ease-bouton),
+      opacity 0.15s calc(var(--retard-lettre) + 0.075s) ease-out;
   }
 }
 

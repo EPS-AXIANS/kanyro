@@ -459,6 +459,108 @@ function initBarre() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Le libellé des boutons                                                     */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Découpe le libellé en lettres et le double, pour l'échange de texte au survol.
+ *
+ * Toute l'animation est dans global.css. Cette fonction ne fait que préparer le
+ * terrain : deux copies superposées du libellé, une lettre par span, et deux
+ * variables par lettre.
+ *
+ * ---- Pourquoi c'est écrit à la main ----
+ *
+ * La ressource d'origine confie ce découpage à GSAP et à son greffon SplitText.
+ * Elle n'en utilise que la capacité à envelopper chaque caractère et à y poser
+ * deux variables — soit ces quelques lignes, contre une quarantaine de kilos de
+ * dépendance. Et le CDN qui les sert est de toute façon refusé par
+ * `script-src 'self'` : il aurait fallu les installer et les empaqueter.
+ *
+ * ---- Les deux variables ----
+ *
+ *   --index  distance de la lettre au centre du mot, 0 au milieu.
+ *   --signe  la même distance, positive à gauche du centre, négative à droite.
+ *
+ * Elles sont écrites par le CSSOM, que `style-src` ne régit pas — un attribut
+ * `style` dans le balisage, lui, serait refusé.
+ *
+ * ---- Le nom accessible ----
+ *
+ * ⚠ Un libellé haché en spans se fait épeler lettre par lettre par certains
+ * lecteurs d'écran. Le texte entier est donc relevé AVANT le découpage et posé
+ * en `aria-label`, et l'enveloppe est masquée par `aria-hidden`. Le bouton garde
+ * ainsi exactement le nom qu'il avait.
+ */
+function initBoutonsAnimes() {
+  /*
+   * Mêmes conditions que la règle de survol dans global.css. Sur un appareil
+   * tactile l'effet ne peut pas se jouer : découper le texte n'y apporterait
+   * rien et ferait perdre au libellé son crénage et ses ligatures.
+   */
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return null;
+
+  const boutons = document.querySelectorAll(
+    '.bouton-primaire, [data-bouton-anime]'
+  );
+
+  for (const bouton of boutons) {
+    /*
+     * `initialiser()` est rejouée sur un DOM déjà préparé au premier chargement :
+     * l'appel direct et `astro:page-load` se suivent de près. Sans ce garde, le
+     * second passage relit `textContent` — qui vaut alors les DEUX copies mises
+     * bout à bout — et redécoupe un libellé doublé. Mesuré avant correction :
+     * 68 lettres au lieu de 34, et un bouton deux fois trop large.
+     *
+     * ⚠ `hasAttribute` et non la valeur : un attribut de données vide est une
+     * chaîne vide, donc fausse. C'est exactement l'erreur qui a produit le
+     * doublement.
+     */
+    if (bouton.hasAttribute('data-bouton-decoupe')) continue;
+
+    const libelle = bouton.textContent.trim();
+    if (!libelle) continue;
+
+    if (!bouton.hasAttribute('aria-label')) {
+      bouton.setAttribute('aria-label', libelle);
+    }
+
+    const lettres = [...libelle];
+    const centre = (lettres.length - 1) / 2;
+
+    const enveloppe = document.createElement('span');
+    enveloppe.className = 'bouton-texte';
+    enveloppe.setAttribute('aria-hidden', 'true');
+    enveloppe.style.setProperty('--index-max', String(Math.floor(centre)));
+
+    for (const variante of ['defaut', 'survol']) {
+      const copie = document.createElement('span');
+      copie.className = `bouton-texte__${variante}`;
+
+      lettres.forEach((lettre, i) => {
+        const distance = Math.floor(Math.abs(i - centre));
+        const span = document.createElement('span');
+        span.className = 'bouton-lettre';
+        span.textContent = lettre;
+        span.style.setProperty('--index', String(distance));
+        span.style.setProperty(
+          '--signe',
+          String(i < centre ? distance : i > centre ? -distance : 0)
+        );
+        copie.append(span);
+      });
+
+      enveloppe.append(copie);
+    }
+
+    bouton.replaceChildren(enveloppe);
+    bouton.dataset.boutonDecoupe = '';
+  }
+
+  return null;
+}
+
+/* ------------------------------------------------------------------------- */
 /* Survol directionnel                                                        */
 /* ------------------------------------------------------------------------- */
 
@@ -664,6 +766,7 @@ function initialiser() {
     initFrise(),
     initBarre(),
     initSurvolDirectionnel(),
+    initBoutonsAnimes(),
     initParallaxe(),
     initVideoHero(),
   ].filter(Boolean);
