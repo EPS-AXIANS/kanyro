@@ -4,6 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 import { BETA, SITE } from './src/config/site.js';
+import { phpEnDeveloppement } from './scripts/php-dev.mjs';
 
 /*
  * Garde-fou de bascule bêta → production.
@@ -59,6 +60,11 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss()],
+    /*
+     * `phpEnDeveloppement` ne s'active qu'avec `astro dev` : il exécute
+     * public/contact.php au lieu de le servir en clair, pour que l'envoi du
+     * formulaire mène à /merci comme en production. Voir scripts/php-dev.mjs.
+     */
+    plugins: [tailwindcss(), phpEnDeveloppement()],
   },
 });

@@ -81,6 +81,19 @@ l'envoi : signaler « adresse invalide » au troisième caractère d'une adresse
 cours de frappe, c'est reprocher au visiteur de ne pas avoir fini. La réussite,
 elle, s'affiche immédiatement.
 
+**Tester l'envoi en local.** Le serveur d'Astro sert `public/` en statique : sans
+rien, `/contact.php` était renvoyé en clair, et envoyer le formulaire affichait
+le code source du script au lieu de `/merci`. `scripts/php-dev.mjs` lance donc un
+serveur PHP avec `astro dev` et ne lui confie que `/contact.php` — le script
+exécuté est le vrai, celui qui partira en production. Rien à faire de plus que
+`npm run dev`, à condition d'avoir PHP sur la machine ; sinon le greffon se
+retire en le disant.
+
+`mail()` échouant sur la plupart des postes, faute de serveur de courrier,
+l'envoi aboutit en local sur `?erreur=envoi` : c'est le bon résultat, il prouve
+que tout a fonctionné jusqu'à la remise au système. Le greffon ne s'active
+**qu'en développement** ; en production, c'est le serveur qui exécute le PHP.
+
 ⚠ **Le bouton reste un vrai bouton d'envoi.** La ressource d'origine cache le
 `<input type="submit">` derrière un faux bouton et n'envoie que par JavaScript :
 script bloqué, formulaire mort. Ici `novalidate` est posé *depuis* le script, de
