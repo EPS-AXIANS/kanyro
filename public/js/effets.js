@@ -196,6 +196,181 @@ function initFormulaireDevis() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Formulaire de devis : validation vivante                                   */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Chaque champ dit où il en est pendant la saisie : une coche quand il est bon,
+ * une pastille et une phrase quand il ne l'est pas. L'affichage est repris de la
+ * ressource Osmo « Live Form Validation (Advanced) » — voir la section « Le
+ * formulaire » de global.css, qui détaille ce qui en vient et ce qui a changé.
+ *
+ * ---- Ce que ce bloc ne fait PAS ----
+ *
+ * Il n'envoie rien. Le bouton reste un `<button type="submit">` et le formulaire
+ * un POST natif vers contact.php : script absent, bloqué par la CSP ou en
+ * erreur, la demande part quand même et `required` rend la main aux bulles du
+ * navigateur. La ressource fait l'inverse — faux bouton, envoi programmatique —
+ * et perd le formulaire avec le script.
+ *
+ * Il ne remplace pas non plus contact.php, qui revalide les mêmes règles : tout
+ * ce qui se vérifie dans un navigateur se contourne depuis un autre.
+ *
+ * ---- Le seul réglage délicat ----
+ *
+ * QUAND un champ a le droit de dire qu'il ne va pas. Trop tôt, et « a@ » est
+ * déclaré fautif au troisième caractère d'une adresse qu'on est en train
+ * d'écrire ; trop tard, et on l'apprend une fois la demande partie. Le compromis
+ * est celui de la ressource : un champ ne peut afficher d'erreur qu'une fois
+ * QUITTÉ une première fois, ou au moment de l'envoi. La réussite, elle,
+ * s'affiche sans attendre — c'est un encouragement, pas un reproche.
+ */
+
+const MOTIF_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/*
+ * Un numéro français en compte dix ; on en exige huit. Les indicatifs, les
+ * formats étrangers et les numéros courts existent, et refuser un téléphone
+ * PARCE QU'IL EST INHABITUEL coûte une demande de devis. Le champ est facultatif
+ * de toute façon : ce seuil n'attrape que la faute de frappe évidente.
+ */
+const CHIFFRES_TELEPHONE = 8;
+
+function initValidationDevis() {
+  const formulaire = document.querySelector('form[name="devis"]');
+  if (!formulaire) return null;
+
+  const champs = [...formulaire.querySelectorAll('[data-validate]')]
+    .map((groupe) => ({
+      groupe,
+      saisie: groupe.querySelector('input, select, textarea'),
+    }))
+    .filter((champ) => champ.saisie);
+
+  if (champs.length === 0) return null;
+
+  /*
+   * `novalidate` posé ICI, et surtout pas dans le balisage. Écrit dans la page,
+   * il désarmerait le navigateur pour tout le monde — y compris pour celui dont
+   * le script n'a jamais chargé, dont le formulaire partirait alors incomplet
+   * vers contact.php, qui ne peut que le refuser. Posé depuis JavaScript, il ne
+   * s'applique qu'aux visiteurs pour lesquels nous prenons vraiment le relais.
+   */
+  formulaire.noValidate = true;
+
+  /*
+   * Une quinzaine d'écouteurs, coupés d'un seul geste au démontage. La liste
+   * de `removeEventListener` équivalente serait à tenir à jour à la main : c'est
+   * une fuite qui attend son tour.
+   */
+  const abandon = new AbortController();
+  const { signal } = abandon;
+
+  /* Les groupes autorisés à afficher une erreur — voir l'en-tête de section. */
+  const eveilles = new WeakSet();
+
+  const estValide = ({ groupe, saisie }) => {
+    const valeur = saisie.value.trim();
+
+    if (valeur === '') return groupe.hasAttribute('data-optionnel');
+    if (saisie.type === 'email') return MOTIF_EMAIL.test(valeur);
+    if (saisie.type === 'tel') {
+      return (valeur.match(/\d/g) ?? []).length >= CHIFFRES_TELEPHONE;
+    }
+
+    /*
+     * Pour tout le reste, une valeur non vide suffit — la longueur maximale est
+     * tenue par `maxlength` dans le balisage, qui empêche la faute au lieu de la
+     * signaler.
+     */
+    return true;
+  };
+
+  const afficher = (champ) => {
+    const { groupe, saisie } = champ;
+    const bon = estValide(champ);
+    const fautif = !bon && eveilles.has(groupe);
+
+    /* Un champ facultatif laissé vide n'a rien réussi : pas de coche. */
+    groupe.classList.toggle('is--succes', bon && saisie.value.trim() !== '');
+    groupe.classList.toggle('is--erreur', fautif);
+
+    if (fautif) saisie.setAttribute('aria-invalid', 'true');
+    else saisie.removeAttribute('aria-invalid');
+  };
+
+  for (const champ of champs) {
+    const { groupe, saisie } = champ;
+
+    saisie.addEventListener(
+      'blur',
+      () => {
+        eveilles.add(groupe);
+        afficher(champ);
+      },
+      { signal }
+    );
+
+    /*
+     * `change` pour une liste déroulante, `input` pour tout le reste : on ne
+     * tape pas dans un <select>, et son `input` n'y ajoute rien qu'un doublon.
+     */
+    saisie.addEventListener(
+      saisie.tagName === 'SELECT' ? 'change' : 'input',
+      () => afficher(champ),
+      { signal }
+    );
+  }
+
+  formulaire.addEventListener(
+    'submit',
+    (evenement) => {
+      let premierFautif = null;
+
+      for (const champ of champs) {
+        eveilles.add(champ.groupe);
+        afficher(champ);
+        if (!premierFautif && !estValide(champ)) premierFautif = champ;
+      }
+
+      /* Rien à redire : l'envoi suit son cours, natif, vers contact.php. */
+      if (!premierFautif) return;
+
+      evenement.preventDefault();
+
+      /*
+       * `preventScroll` parce que le saut sec du focus arriverait AVANT le
+       * défilement doux ci-dessous, qui n'aurait alors plus rien à parcourir.
+       */
+      premierFautif.saisie.focus({ preventScroll: true });
+      premierFautif.groupe.scrollIntoView({
+        block: 'center',
+        behavior: MOUVEMENT_DOUX.matches ? 'auto' : 'smooth',
+      });
+    },
+    { signal }
+  );
+
+  /*
+   * Retour de contact.php avec `?erreur=saisie` : le bandeau annonce « vérifiez
+   * les champs signalés ci-dessous ». Encore faut-il qu'ils le soient.
+   *
+   * ⚠ CETTE PASSE DÉPEND DE L'ORDRE DANS `initialiser()`. La saisie vient d'être
+   * restaurée par `initFormulaireDevis`, qui est appelée juste avant ; dans
+   * l'autre sens, elle ne trouverait que des champs vides et les signalerait
+   * tous, y compris ceux que le visiteur avait correctement remplis.
+   */
+  if (new URLSearchParams(window.location.search).get('erreur') === 'saisie') {
+    for (const champ of champs) {
+      eveilles.add(champ.groupe);
+      afficher(champ);
+    }
+  }
+
+  return () => abandon.abort();
+}
+
+/* ------------------------------------------------------------------------- */
 /* Révélations                                                                */
 /* ------------------------------------------------------------------------- */
 
@@ -761,7 +936,11 @@ function initialiser() {
   demonter();
 
   nettoyages = [
+    // ⚠ `initValidationDevis` LIT les champs que `initFormulaireDevis` vient de
+    // restaurer après un retour en erreur. Les intervertir ferait signaler des
+    // champs encore vides — voir l'en-tête de la validation.
     initFormulaireDevis(),
+    initValidationDevis(),
     initRevelations(),
     initFrise(),
     initBarre(),

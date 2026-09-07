@@ -1,0 +1,71 @@
+---
+import { ChevronDown, CircleAlert, CircleCheck } from 'lucide-astro';
+
+/*
+ * Un champ du formulaire de devis : l'étiquette, la saisie, les deux icônes
+ * d'état et le message d'échec.
+ *
+ * La saisie arrive par <slot /> plutôt que d'être construite ici. Un input, un
+ * select et un textarea n'ont ni les mêmes attributs ni le même contenu : les
+ * décrire par des props aurait fini par recopier HTML dans une signature de
+ * composant, pour la seule satisfaction de ne plus voir de balise dans la page.
+ *
+ * Le groupe porte `data-validate`, que effets.js cherche, et `data-optionnel`
+ * quand le champ peut rester vide — c'est la seule chose qui distingue « vide,
+ * et c'est très bien » de « vide, et il manque quelque chose ».
+ *
+ * Props :
+ *   id         identifiant de la saisie, repris par le <label> et le message
+ *   etiquette  ce qui est écrit au-dessus du champ
+ *   requis     ajoute l'astérisque et rend le vide fautif
+ *   message    la phrase montrée quand le champ ne va pas ; omise, aucun
+ *              message n'est rendu et seule l'icône parle
+ *   variante   'saisie' (défaut) | 'select' (ajoute le chevron) | 'zone'
+ */
+const {
+  id,
+  etiquette,
+  requis = false,
+  message,
+  variante = 'saisie',
+} = Astro.props;
+---
+
+{/*
+  ⚠ `undefined` ET NON `!requis`. Astro ne retire pas un attribut `data-*` dont
+  la valeur est `false` : il écrit `data-optionnel="false"`, que `hasAttribute`
+  trouve — et tous les champs, obligatoires compris, passaient pour facultatifs.
+  Seul `undefined` fait vraiment disparaître l'attribut du balisage.
+*/}
+<div class="champ-groupe" data-validate data-optionnel={requis ? undefined : ''}>
+  <label class="champ-etiquette" for={id}>
+    {etiquette}
+    {requis && <span class="champ-requis" aria-hidden="true">*</span>}
+  </label>
+
+  <div class:list={['champ', { 'is--select': variante === 'select', 'is--zone': variante === 'zone' }]}>
+    <slot />
+
+    {
+      variante === 'select' && (
+        <ChevronDown class="champ-chevron" stroke-width={1.5} aria-hidden="true" />
+      )
+    }
+
+    {/* Les deux icônes sont toujours là ; le CSS ne révèle que celle de l'état
+        courant. Voir la section « Le formulaire » de global.css. */}
+    <CircleCheck class="champ-icone is--succes" stroke-width={1.5} aria-hidden="true" />
+    <CircleAlert class="champ-icone is--erreur" stroke-width={1.5} aria-hidden="true" />
+  </div>
+
+  {
+    /* `aria-live` pour que le message soit lu au moment où il apparaît : sans
+       lui, quelqu'un au lecteur d'écran entendrait « champ invalide » sans
+       jamais entendre pourquoi. */
+    message && (
+      <p class="champ-message" id={`${id}-echec`} aria-live="polite">
+        {message}
+      </p>
+    )
+  }
+</div>

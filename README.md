@@ -69,6 +69,24 @@ une **limite de 5 envois par heure et par IP** : sans elle, on soumet l'adresse
 d'un tiers en boucle et c'est le domaine expéditeur qui finit sur les listes
 noires.
 
+**Validation vivante.** Chaque champ signale lui-même son état pendant la saisie
+— coche verte quand il est bon, pastille orange et une phrase quand il ne l'est
+pas — plutôt que de laisser la faute se découvrir après l'aller-retour serveur.
+L'affichage vient de la ressource Osmo « Live Form Validation (Advanced) », le
+comportement est dans `initValidationDevis` (`effets.js`) et les styles dans la
+section « Le formulaire » de `global.css`, qui détaille ce qui a été refait.
+
+Un champ n'affiche une erreur qu'une fois quitté une première fois, ou à
+l'envoi : signaler « adresse invalide » au troisième caractère d'une adresse en
+cours de frappe, c'est reprocher au visiteur de ne pas avoir fini. La réussite,
+elle, s'affiche immédiatement.
+
+⚠ **Le bouton reste un vrai bouton d'envoi.** La ressource d'origine cache le
+`<input type="submit">` derrière un faux bouton et n'envoie que par JavaScript :
+script bloqué, formulaire mort. Ici `novalidate` est posé *depuis* le script, de
+sorte qu'un visiteur sans JavaScript garde les contrôles natifs du navigateur et
+un formulaire qui part. `contact.php` revalide les mêmes règles de toute façon.
+
 ### Le serveur mail
 
 Depuis le 26 août 2026, `contact@kanyro.tech` existe vraiment : Postfix,
@@ -240,12 +258,12 @@ fichier à éditer.
 
 ## Décisions structurantes
 
-**Sortie statique, deux scripts, 14 Ko gzip en tout.** Le site vend du
+**Sortie statique, deux scripts, 18 Ko gzip en tout.** Le site vend du
 référencement local : il ne peut pas dépendre du client pour afficher son
-contenu. `public/js/effets.js` (8,3 Ko — il n'est pas minifié, voir plus bas,
-et c'est surtout du commentaire) porte les révélations, la frise du déroulement,
-la parallaxe et la barre de navigation ; `<ClientRouter />` d'Astro (5,6 Ko)
-enchaîne les pages en fondu. Tout est décoratif, à une exception près : la
+contenu. `public/js/effets.js` (12,5 Ko gzip — il n'est pas minifié, voir
+plus bas, et c'est surtout du commentaire) porte les révélations, la frise du
+déroulement, la parallaxe, la barre de navigation et la validation du
+formulaire ; `<ClientRouter />` d'Astro (5,6 Ko) enchaîne les pages en fondu. Tout est décoratif, à une exception près : la
 densité de la barre de navigation, qui relève de la lisibilité — d'où un CSS qui
 part de l'état lisible et un script qui ne fait que l'éclaircir.
 

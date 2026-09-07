@@ -26,6 +26,18 @@
   --color-trait: rgba(255, 255, 255, 0.14);
 
   /*
+   * Le seul vert de la maison, et il n'a qu'un emploi : la coche de validation
+   * d'un champ du formulaire.
+   *
+   * Il a fallu l'introduire parce que `--color-signal` porte déjà l'erreur — et
+   * signaler « c'est bon » avec la couleur qui dit « ça ne va pas » deux lignes
+   * plus haut ne se rattrape pas par la forme de l'icône. Volontairement rabattu
+   * vers le gris : un vert saturé sur ce fond chaud aurait l'air d'être tombé
+   * d'un autre site.
+   */
+  --color-valide: #5fbd88;
+
+  /*
    * Typographie — nommée par rôle, comme la palette juste au-dessus. Une classe
    * `font-inter` qui ne pointe plus sur Inter est un piège à six mois ; un
    * changement de fonte se fait ici et nulle part ailleurs.
@@ -846,6 +858,247 @@
 
 [data-astro-transition-fallback='new'] {
   animation: page-entree 0.55s var(--ease-rideau) both;
+}
+
+/* ---- Le formulaire ---- */
+
+/*
+ * Validation vivante : chaque champ dit lui-même où il en est pendant la
+ * saisie, au lieu de laisser le visiteur découvrir sa faute après l'aller-retour
+ * vers contact.php.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * La structure est reprise de la ressource Osmo « Live Form Validation
+ * (Advanced) » : un groupe `[data-validate]` par champ, les classes d'état
+ * posées sur le GROUPE et non sur la saisie — c'est ce qui permet à l'étiquette,
+ * à la bordure, aux icônes et au message de réagir ensemble sans qu'aucun n'ait
+ * à connaître les autres.
+ *
+ * Ce qui a été refait :
+ *
+ *   — La palette. La ressource est claire, ce site est sombre, et il a fallu
+ *     ajouter un vert à une palette qui n'en avait pas (voir --color-valide).
+ *   — Le bouton d'envoi. La ressource cache le vrai `<input type="submit">`
+ *     derrière un faux bouton et n'envoie QUE depuis JavaScript : script en
+ *     échec, formulaire mort. Ici le bouton reste un vrai bouton d'envoi, et la
+ *     validation ne fait que s'interposer quand elle est là.
+ *   — Le délai anti-robot de cinq secondes, qui refuse l'envoi par une `alert()`
+ *     et punit d'abord le visiteur pressé. Le pot de miel, le contrôle
+ *     d'origine et le quota par IP de contact.php tiennent ce rôle sans rien
+ *     demander à personne.
+ *   — Les cases et boutons radio de la ressource : ce formulaire n'en a aucun,
+ *     et du code d'état pour des champs qui n'existent pas se périme sur place.
+ */
+
+.champ-etiquette {
+  display: block;
+  font-family: var(--font-texte);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-texte-faible);
+  transition: color 0.3s var(--ease-rideau);
+}
+
+[data-validate].is--erreur .champ-etiquette {
+  color: var(--color-signal-vif);
+}
+
+.champ-requis {
+  margin-left: 0.35em;
+  color: var(--color-signal-vif);
+}
+
+.champ {
+  position: relative;
+  margin-top: 0.5rem;
+}
+
+.champ-saisie {
+  /*
+   * `appearance: none` d'abord pour la flèche native du <select>, qu'on remplace
+   * par la nôtre — mais elle emporte aussi, sur iOS, les coins arrondis et
+   * l'ombre interne que Safari impose aux champs.
+   */
+  appearance: none;
+  width: 100%;
+  border: 1px solid var(--color-trait);
+  border-radius: 0.75rem;
+  background-color: var(--color-surface);
+  color: var(--color-texte);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  /* La marge de droite réserve la place des icônes d'état, qui se superposent. */
+  padding: 0.875rem 3.25rem 0.875rem 1rem;
+  transition:
+    border-color 0.3s var(--ease-rideau),
+    background-color 0.3s var(--ease-rideau);
+}
+
+.champ-saisie::placeholder {
+  color: var(--color-texte-faible);
+}
+
+.champ-saisie:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: var(--color-surface-haute);
+}
+
+/*
+ * Le menu déroulant d'un <select> est dessiné par le système, pas par la page :
+ * sans ces deux déclarations, la liste s'ouvre en noir sur blanc au milieu d'un
+ * site sombre sous Windows, et les options restent illisibles sur certains
+ * thèmes Linux.
+ */
+.champ-saisie option {
+  background-color: var(--color-surface);
+  color: var(--color-texte);
+}
+
+/*
+ * Première option à valeur vide : c'est un libellé d'attente, pas un choix. Le
+ * texte reste en retrait tant qu'elle est sélectionnée, ce que la couleur du
+ * `placeholder` fait déjà pour les champs de texte.
+ */
+.champ-saisie:has(option[value='']:checked) {
+  color: var(--color-texte-faible);
+}
+
+.champ-saisie.is--zone {
+  resize: vertical;
+  min-height: 9rem;
+}
+
+[data-validate].is--erreur .champ-saisie {
+  border-color: var(--color-signal);
+}
+
+[data-validate].is--succes .champ-saisie {
+  border-color: rgba(95, 189, 136, 0.45);
+}
+
+/* ---- Icônes d'état ---- */
+
+/*
+ * Les deux icônes sont posées dans le balisage et se recouvrent : seule celle
+ * qui correspond à l'état du groupe devient visible. Les afficher ainsi plutôt
+ * que de les créer depuis JavaScript garde le rendu identique au premier cadre,
+ * et ne demande rien au script en dehors d'une classe.
+ */
+.champ-icone,
+.champ-chevron {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.champ-chevron {
+  color: var(--color-texte-faible);
+}
+
+.champ-icone {
+  /*
+   * ⚠ `--echelle-icone` PLUTÔT QU'UN `scale: 1` ÉCRIT EN CLAIR dans la règle
+   * d'état. Lightning CSS supprime les déclarations qu'il juge égales à la
+   * valeur initiale, et `scale: 1` en est une : l'icône serait apparue à 72 % de
+   * sa taille, sans que rien ne le montre en développement. Même piège, et même
+   * parade, que pour les lettres du bouton plus haut.
+   */
+  scale: var(--echelle-icone, 0.72);
+  opacity: var(--opacite-icone, 0);
+  transition:
+    opacity 0.35s var(--ease-rideau),
+    scale 0.35s var(--ease-rideau);
+}
+
+.champ-icone.is--succes {
+  color: var(--color-valide);
+}
+
+.champ-icone.is--erreur {
+  color: var(--color-signal-vif);
+}
+
+[data-validate].is--succes .champ-icone.is--succes,
+[data-validate].is--erreur .champ-icone.is--erreur {
+  --echelle-icone: 1;
+  --opacite-icone: 1;
+}
+
+/*
+ * Le <select> garde sa flèche : les icônes d'état se rangent à sa gauche plutôt
+ * que par-dessus. La saisie recule d'autant.
+ */
+.champ.is--select .champ-icone {
+  right: 2.75rem;
+}
+
+.champ.is--select .champ-saisie {
+  padding-right: 5rem;
+}
+
+/*
+ * Dans une zone de texte, une icône centrée verticalement flotterait au milieu
+ * du vide, et se retrouverait ailleurs à chaque ligne ajoutée. Elle s'aligne
+ * donc sur la première ligne, à hauteur du texte.
+ */
+.champ.is--zone .champ-icone {
+  top: 1.25rem;
+  translate: 0 0;
+}
+
+/* ---- Le message d'erreur ---- */
+
+/*
+ * Absent de la ressource, qui s'en tient à l'icône. Une pastille orange dit
+ * qu'un champ ne va pas, elle ne dit pas pourquoi : sur un champ d'adresse email
+ * ça se devine, sur les autres non.
+ *
+ * Le texte vit dans le balisage et non dans le script : il est traduit, relu et
+ * modifiable là où il se lit, et il s'affiche par la seule classe du groupe —
+ * JavaScript n'a donc rien à écrire dedans.
+ */
+.champ-message {
+  display: none;
+  margin-top: 0.5rem;
+  font-family: var(--font-texte);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-signal-vif);
+}
+
+[data-validate].is--erreur .champ-message {
+  display: block;
+}
+
+/* ---- Les bandeaux d'échec ---- */
+
+.bandeau-alerte {
+  position: relative;
+  border: 1px solid var(--color-signal);
+  border-radius: 0.75rem;
+  background-color: var(--color-brique);
+  font-family: var(--font-texte);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  /* Place réservée à droite pour l'icône, comme dans les champs. */
+  padding: 1.25rem 3.5rem 1.25rem 1.25rem;
+}
+
+.bandeau-alerte-icone {
+  position: absolute;
+  top: 1.35rem;
+  right: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-signal-vif);
 }
 
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */

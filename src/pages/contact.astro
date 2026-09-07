@@ -1,5 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
+import Champ from '../components/Champ.astro';
+import { CircleAlert } from 'lucide-astro';
 import { SITE } from '../config/site.js';
 import { filAriane } from '../config/schema.js';
 import metiers from '../data/metiers.json';
@@ -9,12 +11,7 @@ const jsonLd = filAriane([
   { nom: 'Contact', chemin: '/contact' },
 ]);
 
-const champClasses =
-  'font-texte mt-2 w-full rounded-xl border border-trait bg-surface px-4 py-3.5 text-sm text-texte placeholder:text-texte-faible transition-colors focus:border-white/40';
-const labelClasses =
-  'font-texte text-[10px] font-medium tracking-[0.2em] text-texte-faible uppercase';
-const classesErreur =
-  'font-texte mb-8 rounded-xl border border-signal bg-brique p-5 text-sm leading-relaxed';
+const classesBandeau = 'bandeau-alerte mb-8';
 ---
 
 <Base
@@ -38,7 +35,9 @@ const classesErreur =
       <!--
         POST natif vers public/contact.php — aucun JavaScript nécessaire pour
         envoyer. Le script n'ajoute que le confort : restaurer la saisie après une
-        erreur, et afficher le bon bandeau. Sans lui, le formulaire fonctionne.
+        erreur, afficher le bon bandeau, et signaler un champ fautif avant
+        l'envoi plutôt qu'après. Sans lui, le formulaire fonctionne : les
+        attributs `required` et `type="email"` rendent la main au navigateur.
 
         `bot-field` est le pot de miel : masqué en CSS, un humain ne le voit pas,
         un robot le remplit et l'envoi est ignoré côté serveur.
@@ -57,40 +56,29 @@ const classesErreur =
           problème vient de mon côté » à quelqu'un qui a juste mal tapé son
           adresse : il chercherait la panne au lieu de corriger le champ.
         */}
-        <p
-          id="erreur-saisie"
-          hidden
-          role="alert"
-          class={classesErreur}
-        >
+        <p id="erreur-saisie" hidden role="alert" class={classesBandeau}>
           Il manque quelque chose, ou votre adresse email comporte une erreur.
-          Vérifiez les champs ci-dessous, ce que vous aviez écrit a été conservé.
+          Vérifiez les champs signalés ci-dessous, ce que vous aviez écrit a été
+          conservé.
+          <CircleAlert class="bandeau-alerte-icone" stroke-width={1.5} aria-hidden="true" />
         </p>
 
-        <p
-          id="erreur-limite"
-          hidden
-          role="alert"
-          class={classesErreur}
-        >
+        <p id="erreur-limite" hidden role="alert" class={classesBandeau}>
           Plusieurs demandes viennent de partir depuis votre connexion. Si ce
           n'était pas vous, ou si vous êtes pressé, écrivez-moi directement à{' '}
           <a class="text-signal-vif underline" href={`mailto:${SITE.contact.email}`}>
             {SITE.contact.email}
           </a>.
+          <CircleAlert class="bandeau-alerte-icone" stroke-width={1.5} aria-hidden="true" />
         </p>
 
-        <p
-          id="erreur-envoi"
-          hidden
-          role="alert"
-          class={classesErreur}
-        >
+        <p id="erreur-envoi" hidden role="alert" class={classesBandeau}>
           Votre message n'est pas parti, le problème vient de mon côté, pas du
           vôtre. Écrivez-moi directement à{' '}
           <a class="text-signal-vif underline" href={`mailto:${SITE.contact.email}`}>
             {SITE.contact.email}
           </a>, je vous réponds aussi vite.
+          <CircleAlert class="bandeau-alerte-icone" stroke-width={1.5} aria-hidden="true" />
         </p>
 
         <p class="hidden">
@@ -100,71 +88,115 @@ const classesErreur =
         </p>
 
         <div class="grid gap-6 sm:grid-cols-2">
-          <div>
-            <label class={labelClasses} for="nom">Votre nom</label>
-            <input id="nom" name="nom" type="text" required class={champClasses} />
-          </div>
+          {/*
+            `maxlength` reprend les garde-fous de contact.php (200 et 5000
+            caractères). Empêcher la saisie coûte moins cher au visiteur que la
+            refuser après coup — le serveur revalide de toute façon.
+          */}
+          <Champ
+            id="nom"
+            etiquette="Votre nom"
+            requis
+            message="Il me faut au moins un nom pour savoir à qui je réponds."
+          >
+            <input
+              id="nom"
+              name="nom"
+              type="text"
+              required
+              maxlength="200"
+              autocomplete="name"
+              aria-describedby="nom-echec"
+              class="champ-saisie"
+            />
+          </Champ>
 
-          <div>
-            <label class={labelClasses} for="entreprise">Votre entreprise</label>
-            <input id="entreprise" name="entreprise" type="text" class={champClasses} />
-          </div>
+          <Champ id="entreprise" etiquette="Votre entreprise">
+            <input
+              id="entreprise"
+              name="entreprise"
+              type="text"
+              maxlength="200"
+              autocomplete="organization"
+              class="champ-saisie"
+            />
+          </Champ>
 
-          <div>
-            <label class={labelClasses} for="email">Votre email</label>
+          <Champ
+            id="email"
+            etiquette="Votre email"
+            requis
+            message="Vérifiez cette adresse : c'est là que part ma réponse."
+          >
             <input
               id="email"
               name="email"
               type="email"
               required
               autocomplete="email"
-              class={champClasses}
+              aria-describedby="email-echec"
+              class="champ-saisie"
             />
-          </div>
+          </Champ>
 
-          <div>
-            <label class={labelClasses} for="telephone">Votre téléphone</label>
+          <Champ
+            id="telephone"
+            etiquette="Votre téléphone"
+            message="Ce numéro semble incomplet — ou laissez-le vide, l'email suffit."
+          >
             <input
               id="telephone"
               name="telephone"
               type="tel"
               autocomplete="tel"
-              class={champClasses}
+              aria-describedby="telephone-echec"
+              class="champ-saisie"
             />
-          </div>
+          </Champ>
         </div>
 
         <div class="mt-6">
-          <label class={labelClasses} for="metier">Votre métier</label>
-          <select id="metier" name="metier" class={champClasses}>
-            <option value="">Choisir…</option>
-            {metiers.map((m) => <option value={m.slug}>{m.nom}</option>)}
-            <option value="autre">Autre métier du bâtiment</option>
-          </select>
+          <Champ id="metier" etiquette="Votre métier" variante="select">
+            <select id="metier" name="metier" class="champ-saisie">
+              <option value="">Choisir…</option>
+              {metiers.map((m) => <option value={m.slug}>{m.nom}</option>)}
+              <option value="autre">Autre métier du bâtiment</option>
+            </select>
+          </Champ>
         </div>
 
         {/* Pour ceux qui n'iront pas sur le calendrier — la majorité, sur cette
             cible. Évite au moins un aller-retour de mails. */}
         <div class="mt-6">
-          <label class={labelClasses} for="disponibilite">Quand vous joindre</label>
-          <select id="disponibilite" name="disponibilite" class={champClasses}>
-            <option value="">Peu importe, appelez quand vous pouvez</option>
-            <option value="samedi-matin">Samedi matin</option>
-            <option value="samedi-apres-midi">Samedi après-midi</option>
-            <option value="soir-semaine">En soirée, en semaine</option>
-            <option value="chantier">Passez me voir sur le chantier</option>
-          </select>
+          <Champ id="disponibilite" etiquette="Quand vous joindre" variante="select">
+            <select id="disponibilite" name="disponibilite" class="champ-saisie">
+              <option value="">Peu importe, appelez quand vous pouvez</option>
+              <option value="samedi-matin">Samedi matin</option>
+              <option value="samedi-apres-midi">Samedi après-midi</option>
+              <option value="soir-semaine">En soirée, en semaine</option>
+              <option value="chantier">Passez me voir sur le chantier</option>
+            </select>
+          </Champ>
         </div>
 
         <div class="mt-6">
-          <label class={labelClasses} for="message">Où en êtes-vous aujourd'hui ?</label>
-          <textarea
+          <Champ
             id="message"
-            name="message"
-            rows="6"
-            required
-            placeholder="Pas de site, un vieux site, des clients qui viennent surtout du bouche-à-oreille…"
-            class={champClasses}></textarea>
+            etiquette="Où en êtes-vous aujourd'hui ?"
+            requis
+            variante="zone"
+            message="Deux lignes suffisent : dites-moi simplement où vous en êtes."
+          >
+            <textarea
+              id="message"
+              name="message"
+              rows="6"
+              required
+              maxlength="5000"
+              placeholder="Pas de site, un vieux site, des clients qui viennent surtout du bouche-à-oreille…"
+              aria-describedby="message-echec"
+              class="champ-saisie is--zone"></textarea>
+          </Champ>
         </div>
 
         <div class="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
