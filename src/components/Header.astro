@@ -24,7 +24,7 @@ const droite = [
 const actuel = Astro.url.pathname.replace(/\.html$/, '');
 
 const classeLien =
-  'lien-barre whitespace-nowrap text-[9px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] no-underline transition-colors duration-300';
+  'whitespace-nowrap text-[9px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] no-underline transition-colors duration-300';
 ---
 
 <header
@@ -43,15 +43,15 @@ const classeLien =
     class="liquid-glass barre flex items-center gap-3 rounded-full px-4 py-2.5 sm:gap-12 sm:px-10 sm:py-3"
   >
     {/*
-      `data-curseur-cible` est la prise du curseur magnétique : au survol, le
-      point qui suit la souris vient se dilater derrière le libellé. Le logement
-      qui l'accueille est créé par le script, pas posé ici.
+      Plus de `data-curseur-cible` ici : le curseur se dilate désormais au survol
+      de TOUT lien, par un `:has()` posé sur le <body>. L'attribut n'a survécu
+      que comme prise à poser sur ce qui n'est ni lien ni bouton — voir
+      `.curseur` dans global.css.
     */}
     {
       gauche.map((l) => (
         <a
           href={l.href}
-          data-curseur-cible
           class:list={[classeLien, 'text-white/85 hover:text-white']}
         >
           {l.texte}
@@ -77,7 +77,6 @@ const classeLien =
         <a
           href={l.href}
           aria-current={actuel === l.href ? 'page' : undefined}
-          data-curseur-cible
           class:list={[
             classeLien,
             actuel === l.href ? 'text-white' : 'text-white/85 hover:text-white',
