@@ -1340,7 +1340,28 @@
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 10;
+
+  /*
+   * AU PREMIER PLAN, et pas seulement au-dessus du contenu de sa section.
+   *
+   * À 10, l'arc recouvrait bien les titres et le texte, mais il passait SOUS la
+   * barre de navigation (z-50) et sous le dégradé de pied de page (z-40) : la
+   * courbe montait, et ces deux-là restaient posés par-dessus, ce qui trahit le
+   * raccord au moment précis où il doit se lire comme un seul aplat.
+   *
+   * L'échelle du site, du fond vers le haut : le dégradé de pied à 40, la barre
+   * à 50, l'arc à 54, la bille du curseur à 55, le lien d'évitement à 60.
+   *
+   * ⚠ 54, ET PAS PLUS HAUT. Au-dessus de 55, l'arc recouvrirait la bille — or
+   * elle ne double pas la flèche, elle la REMPLACE (`cursor: none`, voir plus
+   * bas). Le visiteur se retrouverait sans aucun pointeur le temps du raccord,
+   * c'est-à-dire pendant qu'il défile. Le lien d'évitement, lui, ne s'affiche
+   * qu'au clavier et doit rester visible quand il le fait.
+   *
+   * L'arc reste découpé par sa section (`overflow-hidden`) : monter ce chiffre
+   * ne l'en fait pas sortir, ça ne change que l'ordre de peinture.
+   */
+  z-index: 54;
 
   /*
    * Une hauteur d'écran, et surtout PAS la hauteur de la section : c'est ce qui
