@@ -1,31 +1,31 @@
 ---
 # ─────────────────────────────────────────────────────────────────────────────
-# ⚠ BROUILLON, ET IL DOIT LE RESTER POUR L'INSTANT.
+# PUBLIÉE, ET LE SITE N'EST PAS ENCORE EN LIGNE. C'est assumé, à une condition
+# qui est tenue ici : la page LE DIT, dès le résumé et dès la première ligne du
+# corps. Une maquette présentée comme une maquette n'est pas une fausse
+# référence ; une maquette présentée comme un chantier livré, si.
 #
-# La page /realisations dit, dans son état vide : « ni fausses références, ni
-# MAQUETTES PRÉSENTÉES COMME DES CHANTIERS, je préfère la laisser vide jusqu'au
-# premier client livré. » Ce site-là est une maquette : complète, mais pas en
-# ligne. Publier cette fiche aujourd'hui contredirait la phrase à deux clics.
+# `enLigne` reste donc absent tant qu'il n'y a pas d'adresse — c'est lui qui fait
+# écrire « maquette livrée en <mois> » plutôt que « mis en ligne en <mois> » sous
+# le titre, et qui retire le lien « voir le site ». Le renseigner le jour de la
+# bascule suffit à basculer les deux.
 #
-# Ce qu'il faut avant de passer `brouillon` à false :
+# `date:` est celle de la livraison de la maquette. À remplacer par celle de la
+# mise en ligne le même jour.
 #
-#   1. Le site en ligne, et `enLigne:` renseigné avec son adresse.
-#   2. `date:` remplacée par la date de MISE EN LIGNE — la page affiche
-#      « mis en ligne en <mois> », et la date ci-dessous est celle de la maquette.
-#   3. L'accord écrit de Frédérique Deranty pour publier son nom et son chantier.
-#   4. `FONCTIONS.realisations` passé à true dans src/config/site.js, sans quoi
-#      toute la section reste éteinte.
+# ⚠ RESTE À FAIRE, ET CE N'EST PAS DU CODE : l'accord de Frédérique Deranty pour
+# publier son nom, son métier et sa commune sur le site de l'agence. C'est de la
+# famille, donc ça se demande vite — mais ça se demande.
 #
-# `resultats:` reste vide tant qu'il n'y a rien de MESURÉ. Ce qui vaudra la peine
-# d'être compté, une fois le site en ligne depuis quelques mois : les demandes
-# arrivées par le formulaire (elles sont en base, donc comptables), et le temps
-# passé à faire un devis avant et après. Pas d'estimation présentée comme un
-# résultat.
+# `resultats:` reste vide tant qu'il n'y a rien de MESURÉ. Ce qui vaudra d'être
+# compté, une fois le site en ligne depuis quelques mois : les demandes arrivées
+# par le formulaire — elles sont en base, donc comptables — et le temps qu'un
+# devis met à sortir. Pas d'estimation présentée comme un résultat.
 #
 # ⚠ Un mot sur le positionnement : le site vend « des sites pour les artisans du
 # bâtiment ». Une relieuse est une artisane, mais pas du bâtiment. C'est la seule
 # référence réelle, et elle montre plus de travail que n'importe quel chantier de
-# couvreur — mais elle décale le discours d'accueil. À trancher avant publication.
+# couvreur — mais elle décale le discours d'accueil.
 # ─────────────────────────────────────────────────────────────────────────────
 titre: "Un site refait, et la facturation de l'atelier avec"
 client: 'Atelier de reliure Frédérique Deranty'
@@ -34,12 +34,18 @@ commune: 'Chuignolles'
 date: 2026-09-08
 resume: >-
   Un atelier installé depuis 1998, un site Wix qui montrait le travail sans
-  jamais aider à le vendre. Le site a été refait, et le suivi des devis et des
-  factures est passé du papier à un espace de travail qui tient les règles
-  comptables à la place de l'artisane.
+  jamais aider à le vendre. Tout est refait, et le suivi des devis et des
+  factures est passé du papier à un espace qui tient les règles comptables à la
+  place de l'artisane. Maquette livrée, mise en ligne à venir.
 resultats: []
-brouillon: true
+brouillon: false
 ---
+
+> **Ce chantier n'est pas encore en ligne.** Le site est terminé et fonctionne ;
+> il attend le numéro SIRET de l'atelier, quelques tarifs à faire relire, et le
+> plan de redirections qui évitera de perdre dix ans de référencement. Cette
+> fiche décrit donc du travail livré, pas un site que vous pouvez visiter — et
+> aucun chiffre de résultat n'y figure, pour la même raison.
 
 ## Le point de départ
 
@@ -84,12 +90,15 @@ exactement ce qu'un contrôle cherche.
 
 ## Où on en est
 
-Le site est terminé et fonctionne. Il n'est pas encore en ligne : il manque le
-numéro SIRET, quelques tarifs de cours à faire relire, et le plan de bascule du
-référencement — un site indexé depuis des années ne se remplace pas sans
-redirections, et ça demande un accès à la console de recherche.
+La maquette est complète et tourne. Ce qui manque tient à des informations qui
+ne s'inventent pas : le numéro SIRET, mention obligatoire sans laquelle aucune
+facture ne peut être émise ; quelques tarifs de cours dont l'appariement a été
+reconstitué depuis l'ancienne mise en page et qui demandent une relecture ; et le
+plan de bascule du référencement, parce qu'un site indexé depuis des années ne se
+remplace pas sans redirections.
 
 Aucun chiffre de résultat n'est affiché ici, et c'est volontaire : le site n'a pas
 encore servi un seul visiteur. Ce qui sera compté le moment venu, ce sont les
 demandes arrivées par le formulaire — elles sont enregistrées en base, donc
-vérifiables — et le temps qu'un devis prend à sortir.
+vérifiables — et le temps qu'un devis prend à sortir. En attendant, il n'y a rien
+à afficher, et une estimation présentée comme un résultat ne vaut rien.

@@ -344,7 +344,16 @@ fichier à éditer.
 - [ ] Redirection `kaniro.fr` à ajouter dans le `Caddyfile` si le domaine
       défensif est réservé — le nom sera mal orthographié à l'oral (« Kaniro »).
       Mieux vaut une redirection 301 qu'un second site à maintenir.
-- [ ] Livrer un chantier de référence avant de pousser le site.
+- [x] Chantier de référence — l'atelier de reliure Frédérique Deranty, publié
+      dans `/realisations`. ⚠ La fiche dit qu'il s'agit d'une **maquette livrée
+      et pas encore en ligne**, et la section « Preuve » de l'accueil le répète :
+      c'est ce qui la distingue d'une fausse référence, et ça ne tient que tant
+      que les deux textes disent la même chose. Le jour de la mise en ligne,
+      renseigner `enLigne` et la date dans
+      `src/content/realisations/atelier-reliure-deranty.md` — la mention
+      « maquette livrée en <mois> » bascule alors d'elle-même en
+      « mis en ligne en <mois> », et le lien « voir le site » apparaît.
+- [ ] Accord de l'artisane pour publier son nom sur le site de l'agence.
 
 ---
 
