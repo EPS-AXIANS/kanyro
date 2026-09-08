@@ -675,9 +675,19 @@ function initBoutonsAnimes() {
    */
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return null;
 
-  const boutons = document.querySelectorAll(
-    '.bouton-primaire, [data-bouton-anime]'
-  );
+  /*
+   * ⚠ `[data-bouton-anime]` SEUL, et plus `.bouton-primaire`.
+   *
+   * L'échange de lettres appartient au « Demander un devis » : c'est le geste
+   * de l'unique chemin de conversion, et il perd tout son poids s'il se joue
+   * aussi sur « Retour à l'accueil » ou « Revoir l'offre ». Le commentaire de
+   * 404.astro le disait déjà — « l'effet suit le libellé » — mais le sélecteur,
+   * lui, suivait la classe, et attrapait les onze boutons primaires du site.
+   *
+   * Désormais l'effet se demande, il ne s'hérite pas. Les autres boutons
+   * gardent l'aimantation du curseur, qui elle reste automatique.
+   */
+  const boutons = document.querySelectorAll('[data-bouton-anime]');
 
   for (const bouton of boutons) {
     /*
@@ -873,6 +883,275 @@ function initParallaxe() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Le curseur magnétique                                                      */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Un point suit le pointeur ; au survol d'un lien de la barre, il migre DANS le
+ * lien et s'y dilate pour en devenir le fond.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * Le découpage est celui de la ressource Osmo « Magnetic Cursor » : un élément
+ * fixe qui suit la souris, un enfant qui change de parent au survol, une
+ * animation FLIP par-dessus pour que le changement de parent se voie comme un
+ * mouvement et non comme un saut.
+ *
+ * La ressource confie les deux à GSAP (`quickTo`) et à son greffon Flip, servis
+ * par jsDelivr. Ils sont donc bloqués par `script-src 'self'`, comme l'était
+ * SplitText pour le libellé des boutons : ce qui suit les remplace.
+ *
+ * ---- Le FLIP, en trois mesures ----
+ *
+ * Déplacer un nœud dans le document le fait sauter : il disparaît d'un endroit
+ * et réapparaît ailleurs, à une autre taille. Le remède tient en quatre gestes —
+ * mesurer AVANT, déplacer, mesurer APRÈS, puis animer depuis la différence
+ * jusqu'à zéro. Le nœud est déjà à sa place définitive pendant toute
+ * l'animation ; ce qu'on voit n'est qu'une transformation qui s'annule.
+ *
+ * C'est tout ce que fait le greffon Flip, à ceci près qu'il couvre des cas dont
+ * rien ici n'a besoin : listes réordonnées, éléments absents d'un des deux
+ * états, `position: absolute` recalculé.
+ */
+
+/*
+ * Ce que le point sait habiter : les liens marqués, et TOUS les boutons du
+ * vocabulaire partagé. Les nommer par leur classe plutôt que de poser un
+ * attribut sur chacun évite qu'un bouton ajouté demain soit le seul à ne rien
+ * faire — c'est le même parti que `initBoutonsAnimes` prenait pour les lettres,
+ * avant que celles-ci ne deviennent l'exception plutôt que la règle.
+ */
+const CIBLES_CURSEUR =
+  '[data-curseur-cible], .bouton-primaire, .bouton-secondaire';
+
+/*
+ * Fraction de la distance restante rattrapée à chaque cadre.
+ *
+ * Resserré depuis que la bille REMPLACE le curseur natif au lieu de
+ * l'accompagner : ce n'est plus un ornement qui traîne derrière une flèche
+ * bien visible, c'est le seul repère dont dispose la main pour viser. Un
+ * amortissement trop lâche donne alors l'impression que la page répond mal.
+ *
+ * Assez haut pour que la bille colle au geste, assez bas pour qu'il reste une
+ * traîne : c'est le seul réglage à toucher si le suivi paraît mou ou nerveux.
+ */
+const SUIVI_CURSEUR = 0.22;
+
+/** En deçà, le point est arrivé et la boucle s'arrête au lieu de tourner à vide. */
+const SEUIL_ARRET_CURSEUR = 0.1;
+
+/*
+ * Capture plus courte que le relâchement, et légèrement rebondie : le point est
+ * happé par le lien, puis y retourne sans hâte. Les deux durées sont celles de
+ * la ressource ; `back.out(1)` et `power4.out` sont ici leurs équivalents en
+ * courbes de Bézier, GSAP n'étant pas là pour les fournir.
+ */
+const DUREE_CAPTURE = 300;
+const DUREE_RELACHE = 450;
+const COURBE_CAPTURE = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+const COURBE_RELACHE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
+/*
+ * Dernière position connue du pointeur, gardée AU NIVEAU DU MODULE et non dans
+ * la fonction d'initialisation.
+ *
+ * `<ClientRouter />` remplace le <body> à chaque navigation : le point est donc
+ * un nouvel élément, sans position. Repartir de zéro le ferait traverser
+ * l'écran depuis le coin haut-gauche après chaque changement de page — alors
+ * que le pointeur, lui, n'a pas bougé. Le module, lui, n'est exécuté qu'une
+ * fois : cette variable survit à la navigation.
+ */
+let positionPointeur = null;
+
+function initCurseurMagnetique() {
+  /*
+   * Mêmes conditions que pour le libellé des boutons. Sur un écran tactile il
+   * n'y a pas de pointeur à suivre ; sous mouvement réduit, un point qui
+   * poursuit la souris est exactement ce que le réglage demande d'éviter.
+   */
+  if (MOUVEMENT_DOUX.matches) return null;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return null;
+
+  const curseur = document.querySelector('[data-curseur]');
+  const fond = curseur?.querySelector('[data-curseur-fond]');
+  if (!curseur || !fond) return null;
+
+  /*
+   * À partir d'ici, la bille existe : le curseur natif peut s'effacer.
+   *
+   * ⚠ POSÉE ICI ET NULLE PART AILLEURS, et jamais retirée au démontage.
+   *
+   * Ici, parce que toutes les conditions viennent d'être vérifiées — pointeur
+   * fin, mouvement non réduit, script exécuté, éléments présents. Dans le
+   * balisage, la classe priverait de curseur ceux pour qui rien ne le remplace.
+   *
+   * Jamais retirée, parce que `demonter()` est joué à chaque navigation : la
+   * flèche reviendrait le temps du changement de page, à chaque fois. Ce que la
+   * classe décrit — un pointeur fin, un visiteur qui accepte le mouvement — ne
+   * change pas d'une page à l'autre.
+   */
+  document.documentElement.classList.add('curseur-remplace');
+
+  const abandon = new AbortController();
+  const { signal } = abandon;
+
+  let x = positionPointeur?.x ?? 0;
+  let y = positionPointeur?.y ?? 0;
+  let viseeX = x;
+  let viseeY = y;
+  let trame = 0;
+
+  /* Le CSSOM échappe à `style-src` — voir l'en-tête du fichier. */
+  const poser = () => {
+    curseur.style.setProperty('--x', String(x));
+    curseur.style.setProperty('--y', String(y));
+  };
+
+  /* Retour de navigation : le point reprend là où le pointeur avait été vu. */
+  if (positionPointeur) {
+    poser();
+    curseur.classList.add('est-visible');
+  }
+
+  const avancer = () => {
+    x += (viseeX - x) * SUIVI_CURSEUR;
+    y += (viseeY - y) * SUIVI_CURSEUR;
+
+    if (
+      Math.abs(viseeX - x) < SEUIL_ARRET_CURSEUR &&
+      Math.abs(viseeY - y) < SEUIL_ARRET_CURSEUR
+    ) {
+      x = viseeX;
+      y = viseeY;
+      poser();
+      trame = 0; // La boucle s'éteint ; le prochain mouvement la rallume.
+      return;
+    }
+
+    poser();
+    trame = requestAnimationFrame(avancer);
+  };
+
+  window.addEventListener(
+    'mousemove',
+    (evenement) => {
+      viseeX = evenement.clientX;
+      viseeY = evenement.clientY;
+
+      if (!positionPointeur) {
+        // Tout premier mouvement de la session : le point se pose sous le
+        // pointeur au lieu d'y courir depuis le coin de l'écran.
+        x = viseeX;
+        y = viseeY;
+        poser();
+        curseur.classList.add('est-visible');
+      }
+
+      positionPointeur = { x: viseeX, y: viseeY };
+      if (!trame) trame = requestAnimationFrame(avancer);
+    },
+    { signal, passive: true }
+  );
+
+  /**
+   * Déplace le fond dans `destination` sans que le saut se voie.
+   *
+   * ⚠ L'ORDRE DES QUATRE GESTES N'EST PAS INTERCHANGEABLE.
+   *
+   * La mesure d'avant se prend AVANT d'annuler l'animation en cours :
+   * `getBoundingClientRect` tient compte des transformations, donc elle rend la
+   * position RÉELLEMENT VUE à cet instant. C'est ce qui rend une interruption
+   * fluide — repartir de la position de repos ferait sauter le fond au milieu
+   * de son trajet.
+   *
+   * L'annulation se fait ensuite, et avant la mesure d'après : une
+   * transformation encore appliquée fausserait la mesure d'arrivée, et le
+   * décalage se reporterait sur l'animation entière.
+   */
+  const migrer = (destination, duree, courbe) => {
+    const avant = fond.getBoundingClientRect();
+    const opaciteAvant = getComputedStyle(fond).opacity;
+
+    for (const animation of fond.getAnimations()) animation.cancel();
+
+    destination.append(fond);
+
+    const apres = fond.getBoundingClientRect();
+    // Destination encore sans dimensions (barre masquée, page en cours de
+    // remplacement) : le rapport d'échelle serait une division par zéro.
+    if (apres.width === 0 || apres.height === 0) return;
+
+    fond.animate(
+      [
+        {
+          transform: `translate(${avant.left - apres.left}px, ${avant.top - apres.top}px) scale(${avant.width / apres.width}, ${avant.height / apres.height})`,
+          opacity: opaciteAvant,
+        },
+        {
+          transform: 'translate(0px, 0px) scale(1, 1)',
+          opacity: getComputedStyle(fond).opacity,
+        },
+      ],
+      { duration: duree, easing: courbe, fill: 'none' }
+    );
+  };
+
+  for (const cible of document.querySelectorAll(CIBLES_CURSEUR)) {
+    /*
+     * Le logement est CRÉÉ ICI plutôt que posé dans le balisage.
+     *
+     * Une douzaine de boutons répartis sur sept fichiers auraient eu à porter
+     * le même <span> vide, et le prochain bouton ajouté aurait été le premier à
+     * l'oublier — sans que rien ne le signale, puisqu'un bouton sans logement
+     * ne fait qu'ignorer l'effet. `initBoutonsAnimes` procède déjà ainsi pour
+     * les lettres.
+     *
+     * `:scope >` : seulement un logement à soi. Un bouton contenu dans une
+     * autre cible ne doit pas hériter du sien.
+     */
+    let logement = cible.querySelector(':scope > [data-curseur-logement]');
+
+    if (!logement) {
+      logement = document.createElement('span');
+      logement.className = 'curseur-logement';
+      logement.setAttribute('data-curseur-logement', '');
+      logement.setAttribute('aria-hidden', 'true');
+      cible.append(logement);
+    }
+
+    cible.addEventListener(
+      'mouseenter',
+      () => migrer(logement, DUREE_CAPTURE, COURBE_CAPTURE),
+      { signal }
+    );
+
+    cible.addEventListener(
+      'mouseleave',
+      () => migrer(curseur, DUREE_RELACHE, COURBE_RELACHE),
+      { signal }
+    );
+  }
+
+  return () => {
+    abandon.abort();
+    if (trame) cancelAnimationFrame(trame);
+
+    /*
+     * ⚠ RAMENER LE FOND DANS LE POINT AVANT LE REMPLACEMENT DE LA PAGE.
+     *
+     * Ce démontage est joué sur `astro:before-swap`. Si le pointeur se trouve
+     * alors sur un lien de la barre — le cas ORDINAIRE, puisqu'on vient de
+     * cliquer dessus — le fond vit à l'intérieur de ce lien, qui part avec
+     * l'ancien document. Sans cette ligne il serait détruit avec lui : plus
+     * rien ne suivrait le pointeur sur toutes les pages suivantes, et la panne
+     * n'apparaîtrait qu'après une navigation.
+     */
+    for (const animation of fond.getAnimations()) animation.cancel();
+    curseur.append(fond);
+  };
+}
+
+/* ------------------------------------------------------------------------- */
 /* Vidéo du hero : reprise au premier geste                                   */
 /* ------------------------------------------------------------------------- */
 
@@ -945,7 +1224,12 @@ function initialiser() {
     initFrise(),
     initBarre(),
     initSurvolDirectionnel(),
+    // ⚠ `initBoutonsAnimes` REMPLACE le contenu des boutons qu'il découpe
+    // (`replaceChildren`). Il doit donc passer AVANT le curseur, qui y ajoute
+    // son logement — dans l'autre sens, le logement serait effacé au premier
+    // chargement et l'aimantation ne marcherait que sur les autres cibles.
     initBoutonsAnimes(),
+    initCurseurMagnetique(),
     initParallaxe(),
     initVideoHero(),
   ].filter(Boolean);

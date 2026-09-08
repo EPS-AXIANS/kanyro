@@ -18,8 +18,9 @@ import Base from '../layouts/Base.astro';
 
     <div class="mt-11 flex flex-wrap justify-center gap-4">
       <a href="/" class="bouton-primaire">Retour à l'accueil</a>
-      {/* Marqué explicitement : c'est le seul « Demander un devis » du site qui ne
-          soit pas un bouton primaire, et l'effet suit le libellé. */}
+      {/* `data-bouton-anime` réserve l'échange de lettres au « Demander un devis » :
+          l'effet suit le libellé, pas la classe. Le bouton voisin, lui, n'a plus
+          que l'aimantation du curseur — automatique sur tous les boutons. */}
       <a href="/contact" data-bouton-anime class="bouton-secondaire inline-grid justify-items-center">
         Demander un devis
       </a>

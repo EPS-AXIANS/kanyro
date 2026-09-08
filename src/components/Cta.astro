@@ -5,6 +5,22 @@ const {
   libelle = 'Demander un devis',
   href = '/contact',
 } = Astro.props;
+
+/*
+ * L'échange de lettres au survol est réservé au « Demander un devis ». Le
+ * libellé étant une prop, la décision se prend ici plutôt que dans les cinq
+ * pages qui posent ce bloc — dont aucune, aujourd'hui, ne le remplace.
+ *
+ * ⚠ `undefined` ET NON `false`. Astro écrit `data-bouton-anime="false"` pour un
+ * attribut de données faux, et le sélecteur `[data-bouton-anime]` l'attraperait
+ * quand même : l'effet se jouerait précisément sur les boutons censés y avoir
+ * renoncé. Même piège que `data-optionnel` dans Champ.astro.
+ *
+ * Et chaîne vide plutôt que `true`, qui ferait écrire `data-bouton-anime="true"`
+ * — sans conséquence pour le sélecteur, mais la valeur laisserait croire qu'elle
+ * est lue. C'est la forme que pose déjà `bouton.dataset.boutonDecoupe = ''`.
+ */
+const anime = libelle === 'Demander un devis' ? '' : undefined;
 ---
 
 <section class="contenu py-24">
@@ -17,6 +33,6 @@ const {
     <p class="font-texte mx-auto mt-6 max-w-xl text-xs leading-relaxed text-white/60 sm:text-sm">
       {texte}
     </p>
-    <a href={href} class="bouton-primaire mt-10">{libelle}</a>
+    <a href={href} data-bouton-anime={anime} class="bouton-primaire mt-10">{libelle}</a>
   </div>
 </section>
