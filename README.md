@@ -295,6 +295,14 @@ amortie et un FLIP écrit à la main : mesurer avant, déplacer, mesurer après,
 animer l'écart. Dans les trois cas, la ressource servait de plan, pas de
 bibliothèque.
 
+**Deux effets de survol, et un partage clair.** L'aimantation du curseur est
+automatique sur tous les boutons — `.bouton-primaire`, `.bouton-secondaire`, et
+tout ce qui porte `data-curseur-cible`. L'échange de lettres, lui, se demande
+explicitement par `data-bouton-anime` et n'est posé que sur les
+« Demander un devis » : c'est le geste de l'unique chemin de conversion, et il
+perdait tout son poids à se jouer aussi sur « Retour à l'accueil » ou
+« Revoir l'offre ». L'effet suit le libellé, pas la classe.
+
 **Le contenu ne dépend jamais du script.** `.reveal { opacity: 0 }` n'est appliqué
 que sous `@media (scripting: enabled)`. Sans JavaScript, sans
 `IntersectionObserver`, ou si le script échoue, tout reste lisible. C'est la

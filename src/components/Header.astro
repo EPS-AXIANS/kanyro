@@ -43,10 +43,9 @@ const classeLien =
     class="liquid-glass barre flex items-center gap-3 rounded-full px-4 py-2.5 sm:gap-12 sm:px-10 sm:py-3"
   >
     {/*
-      `data-curseur-cible` et son `[data-curseur-logement]` sont la prise du
-      curseur magnétique : au survol, le point qui suit la souris vient se
-      dilater dans le logement pour devenir le fond du lien. Sans script, le
-      logement reste une boîte vide et transparente.
+      `data-curseur-cible` est la prise du curseur magnétique : au survol, le
+      point qui suit la souris vient se dilater derrière le libellé. Le logement
+      qui l'accueille est créé par le script, pas posé ici.
     */}
     {
       gauche.map((l) => (
@@ -55,8 +54,7 @@ const classeLien =
           data-curseur-cible
           class:list={[classeLien, 'text-white/85 hover:text-white']}
         >
-          <span class="lien-barre__texte">{l.texte}</span>
-          <span class="curseur-logement" data-curseur-logement />
+          {l.texte}
         </a>
       ))
     }
@@ -85,8 +83,7 @@ const classeLien =
             actuel === l.href ? 'text-white' : 'text-white/85 hover:text-white',
           ]}
         >
-          <span class="lien-barre__texte">{l.texte}</span>
-          <span class="curseur-logement" data-curseur-logement />
+          {l.texte}
         </a>
       ))
     }

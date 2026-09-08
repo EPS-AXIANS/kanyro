@@ -675,9 +675,19 @@ function initBoutonsAnimes() {
    */
   if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return null;
 
-  const boutons = document.querySelectorAll(
-    '.bouton-primaire, [data-bouton-anime]'
-  );
+  /*
+   * ⚠ `[data-bouton-anime]` SEUL, et plus `.bouton-primaire`.
+   *
+   * L'échange de lettres appartient au « Demander un devis » : c'est le geste
+   * de l'unique chemin de conversion, et il perd tout son poids s'il se joue
+   * aussi sur « Retour à l'accueil » ou « Revoir l'offre ». Le commentaire de
+   * 404.astro le disait déjà — « l'effet suit le libellé » — mais le sélecteur,
+   * lui, suivait la classe, et attrapait les onze boutons primaires du site.
+   *
+   * Désormais l'effet se demande, il ne s'hérite pas. Les autres boutons
+   * gardent l'aimantation du curseur, qui elle reste automatique.
+   */
+  const boutons = document.querySelectorAll('[data-bouton-anime]');
 
   for (const bouton of boutons) {
     /*
@@ -904,6 +914,16 @@ function initParallaxe() {
  * états, `position: absolute` recalculé.
  */
 
+/*
+ * Ce que le point sait habiter : les liens marqués, et TOUS les boutons du
+ * vocabulaire partagé. Les nommer par leur classe plutôt que de poser un
+ * attribut sur chacun évite qu'un bouton ajouté demain soit le seul à ne rien
+ * faire — c'est le même parti que `initBoutonsAnimes` prenait pour les lettres,
+ * avant que celles-ci ne deviennent l'exception plutôt que la règle.
+ */
+const CIBLES_CURSEUR =
+  '[data-curseur-cible], .bouton-primaire, .bouton-secondaire';
+
 /** Fraction de la distance restante rattrapée à chaque cadre. */
 const SUIVI_CURSEUR = 0.14;
 
@@ -1050,9 +1070,28 @@ function initCurseurMagnetique() {
     );
   };
 
-  for (const cible of document.querySelectorAll('[data-curseur-cible]')) {
-    const logement = cible.querySelector('[data-curseur-logement]');
-    if (!logement) continue;
+  for (const cible of document.querySelectorAll(CIBLES_CURSEUR)) {
+    /*
+     * Le logement est CRÉÉ ICI plutôt que posé dans le balisage.
+     *
+     * Une douzaine de boutons répartis sur sept fichiers auraient eu à porter
+     * le même <span> vide, et le prochain bouton ajouté aurait été le premier à
+     * l'oublier — sans que rien ne le signale, puisqu'un bouton sans logement
+     * ne fait qu'ignorer l'effet. `initBoutonsAnimes` procède déjà ainsi pour
+     * les lettres.
+     *
+     * `:scope >` : seulement un logement à soi. Un bouton contenu dans une
+     * autre cible ne doit pas hériter du sien.
+     */
+    let logement = cible.querySelector(':scope > [data-curseur-logement]');
+
+    if (!logement) {
+      logement = document.createElement('span');
+      logement.className = 'curseur-logement';
+      logement.setAttribute('data-curseur-logement', '');
+      logement.setAttribute('aria-hidden', 'true');
+      cible.append(logement);
+    }
 
     cible.addEventListener(
       'mouseenter',
@@ -1159,6 +1198,10 @@ function initialiser() {
     initFrise(),
     initBarre(),
     initSurvolDirectionnel(),
+    // ⚠ `initBoutonsAnimes` REMPLACE le contenu des boutons qu'il découpe
+    // (`replaceChildren`). Il doit donc passer AVANT le curseur, qui y ajoute
+    // son logement — dans l'autre sens, le logement serait effacé au premier
+    // chargement et l'aimantation ne marcherait que sur les autres cibles.
     initBoutonsAnimes(),
     initCurseurMagnetique(),
     initParallaxe(),

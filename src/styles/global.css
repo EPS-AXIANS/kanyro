@@ -739,7 +739,7 @@
     will-change: transform, translate, rotate, opacity;
   }
 
-  :is(.bouton-primaire, [data-bouton-anime]):is(:hover, :focus-visible)
+  [data-bouton-anime]:is(:hover, :focus-visible)
     .bouton-texte__defaut
     .bouton-lettre {
     translate: calc(var(--signe, 0) * 0.125em) -1.25em 0;
@@ -754,7 +754,7 @@
   }
 
   /* Ne flippe que des variables — voir le bloc de repos pour la raison. */
-  :is(.bouton-primaire, [data-bouton-anime]):is(:hover, :focus-visible)
+  [data-bouton-anime]:is(:hover, :focus-visible)
     .bouton-texte__survol
     .bouton-lettre {
     --derive: 0;
@@ -1183,34 +1183,70 @@
 }
 
 /*
- * Le logement : une boîte vide dans le lien, qui ne se voit que le temps où le
- * fond l'habite. Les débords négatifs donnent au fond l'air d'entourer le
- * libellé plutôt que de l'épouser au caractère près.
+ * Toute cible s'isole et se pose en repère : le logement est absolu, il lui
+ * faut un ancrage, et `isolation` lui garantit un contexte d'empilement à elle
+ * — voir le z-index négatif juste en dessous, qui n'a de sens que là-dedans.
+ */
+[data-curseur-cible],
+.bouton-primaire,
+.bouton-secondaire {
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * Le logement : une boîte vide dans la cible, qui ne se voit que le temps où le
+ * fond l'habite. Créé par le script, pas par le balisage — voir
+ * `initCurseurMagnetique`.
+ *
+ * ⚠ `z-index: -1`, ET C'EST LE SEUL QUI MARCHE SANS ENVELOPPER LE LIBELLÉ.
+ *
+ * Dans l'ordre de peinture d'un contexte d'empilement, le texte en ligne passe
+ * APRÈS les descendants positionnés à z-index négatif, mais AVANT ceux à 0 ou
+ * plus. À 0, le lavis recouvrait donc le libellé — il fallait remonter le texte
+ * dans un <span> à z-index 1, soit une enveloppe de plus dans chaque bouton.
+ * À -1, le fond se glisse entre l'arrière-plan de la cible et son libellé, et
+ * le balisage reste nu.
+ *
+ * C'est aussi pourquoi la règle ci-dessus pose `isolation: isolate` : sans
+ * contexte d'empilement propre, un enfant à z-index négatif passerait derrière
+ * l'arrière-plan d'un ancêtre au lieu de rester dans son bouton.
  */
 .curseur-logement {
   position: absolute;
-  inset: -0.6em -0.9em;
-  z-index: 0;
-  border-radius: 100em;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
   pointer-events: none;
 }
 
+/*
+ * Le point est blanc plein ; en lavis de fond, il doit rester une présence et
+ * non un aplat. À pleine opacité, il éteindrait le libellé qu'il accompagne.
+ */
 .curseur-logement .curseur-fond {
-  /*
-   * Le point est blanc plein ; en fond de lien, il doit rester une présence.
-   * À pleine opacité sur le verre de la barre, il éteindrait le libellé.
-   */
-  opacity: 0.16;
+  opacity: 0.14;
+}
+
+/*
+ * Un bouton primaire est BLANC : un lavis blanc n'y ferait rien du tout. Le
+ * fond y passe donc à la couleur du fond de page, et le lavis se lit comme une
+ * pression sur le bouton plutôt que comme un halo.
+ */
+.bouton-primaire .curseur-fond {
+  background-color: var(--color-fond);
+  opacity: 0.1;
 }
 
 .lien-barre {
+  /* Les liens de la barre n'ont ni fond ni rembourrage : sans ces débords, le
+     lavis épouserait le libellé au caractère près. */
   position: relative;
 }
 
-/* Le libellé repasse au-dessus du fond, qui vient l'habiter par en dessous. */
-.lien-barre__texte {
-  position: relative;
-  z-index: 1;
+.lien-barre .curseur-logement {
+  inset: -0.6em -0.9em;
+  border-radius: 100em;
 }
 
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
