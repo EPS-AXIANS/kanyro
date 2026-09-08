@@ -102,10 +102,6 @@
    * que les lettres sont chassées plutôt que déplacées.
    */
   --ease-bouton: cubic-bezier(0.675, 0.15, 0.1, 1);
-
-  /* Départ ferme, arrivée très posée : c'est la courbe de la ressource dont
-     vient le curseur, et elle ne sert qu'à sa dilatation au survol. */
-  --ease-curseur: cubic-bezier(0.625, 0.05, 0, 1);
 }
 
 @layer base {
@@ -1136,47 +1132,42 @@
   color: var(--color-signal-vif);
 }
 
-/* ---- Le curseur ---- */
+/* ---- Le curseur magnétique ---- */
 
 /*
- * Un point orange accompagne le pointeur, en retard sur lui, et se dilate en
- * halo au survol de tout ce qui se clique.
+ * Un point suit le pointeur. Au survol d'un lien de la barre, ce même point
+ * migre dans le lien et s'y dilate pour en devenir le fond ; en sortant, il
+ * revient au pointeur. Ce n'est pas un fondu entre deux éléments : c'est le
+ * MÊME nœud qu'on déplace dans le document, et une animation qui rattrape le
+ * saut de position.
  *
  * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
  *
- * C'est la ressource Osmo « Basic Custom Cursor », dans sa forme : un élément
- * fixe, deux tailles, une transition entre les deux, et un `:has()` qui lit le
- * survol depuis le <body>. LE MOTEUR est refait, comme pour le libellé des
- * boutons et les arcs de raccord : la ressource confie le suivi à
- * `gsap.quickTo`, servi par jsDelivr, donc bloqué par `script-src 'self'`. Un
- * amortissement en `requestAnimationFrame` le remplace — voir `initCurseur`.
+ * L'idée et le découpage viennent de la ressource Osmo « Magnetic Cursor » :
+ * un élément fixe qui suit la souris, un enfant qui change de parent au survol,
+ * et une animation FLIP par-dessus.
  *
- * L'orange est celui de la maison (`--color-signal-vif`) et non le `#ff4c24` de
- * la ressource : deux oranges à quelques points d'écart sur la même page, c'est
- * un accident, pas une nuance.
+ * Ce qui a été refait : LE MOTEUR, en entier. La ressource repose sur GSAP et
+ * son greffon Flip, servis par jsDelivr — donc bloqués par `script-src 'self'`,
+ * exactement comme l'était SplitText pour le libellé des boutons. Le suivi est
+ * devenu un amortissement en `requestAnimationFrame`, et le FLIP se fait à la
+ * main : mesurer avant, déplacer, mesurer après, animer l'écart. Voir
+ * `initCurseurMagnetique` dans effets.js.
  *
- * ---- Ce que ce curseur ne fait plus ----
- *
- * Le précédent REMPLAÇAIT le curseur natif : `cursor: none` sur toute la page,
- * une bille blanche qui migrait dans les boutons par une animation FLIP, et
- * trois verrous pour ne jamais laisser quelqu'un sans pointeur du tout.
- *
- * Celui-ci l'ACCOMPAGNE. La flèche reste, le point la suit. Tout l'appareillage
- * qui allait avec — logement, lavis dans les boutons, classe `curseur-remplace`,
- * média à trois conditions — est parti avec lui : il n'avait de raison d'être
- * que parce que la flèche avait disparu.
+ * Les attributs ont été renommés en français (`data-curseur-cible`,
+ * `data-curseur-logement`) pour rester cohérents avec `data-barre`,
+ * `data-bouton-anime` et `data-survol-item`. Rien ne dépend plus des noms de la
+ * ressource, puisque le script qui les lisait n'existe plus ici.
  */
 
 .curseur {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 100;
-  width: 1em;
-  height: 1em;
-  border: 1px solid var(--color-signal-vif);
+  z-index: 55;
+  width: 0.75rem;
+  aspect-ratio: 1;
   border-radius: 100em;
-  background-color: var(--color-signal-vif);
   pointer-events: none;
 
   /*
@@ -1197,12 +1188,7 @@
    * du formulaire et les lettres des boutons.
    */
   opacity: var(--curseur-opacite, 0);
-
-  transition:
-    width 0.375s var(--ease-curseur),
-    height 0.375s var(--ease-curseur),
-    background-color 0.375s var(--ease-curseur),
-    opacity 0.3s var(--ease-rideau);
+  transition: opacity 0.3s var(--ease-rideau);
 }
 
 /* Posée par le script au premier mouvement de souris : avant, le point n'a
@@ -1211,30 +1197,124 @@
   --curseur-opacite: 1;
 }
 
-/*
- * Le survol est lu DEPUIS LE <body>, et c'est ce qui dispense le script d'en
- * savoir quoi que ce soit : `:has()` remonte de la cible survolée jusqu'à un
- * ancêtre commun au point, qui n'est ni son parent ni son voisin. Aucun
- * écouteur à poser sur chaque lien, donc rien à réattacher quand une
- * navigation en amène de nouveaux.
- *
- * Liens et boutons sont pris automatiquement — c'est ce que voulait dire
- * l'ancien commentaire du 404 par « automatique sur tous les boutons », et
- * c'est maintenant vrai partout. `data-curseur-cible` reste la prise à poser à
- * la main sur ce qui se survole sans être l'un ni l'autre.
- */
-body:has(a:hover) .curseur,
-body:has(button:hover) .curseur,
-body:has([data-curseur-cible]:hover) .curseur {
-  width: 3em;
-  height: 3em;
-  background-color: color-mix(in srgb, var(--color-signal-vif) 30%, transparent);
+.curseur-fond {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background-color: var(--color-texte);
+
+  /*
+   * ⚠ INDISPENSABLE AU CALCUL DU FLIP. Le script anime un `scale` déduit du
+   * rapport des deux tailles mesurées ; ce rapport n'est juste que si la mise à
+   * l'échelle part du coin haut-gauche, celui-là même dont il mesure l'écart.
+   * Avec l'origine par défaut (le centre), le fond arriverait décalé de la
+   * moitié de sa croissance.
+   */
+  transform-origin: top left;
 }
 
-/* Pas de pointeur à accompagner sur un écran tactile. */
-@media (hover: none) and (pointer: coarse) {
-  .curseur {
-    display: none;
+/*
+ * Toute cible s'isole et se pose en repère : le logement est absolu, il lui
+ * faut un ancrage, et `isolation` lui garantit un contexte d'empilement à elle
+ * — voir le z-index négatif juste en dessous, qui n'a de sens que là-dedans.
+ */
+[data-curseur-cible],
+.bouton-primaire,
+.bouton-secondaire {
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * Le logement : une boîte vide dans la cible, qui ne se voit que le temps où le
+ * fond l'habite. Créé par le script, pas par le balisage — voir
+ * `initCurseurMagnetique`.
+ *
+ * ⚠ `z-index: -1`, ET C'EST LE SEUL QUI MARCHE SANS ENVELOPPER LE LIBELLÉ.
+ *
+ * Dans l'ordre de peinture d'un contexte d'empilement, le texte en ligne passe
+ * APRÈS les descendants positionnés à z-index négatif, mais AVANT ceux à 0 ou
+ * plus. À 0, le lavis recouvrait donc le libellé — il fallait remonter le texte
+ * dans un <span> à z-index 1, soit une enveloppe de plus dans chaque bouton.
+ * À -1, le fond se glisse entre l'arrière-plan de la cible et son libellé, et
+ * le balisage reste nu.
+ *
+ * C'est aussi pourquoi la règle ci-dessus pose `isolation: isolate` : sans
+ * contexte d'empilement propre, un enfant à z-index négatif passerait derrière
+ * l'arrière-plan d'un ancêtre au lieu de rester dans son bouton.
+ */
+.curseur-logement {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/*
+ * Le point est blanc plein ; en lavis de fond, il doit rester une présence et
+ * non un aplat. À pleine opacité, il éteindrait le libellé qu'il accompagne.
+ */
+.curseur-logement .curseur-fond {
+  opacity: 0.14;
+}
+
+/*
+ * Un bouton primaire est BLANC : un lavis blanc n'y ferait rien du tout. Le
+ * fond y passe donc à la couleur du fond de page, et le lavis se lit comme une
+ * pression sur le bouton plutôt que comme un halo.
+ */
+.bouton-primaire .curseur-fond {
+  background-color: var(--color-fond);
+  opacity: 0.1;
+}
+
+.lien-barre {
+  /* Les liens de la barre n'ont ni fond ni rembourrage : sans ces débords, le
+     lavis épouserait le libellé au caractère près. */
+  position: relative;
+}
+
+.lien-barre .curseur-logement {
+  inset: -0.6em -0.9em;
+  border-radius: 100em;
+}
+
+/*
+ * Le curseur natif s'efface : la bille ne l'accompagne plus, elle le remplace.
+ *
+ * ⚠ LA CLASSE EST POSÉE PAR LE SCRIPT, JAMAIS DANS LE BALISAGE.
+ *
+ * Écrite dans le HTML, elle retirerait son curseur à quiconque n'a PAS la bille
+ * pour le remplacer — script bloqué par la CSP, JavaScript coupé, appareil
+ * tactile branché sur une souris, mouvement réduit. Le visiteur se retrouverait
+ * à viser à l'aveugle une page qu'il ne peut plus pointer, et c'est la panne
+ * qu'on ne peut pas contourner : il lui faudrait deviner où il clique pour
+ * partir. `initCurseurMagnetique` ne la pose donc qu'une fois attachée.
+ *
+ * Le sélecteur universel n'est pas de la paresse : la feuille de l'agent
+ * utilisateur pose `cursor: pointer` sur les liens et `cursor: text` dans les
+ * champs. Une règle sur la seule racine les laisserait tous ressortir.
+ *
+ * ⚠ LES TROIS CONDITIONS DU MÉDIA SONT UN SECOND VERROU, ET ELLES SERVENT.
+ *
+ * Ce sont celles que le script vérifie avant de poser la classe — mais lui ne
+ * les vérifie qu'UNE FOIS, au chargement, et ne retire jamais la classe. Elles,
+ * sont réévaluées en permanence par le navigateur.
+ *
+ * Le cas qui a motivé ce doublon : quelqu'un qui active le mouvement réduit
+ * pendant sa visite. La règle de fin de fichier masque alors `.curseur` — et
+ * sans ce média, la classe survivrait sur <html> avec plus aucun pointeur du
+ * tout, ni flèche ni bille, jusqu'au prochain rechargement. Ici, la flèche
+ * revient dans le même cadre. Même chose si le pointeur cesse d'être fin.
+ *
+ * (Ce sont les trois conditions du survol des boutons, plus haut. Les mêmes
+ * causes, les mêmes garde-fous.)
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .curseur-remplace,
+  .curseur-remplace * {
+    cursor: none;
   }
 }
 
@@ -1350,9 +1430,9 @@ body:has([data-curseur-cible]:hover) .curseur {
 
   /*
    * Un point qui poursuit le pointeur est précisément ce que ce réglage
-   * demande d'éviter. `initCurseur` ne s'attache pas dans ce cas ; cette règle
-   * couvre le passage en cours de session, où le point aurait déjà reçu sa
-   * classe de visibilité.
+   * demande d'éviter. `initCurseurMagnetique` ne s'attache pas dans ce cas ;
+   * cette règle couvre le passage en cours de session, où le point aurait déjà
+   * reçu sa classe de visibilité.
    */
   .curseur {
     display: none !important;
