@@ -1,8 +1,8 @@
 # Kanyro
 
-Site de l'agence. Astro en sortie statique, Tailwind 4, hébergement mutualisé
-OVH. Direction visuelle sombre et cinématographique, reprise d'un template de
-galerie d'art et transposée sur le socle SEO.
+Site de l'agence. Astro en sortie statique, Tailwind 4, servi par Caddy sur un
+VPS Hostinger. Direction visuelle sombre et cinématographique, reprise d'un
+template de galerie d'art et transposée sur le socle SEO.
 
 ```bash
 npm run verifier # contrôle que le poste a tout ce qu'il faut
@@ -21,42 +21,108 @@ est dans [`docs/environnement.md`](docs/environnement.md).
 
 ---
 
-## Déploiement — OVH mutualisé
+## Déploiement — VPS Hostinger, Caddy
 
-Uploader **le contenu de `dist/`** (pas le dossier lui-même) dans `www/`. Le
-build produit tout ce qu'il faut, y compris `.htaccess` et `contact.php`.
+Le site tourne sur le VPS `srv1917309.hstgr.cloud` (Hostinger), servi par le
+**Caddy du système** depuis `/var/www/kanyro`. La configuration est dans
+`/etc/caddy/Caddyfile`, **hors du dépôt**, et `contact.php` est exécuté par
+PHP-FPM 8.3 via `unix/run/php/php-fpm.sock`.
 
-Vérifier après l'upload que `_astro/` et `js/` sont bien présents à côté de
-`index.html` : certains clients FTP échouent silencieusement sur les
-sous-dossiers.
+Publier, c'est donc synchroniser le contenu de `dist/` vers `/var/www/kanyro/`.
+Le répertoire est accessible en écriture sans `sudo`.
 
-### Ce que `.htaccess` prend en charge
+```bash
+npm run build
 
-Il remplace ce que `netlify.toml` fournissait : redirection HTTPS forcée,
-en-têtes de sécurité, cache des assets hashés, compression, page 404.
+# Sauvegarder d'abord : la synchronisation supprime ce qui n'est plus produit.
+tar -czf ~/kanyro-sauvegarde-$(date +%Y%m%d-%H%M%S).tar.gz -C /var/www kanyro
 
-Il gère aussi les **URL sans slash final**. Astro déclare le canonical
-`/contact` ; sans la règle `DirectorySlash Off`, Apache redirigerait vers
-`/contact/` et le visiteur arriverait sur une adresse différente de celle
-annoncée à Google.
+rsync -rlt --delete --no-perms --no-owner --no-group \
+      --exclude '.htaccess' dist/ /var/www/kanyro/
+```
 
-> **HSTS est commenté**, volontairement. À décommenter seulement une fois le
-> certificat vérifié et le site accessible en HTTPS sans erreur : une fois
-> l'en-tête envoyé, le navigateur refuse le HTTP pendant un an, même si vous
-> faites machine arrière.
+Ajouter `--dry-run --itemize-changes` pour voir ce qui bougerait avant de le
+faire. Les trois `--no-*` laissent au répertoire ses permissions et son
+propriétaire (`caddy:caddy`, avec le bit setgid) : sans eux, rsync lui
+appliquerait ceux de `dist/` et un déploiement suivant, fait par un autre
+utilisateur, pourrait ne plus passer.
+
+**`--exclude '.htaccess'` n'est pas un détail.** Caddy ne le lit pas, mais il le
+SERVIRAIT comme un fichier ordinaire : `https://kanyro.tech/.htaccess`
+publierait la politique de sécurité du site.
+
+> **`git push` ne déploie rien.** Aucun webhook, aucune CI — vérifié. GitHub ne
+> sert que de dépôt. La mise en ligne est l'étape ci-dessus, et elle seule.
+
+### Ce que Caddy prend en charge
+
+- **HTTPS et le certificat**, obtenus et renouvelés seuls auprès de
+  Let's Encrypt. Le HTTP répond `308` vers HTTPS ; `www.kanyro.tech` est servi
+  par le même bloc.
+- **Les URL sans slash final**, par `try_files {path} {path}.html {path}/index.html`.
+  Astro déclare le canonical `/contact` : le visiteur doit arriver sur cette
+  adresse, pas sur `/contact/`.
+- **Le cache des assets hashés** (`/_astro/*` en `immutable`, un an) et la
+  **compression** (zstd, gzip).
+- **La page 404**, par `handle_errors`.
+- **Quatre en-têtes de sécurité** : `X-Frame-Options: SAMEORIGIN`,
+  `X-Content-Type-Options`, `Referrer-Policy`, et une `Permissions-Policy`
+  courte (caméra, micro, géolocalisation). Plus `-Server`, qui retire la
+  signature du serveur.
+
+### ⚠ Ce que Caddy N'ENVOIE PAS, et qui manque
+
+**Aucun en-tête `Content-Security-Policy`.** En production, la CSP ne vient donc
+QUE de la balise `<meta http-equiv>` de `src/layouts/Base.astro`. Deux
+conséquences, à connaître avant de croire le site protégé :
+
+- **`frame-ancestors` est inopérant en `<meta>`**, la spécification l'ignore
+  dans cette forme. C'est le `X-Frame-Options: SAMEORIGIN` de Caddy qui tient ce
+  rôle — en plus permissif, puisqu'il autorise l'encadrement par le site
+  lui-même là où la directive disait `'none'`.
+- **`upgrade-insecure-requests` n'est émis nulle part** : la balise l'exclut
+  volontairement (voir plus bas), et il n'y a plus d'en-tête HTTP pour le
+  porter.
+
+**Ni la `Permissions-Policy` longue** (quatorze API refusées) que décrivait
+l'ancienne configuration Apache. **Ni HSTS** — mais celui-là n'a jamais été
+envoyé : il était déjà commenté dans le `.htaccess`, volontairement.
+
+> **Le bon endroit pour corriger tout cela est le `Caddyfile`**, dans le bloc
+> `header` du site. Y déplacer la CSP la rendrait complète, et rendrait la
+> balise `<meta>` superflue. Tant que ce n'est pas fait, ne pas se fier à ce que
+> raconte `public/.htaccess`.
+>
+> **HSTS s'ajoute au même endroit, et seulement une fois** le certificat
+> vérifié : l'en-tête envoyé, le navigateur refuse le HTTP pendant un an, même
+> si vous faites machine arrière.
+
+### ⚠ `public/.htaccess` n'est plus lu par personne
+
+Le fichier date de l'hébergement mutualisé OVH, où Apache l'exécutait. Il est
+conservé dans le dépôt, mais **Caddy l'ignore entièrement** et le déploiement
+l'exclut.
+
+C'est un leurre dangereux : à le lire, on croirait que la CSP, HSTS et la
+`Permissions-Policy` longue sont appliqués. Aucun ne l'est. Le supprimer, ou
+porter son contenu dans le `Caddyfile`, éviterait qu'on s'y fie.
 
 ### Le formulaire
 
-`public/contact.php`, sans dépendance ni service tiers. Netlify Forms a été
-abandonné : sa détection se fait au déploiement chez Netlify, donc sur OVH le
-formulaire postait dans le vide.
+`public/contact.php`, sans dépendance ni service tiers, exécuté par PHP-FPM.
+Netlify Forms a été abandonné : sa détection se fait au déploiement chez
+Netlify, donc partout ailleurs le formulaire postait dans le vide.
 
-**Prérequis :** `mail()` n'est accepté par OVH que si l'expéditeur appartient au
-domaine hébergé. Pendant la bêta, c'est `elio-pallois.fr` : créez
-`kanyro@elio-pallois.fr` dans votre espace client **avant** de tester, sinon les
-messages seront rejetés ou classés en spam. Les adresses se règlent en haut de
-`contact.php`, et doivent rester cohérentes avec `SITE.contact.email` dans
-`src/config/site.js`.
+**Le courrier part par le Postfix du VPS**, pas par un `mail()` d'hébergeur
+mutualisé : `mail.kanyro.tech` a son propre bloc dans le `Caddyfile`, dont le
+certificat Let's Encrypt est partagé avec Postfix et Dovecot par
+`/usr/local/bin/sync-mail-certs.sh`. Les adresses se règlent en haut de
+`contact.php` et doivent rester cohérentes avec `SITE.contact.email` dans
+`src/config/site.js` — les trois valent `contact@kanyro.tech`.
+
+> ⚠ L'en-tête de `contact.php` décrit encore les contraintes d'OVH et une
+> adresse d'expédition en `elio-pallois.fr`, héritées de la bêta. Le code, lui,
+> est à jour ; seuls les commentaires sont à reprendre.
 
 En cas d'échec, le visiteur est renvoyé sur `/contact?erreur=<motif>` — `saisie`,
 `limite` ou `envoi` — et `effets.js` dévoile le bandeau correspondant en
@@ -140,17 +206,20 @@ deux se font concurrence.
 
 > **`robots.txt` ne ferme rien.** C'est une demande, que les robots sont libres
 > d'ignorer, et un simple lien partagé suffit à faire entrer l'URL dans l'index.
-> La vraie serrure est le mot de passe HTTP : le bloc est prêt et commenté en
-> haut de `public/.htaccess`, il ne manque que le `.htpasswd`.
+> La vraie serrure est le mot de passe HTTP. Le bloc commenté en haut de
+> `public/.htaccess` ne sert plus à rien depuis le passage à Caddy : c'est
+> `basic_auth` qu'il faut poser dans le bloc du site, avec une empreinte
+> produite par `caddy hash-password`.
 
 **⚠ Servir la bêta depuis un sous-dossier ne marchera pas.** Le site génère des
-chemins absolus (`/_astro/…`, `/contact.php`, `/merci`) et le `.htaccess` se pose
-à la racine du domaine. Il faut un sous-domaine.
+chemins absolus (`/_astro/…`, `/contact.php`, `/merci`) et la configuration
+s'applique à la racine d'un domaine. Il faut un sous-domaine, donc un bloc de
+site à part dans le `Caddyfile`.
 
 **Le jour de l'ouverture :** passer `actif` à `false`. L'URL, les canonical, le
 sitemap, les `noindex` et le `robots.txt` rebasculent ensemble. Restent trois
 choses que ce fichier ne pilote pas — les adresses en haut de `contact.php`,
-`SITE.contact.email`, et le mot de passe du `.htaccess` à retirer.
+`SITE.contact.email`, et le `basic_auth` du `Caddyfile` à retirer.
 
 ---
 
@@ -159,32 +228,42 @@ choses que ce fichier ne pilote pas — les adresses en haut de `contact.php`,
 Cloudflare Pages est une piste envisagée pour plus tard. Trois choses tombent
 le jour où vous basculez, et il vaut mieux le savoir avant :
 
-1. **`.htaccess` est ignoré.** Apache n'y tourne pas. Les en-têtes de sécurité,
-   le cache et la règle d'URL sans slash final se réécrivent dans un fichier
-   `public/_headers` (même syntaxe chez Netlify, si la question se reposait).
+1. **La configuration du serveur est à réécrire.** Le `Caddyfile` ne part pas
+   avec le dépôt. Les en-têtes, le cache et la règle d'URL sans slash final se
+   redéclarent dans un fichier `public/_headers` (même syntaxe chez Netlify, si
+   la question se reposait). Occasion de porter enfin la CSP dans un en-tête
+   HTTP plutôt que dans la balise `<meta>`.
 2. **`contact.php` ne s'exécute pas.** Cloudflare Pages ne sert pas de PHP. Le
    formulaire doit être recâblé sur une Pages Function, et l'envoi de mail passe
-   par un service tiers (Resend, MailChannels) puisqu'il n'y a pas de `mail()`.
-   Prévoir aussi `form-action` et `connect-src` dans la CSP en conséquence.
-3. **Les mentions légales changent.** `SITE.legal.hebergeur` identifie
-   nommément OVH ; l'article 19 de la LCEN impose que ce soit l'hébergeur réel.
+   par un service tiers (Resend, MailChannels) puisqu'il n'y a plus de Postfix
+   local. Prévoir aussi `form-action` et `connect-src` dans la CSP en
+   conséquence.
+3. **Les mentions légales changent.** `SITE.legal.hebergeur` doit nommer
+   l'hébergeur RÉEL : l'article 19 de la LCEN l'impose. Il déclare aujourd'hui
+   Hostinger, ce qui est juste tant que le site vit sur ce VPS.
 
-Tant que ce n'est pas fait, **ne déployez pas ce dépôt ailleurs que sur OVH** :
-le formulaire tomberait en 404 sans aucun message d'erreur, et l'unique chemin
-de conversion du site serait mort sans que rien ne le signale.
+Tant que ce n'est pas fait, **ne déployez pas ce dépôt ailleurs** : le
+formulaire tomberait en 404 sans aucun message d'erreur, et l'unique chemin de
+conversion du site serait mort sans que rien ne le signale.
 
 ---
 
 ### `upgrade-insecure-requests`
 
-Cette directive est portée par l'en-tête HTTP du `.htaccess`, **jamais par la
-balise `<meta>`**. Dans le HTML elle partirait partout, y compris là où HTTPS
-n'est pas actif — certificat non provisionné, préproduction, test depuis une IP
-du réseau local. Le navigateur irait alors chercher `https://…/_astro/style.css`
-sur un serveur qui ne parle pas HTTPS, et la page s'afficherait en HTML brut.
+Cette directive doit être portée par un **en-tête HTTP**, jamais par la balise
+`<meta>`. Dans le HTML elle partirait partout, y compris là où HTTPS n'est pas
+actif — certificat non provisionné, préproduction, test depuis une IP du réseau
+local. Le navigateur irait alors chercher `https://…/_astro/style.css` sur un
+serveur qui ne parle pas HTTPS, et la page s'afficherait en HTML brut.
 
 Le piège est que tout fonctionne sur `localhost`, que la spécification exempte
 des adresses de bouclage : le symptôme n'apparaît qu'une fois déployé.
+
+**⚠ Elle n'est donc émise nulle part aujourd'hui.** L'en-tête qui la portait
+était celui du `.htaccess`, que Caddy ne lit pas. La conséquence est faible —
+tout le site est en même origine et servi en HTTPS — mais c'est une raison de
+plus de déplacer la CSP dans le `Caddyfile`, où cette directive retrouverait sa
+place.
 
 ---
 
@@ -262,7 +341,7 @@ fichier à éditer.
 - [ ] Image de partage (`og:image`), à passer via la prop `image` du layout.
       Aucune balise n'est émise tant qu'elle n'existe pas, ce qui vaut mieux
       qu'une balise pointant vers un fichier absent.
-- [ ] Redirection `kaniro.fr` à ajouter dans `public/.htaccess` si le domaine
+- [ ] Redirection `kaniro.fr` à ajouter dans le `Caddyfile` si le domaine
       défensif est réservé — le nom sera mal orthographié à l'oral (« Kaniro »).
       Mieux vaut une redirection 301 qu'un second site à maintenir.
 - [ ] Livrer un chantier de référence avant de pousser le site.
@@ -369,7 +448,7 @@ donne un bouton invisible. Le rôle survit au changement de thème.
 | Communes couvertes | `src/data/communes.json` |
 | JSON-LD | `src/config/schema.js` |
 | Sections de l'accueil | `src/components/sections/` |
-| En-têtes HTTP, redirections | `public/.htaccess` |
+| En-têtes HTTP, redirections | `/etc/caddy/Caddyfile` — **hors du dépôt** |
 
 ---
 
