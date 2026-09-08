@@ -1,26 +1,36 @@
 <?php
 /**
- * Traitement du formulaire de devis — hébergement mutualisé OVH.
+ * Traitement du formulaire de devis — VPS Hostinger, PHP-FPM derrière Caddy.
  *
  * Aucune dépendance, aucun service tiers, aucune modification de la CSP :
  * `form-action 'self'` autorise déjà un envoi vers le même domaine.
  *
- * ⚠ PRÉREQUIS OVH
- * `mail()` n'est accepté que si l'expéditeur appartient au domaine hébergé.
- * $expediteur doit donc être une adresse réellement créée dans votre espace
- * client OVH, sans quoi les messages seront rejetés ou classés en spam.
+ * ⚠ CE QUE `mail()` SUPPOSE ICI
  *
- * Pendant la bêta, c'est `elio-pallois.fr` qui héberge : `$expediteur` doit donc
- * être une adresse de CE domaine. Le jour du passage sur le domaine de l'agence,
- * les trois constantes ci-dessous changent ensemble — une adresse d'expédition
- * qui ne correspond plus au domaine hébergeur est rejetée en silence.
+ * Le courrier part par le Postfix de la machine, pas par le relais d'un
+ * hébergeur mutualisé. Il n'y a donc plus d'adresse à créer dans un espace
+ * client — mais `$expediteur` doit rester une adresse DU DOMAINE, pour une
+ * raison qui n'a pas changé de conséquence, seulement de cause :
+ *
+ *   kanyro.tech publie `v=spf1 mx ~all`, et un DMARC en `p=none`. SPF n'autorise
+ *   donc que les MX du domaine à écrire en son nom, et l'alignement DMARC
+ *   compare le domaine du `From:` à celui que SPF a validé. Un `From:` sur un
+ *   autre domaine casse cet alignement, et le message part en indésirable sans
+ *   qu'aucune erreur ne remonte.
+ *
+ * Les trois constantes ci-dessous changent donc ensemble le jour d'un
+ * déménagement, et l'enregistrement SPF avec elles.
+ *
+ * ⚠ Ce fichier N'EST PAS exécuté par le serveur de développement d'Astro, qui
+ * sert `public/` en statique. `scripts/php-dev.mjs` s'en charge — voir la
+ * section « Le formulaire » du README.
  */
 
 declare(strict_types=1);
 
 // ── À renseigner ────────────────────────────────────────────────────────────
 $destinataire = 'contact@kanyro.tech';   // où vous recevez les demandes
-$expediteur   = 'contact@kanyro.tech';   // doit exister sur le domaine hébergé
+$expediteur   = 'contact@kanyro.tech';   // doit rester sur le domaine (SPF/DMARC)
 $siteUrl      = 'https://kanyro.tech';    // signature de l'accusé de réception
 $pageMerci    = '/merci';
 
@@ -51,11 +61,17 @@ $fenetreLimite = 3600; // secondes
 /*
  * Sel du nom de fichier de quota.
  *
- * Sur un mutualisé, `sys_get_temp_dir()` est `/tmp`, partagé en 1777 avec tous
- * les autres comptes de la machine. Un nom de fichier dérivé de la seule IP est
- * donc devinable : un voisin qui connaît l'IP d'un visiteur peut y déposer
- * d'avance cinq horodatages frais et lui fermer le formulaire pour une heure,
- * renouvelable indéfiniment. Le sel rend le chemin imprévisible.
+ * `sys_get_temp_dir()` vaut `/tmp`, et PHP-FPM tourne sans `PrivateTmp` : c'est
+ * donc le VRAI /tmp de la machine, partagé en 1777 avec tout ce qui s'y exécute.
+ * Un nom de fichier dérivé de la seule IP y serait devinable — qui connaît l'IP
+ * d'un visiteur pourrait déposer d'avance cinq horodatages frais et lui fermer
+ * le formulaire pour une heure, renouvelable indéfiniment. Le sel rend le
+ * chemin imprévisible.
+ *
+ * Le VPS n'héberge que ce site, ce qui réduit beaucoup la surface par rapport au
+ * mutualisé pour lequel cette protection avait été écrite : il faudrait déjà un
+ * processus local non privilégié pour en profiter. Elle ne coûte rien et couvre
+ * ce cas-là, on la garde.
  *
  * À personnaliser au déploiement — la valeur ci-dessous est publique puisque le
  * dépôt l'est. `KANYRO_SEL_QUOTA` dans l'environnement PHP la remplace si vous
@@ -142,8 +158,9 @@ function sujetEncode(string $sujet): string
  * Vrai si l'IP a déjà dépassé son quota sur la fenêtre glissante.
  *
  * Les horodatages sont stockés dans un fichier par IP, dans le répertoire
- * temporaire — pas de base de données à provisionner sur un mutualisé. L'IP est
- * hachée : le fichier ne conserve donc aucune donnée personnelle en clair.
+ * temporaire — un site vitrine n'a pas à se doter d'une base de données pour
+ * compter cinq envois. L'IP est hachée : le fichier ne conserve donc aucune
+ * donnée personnelle en clair.
  *
  * En cas d'impossibilité d'écrire (répertoire en lecture seule, quota disque),
  * la fonction laisse passer. Bloquer une vraie demande de devis coûte plus cher
@@ -281,7 +298,8 @@ $corps = implode("\n", [
 ]);
 
 // `Reply-To` porte l'adresse du visiteur pour qu'un simple « Répondre » lui
-// parvienne. `From` reste une adresse du domaine, exigence d'OVH.
+// parvienne. `From` reste une adresse du domaine : c'est ce que SPF autorise et
+// ce sur quoi DMARC s'aligne — voir l'en-tête du fichier.
 $entetes = implode("\r\n", [
     'From: Kanyro <' . $expediteur . '>',
     'Reply-To: ' . nettoyerEntete($email),
