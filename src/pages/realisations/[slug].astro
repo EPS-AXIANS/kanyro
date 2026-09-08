@@ -75,6 +75,23 @@ const livraison = fiche.data.enLigne
           </>
         )
       }
+      {
+        /* Le lien de maquette s'efface dès que le site est en ligne : à ce
+           moment-là, c'est le site qu'on veut montrer, pas son chantier. */
+        !fiche.data.enLigne && fiche.data.maquette && (
+          <>
+            {' · '}
+            <a
+              class="text-signal-vif"
+              href={fiche.data.maquette}
+              target="_blank"
+              rel="noopener"
+            >
+              voir la maquette
+            </a>
+          </>
+        )
+      }
     </p>
 
     {

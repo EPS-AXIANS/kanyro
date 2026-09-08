@@ -13,6 +13,22 @@
 # `date:` est celle de la livraison de la maquette. À remplacer par celle de la
 # mise en ligne le même jour.
 #
+# `maquette:` sert le site lui-même depuis un sous-chemin de kanyro.tech. Il est
+# construit avec `base: '/demo/reliure-deranty'` et déposé dans
+# /var/www/kanyro/demo/. Ce sont les pages PUBLIQUES seulement : le formulaire de
+# rendez-vous et l'espace atelier tournent sur un Worker Cloudflare qui n'est pas
+# là, donc envoyer le formulaire tombe en 404.
+#
+# ⚠ Les douze pages de la démo portent `noindex, nofollow`, posé après coup sur
+# la sortie construite. Sans ça, Google indexerait le futur site de l'atelier
+# sous le domaine de l'agence, et les deux se feraient concurrence le jour de la
+# vraie mise en ligne. Et surtout PAS un `Disallow` dans robots.txt : il
+# empêcherait le robot de lire le `noindex` qu'on vient de poser.
+#
+# La démo se refait en rejouant le build du projet reliure avec un `base`, puis
+# en réécrivant les chemins absolus écrits à la main — Astro ne préfixe que ce
+# qu'il génère, pas les `href` du balisage.
+#
 # ⚠ RESTE À FAIRE, ET CE N'EST PAS DU CODE : l'accord de Frédérique Deranty pour
 # publier son nom, son métier et sa commune sur le site de l'agence. C'est de la
 # famille, donc ça se demande vite — mais ça se demande.
@@ -32,6 +48,7 @@ client: 'Atelier de reliure Frédérique Deranty'
 metier: 'relieur et restaurateur de livres anciens'
 commune: 'Chuignolles'
 date: 2026-09-08
+maquette: 'https://kanyro.tech/demo/reliure-deranty/'
 resume: >-
   Un atelier installé depuis 1998, un site Wix qui montrait le travail sans
   jamais aider à le vendre. Tout est refait, et le suivi des devis et des

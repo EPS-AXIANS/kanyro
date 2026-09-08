@@ -32,7 +32,18 @@ const realisations = defineCollection({
       )
       .default([]),
     image: z.string().optional(),
+    /** Le site en production. Sa présence fait basculer la fiche de « maquette
+     *  livrée » à « mis en ligne », et fait apparaître le lien « voir le site ». */
     enLigne: z.string().url().optional(),
+    /**
+     * Où regarder le travail tant qu'il n'est pas en production : une
+     * prévisualisation déployée, un dépôt.
+     *
+     * Champ SÉPARÉ d'`enLigne`, et pas un repli sur lui : une maquette n'est pas
+     * un site en ligne, et confondre les deux ferait écrire « mis en ligne »
+     * au-dessus d'un lien qui ne mène pas au site du client.
+     */
+    maquette: z.string().url().optional(),
     brouillon: z.boolean().default(true),
   }),
 });
