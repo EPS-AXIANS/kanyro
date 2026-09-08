@@ -1280,6 +1280,44 @@
   border-radius: 100em;
 }
 
+/*
+ * Le curseur natif s'efface : la bille ne l'accompagne plus, elle le remplace.
+ *
+ * ⚠ LA CLASSE EST POSÉE PAR LE SCRIPT, JAMAIS DANS LE BALISAGE.
+ *
+ * Écrite dans le HTML, elle retirerait son curseur à quiconque n'a PAS la bille
+ * pour le remplacer — script bloqué par la CSP, JavaScript coupé, appareil
+ * tactile branché sur une souris, mouvement réduit. Le visiteur se retrouverait
+ * à viser à l'aveugle une page qu'il ne peut plus pointer, et c'est la panne
+ * qu'on ne peut pas contourner : il lui faudrait deviner où il clique pour
+ * partir. `initCurseurMagnetique` ne la pose donc qu'une fois attachée.
+ *
+ * Le sélecteur universel n'est pas de la paresse : la feuille de l'agent
+ * utilisateur pose `cursor: pointer` sur les liens et `cursor: text` dans les
+ * champs. Une règle sur la seule racine les laisserait tous ressortir.
+ *
+ * ⚠ LES TROIS CONDITIONS DU MÉDIA SONT UN SECOND VERROU, ET ELLES SERVENT.
+ *
+ * Ce sont celles que le script vérifie avant de poser la classe — mais lui ne
+ * les vérifie qu'UNE FOIS, au chargement, et ne retire jamais la classe. Elles,
+ * sont réévaluées en permanence par le navigateur.
+ *
+ * Le cas qui a motivé ce doublon : quelqu'un qui active le mouvement réduit
+ * pendant sa visite. La règle de fin de fichier masque alors `.curseur` — et
+ * sans ce média, la classe survivrait sur <html> avec plus aucun pointeur du
+ * tout, ni flèche ni bille, jusqu'au prochain rechargement. Ici, la flèche
+ * revient dans le même cadre. Même chose si le pointeur cesse d'être fin.
+ *
+ * (Ce sont les trois conditions du survol des boutons, plus haut. Les mêmes
+ * causes, les mêmes garde-fous.)
+ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .curseur-remplace,
+  .curseur-remplace * {
+    cursor: none;
+  }
+}
+
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
 @media (prefers-reduced-motion: reduce) {
   html {

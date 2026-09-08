@@ -241,8 +241,30 @@ const csp = [
       Sans script, sans souris, ou sous `prefers-reduced-motion`, le CSS le
       laisse invisible et il ne coûte rien. Voir `initCurseurMagnetique` dans
       effets.js.
+
+      ⚠ `transition:persist` — LE SEUL DU SITE, ET IL SE JUSTIFIE.
+
+      L'en-tête s'en passe volontairement (voir plus haut) : il porte
+      `aria-current`, qui dépend de l'URL. La bille, elle, ne porte aucun état
+      de page — mais depuis qu'elle REMPLACE le curseur natif, sa disparition
+      n'est plus un défaut d'ornement.
+
+      Sans persistance, `<ClientRouter />` la reconstruit avec le <body> : le
+      nouvel élément arrive sans position et sans sa classe de visibilité, donc
+      invisible dans un coin, jusqu'à ce que `astro:page-load` la replace. Or la
+      classe `curseur-remplace` vit sur <html>, qui ne bouge pas. Pendant cet
+      intervalle, le visiteur n'a plus AUCUN pointeur : ni la flèche, qu'on a
+      masquée, ni la bille, qui n'est pas encore là.
+
+      Persistée, c'est le même nœud qui traverse la navigation, avec sa position
+      et son fond. Il n'y a plus d'intervalle du tout.
     */}
-    <div class="curseur" data-curseur aria-hidden="true">
+    <div
+      class="curseur"
+      data-curseur
+      aria-hidden="true"
+      transition:persist="curseur"
+    >
       <div class="curseur-fond" data-curseur-fond></div>
     </div>
 

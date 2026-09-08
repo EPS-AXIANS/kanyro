@@ -924,8 +924,18 @@ function initParallaxe() {
 const CIBLES_CURSEUR =
   '[data-curseur-cible], .bouton-primaire, .bouton-secondaire';
 
-/** Fraction de la distance restante rattrapée à chaque cadre. */
-const SUIVI_CURSEUR = 0.14;
+/*
+ * Fraction de la distance restante rattrapée à chaque cadre.
+ *
+ * Resserré depuis que la bille REMPLACE le curseur natif au lieu de
+ * l'accompagner : ce n'est plus un ornement qui traîne derrière une flèche
+ * bien visible, c'est le seul repère dont dispose la main pour viser. Un
+ * amortissement trop lâche donne alors l'impression que la page répond mal.
+ *
+ * Assez haut pour que la bille colle au geste, assez bas pour qu'il reste une
+ * traîne : c'est le seul réglage à toucher si le suivi paraît mou ou nerveux.
+ */
+const SUIVI_CURSEUR = 0.22;
 
 /** En deçà, le point est arrivé et la boucle s'arrête au lieu de tourner à vide. */
 const SEUIL_ARRET_CURSEUR = 0.1;
@@ -965,6 +975,22 @@ function initCurseurMagnetique() {
   const curseur = document.querySelector('[data-curseur]');
   const fond = curseur?.querySelector('[data-curseur-fond]');
   if (!curseur || !fond) return null;
+
+  /*
+   * À partir d'ici, la bille existe : le curseur natif peut s'effacer.
+   *
+   * ⚠ POSÉE ICI ET NULLE PART AILLEURS, et jamais retirée au démontage.
+   *
+   * Ici, parce que toutes les conditions viennent d'être vérifiées — pointeur
+   * fin, mouvement non réduit, script exécuté, éléments présents. Dans le
+   * balisage, la classe priverait de curseur ceux pour qui rien ne le remplace.
+   *
+   * Jamais retirée, parce que `demonter()` est joué à chaque navigation : la
+   * flèche reviendrait le temps du changement de page, à chaque fois. Ce que la
+   * classe décrit — un pointeur fin, un visiteur qui accepte le mouvement — ne
+   * change pas d'une page à l'autre.
+   */
+  document.documentElement.classList.add('curseur-remplace');
 
   const abandon = new AbortController();
   const { signal } = abandon;
