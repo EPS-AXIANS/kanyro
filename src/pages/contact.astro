@@ -26,18 +26,24 @@ const classesBandeau = 'bandeau-alerte mb-8';
     à cliquer dedans déplace une cible que la main vise déjà.
   */}
   {/*
-    Une seule colonne depuis que la carte de coordonnées a été retirée. La
-    largeur maximale reprend celle qu'occupait la colonne du formulaire : sans
-    elle, le titre s'étirerait sur les 78 rem de `.contenu`.
+    Colonne unique et centrée depuis que la carte de coordonnées a été retirée.
+    Sans le centrage, le formulaire restait collé au bord gauche des 78 rem de
+    `.contenu` et laissait la moitié de l'écran vide — la page avait l'air
+    inachevée plutôt que sobre.
+
+    La forme est celle de /merci et /404, les deux autres pages du site à une
+    seule colonne : sur-titre, titre, une phrase, puis le contenu. Les champs,
+    eux, restent alignés à gauche — un libellé centré au-dessus de sa saisie ne
+    se lit pas.
   */}
-  <section data-reveal-fondu class="contenu sous-navbar pb-24">
-    <div class="max-w-2xl">
+  <section data-reveal-fondu class="contenu sous-navbar pb-24 text-center">
+    <div class="mx-auto max-w-3xl">
       <p class="surtitre reveal">Contact</p>
       <h1 class="titre-page reveal mt-6 [--retard:80ms]">
         Parlons de votre activité
       </h1>
       <p
-        class="font-texte reveal mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [--retard:160ms]"
+        class="font-texte reveal mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [--retard:160ms]"
       >
         Quelques lignes suffisent. Je réponds sous 48 heures, et je vous dis
         franchement si un site vous rapportera quelque chose.
@@ -57,7 +63,7 @@ const classesBandeau = 'bandeau-alerte mb-8';
         name="devis"
         method="POST"
         action="/contact.php"
-        class="reveal mt-12 max-w-xl [--retard:240ms]"
+        class="reveal mx-auto mt-12 max-w-2xl text-left [--retard:240ms]"
       >
         {/*
           Trois bandeaux, un par motif d'échec renvoyé par contact.php via
@@ -210,7 +216,9 @@ const classesBandeau = 'bandeau-alerte mb-8';
           </Champ>
         </div>
 
-        <div class="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div
+          class="mt-9 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center"
+        >
           <button type="submit" class="bouton-primaire w-full sm:w-auto">
             Envoyer ma demande
           </button>
@@ -234,14 +242,14 @@ const classesBandeau = 'bandeau-alerte mb-8';
 
         {
           SITE.rendezVous.url && (
-            <p class="font-texte mt-4 text-xs text-texte-faible">
+            <p class="font-texte mt-4 text-center text-xs text-texte-faible">
               Le calendrier n'affiche que des créneaux réellement ouverts —{' '}
               {SITE.rendezVous.duree}, par téléphone ou sur votre chantier.
             </p>
           )
         }
 
-        <p class="font-texte mt-5 text-xs text-texte-faible">
+        <p class="font-texte mt-5 text-center text-xs text-texte-faible">
           Vos coordonnées servent uniquement à vous répondre. Elles ne sont ni
           revendues, ni utilisées pour de la prospection.
         </p>
