@@ -74,7 +74,22 @@ Trois choses à savoir avant d'y toucher :
   lire le `noindex`.
 - **Astro ne préfixe que ce qu'il génère.** Les `href` écrits à la main dans le
   balisage gardent leur `/` de tête et s'échappent du sous-chemin : ils sont
-  réécrits après le build. Refaire la démo, c'est refaire ces deux passes.
+  réécrits après le build, dans le balisage comme dans les chaînes compilées
+  dans les scripts.
+
+Ces trois passes sont dans `scripts/deployer-demo-reliure.mjs`. Mettre la démo à
+jour tient donc en une commande, après avoir tiré la nouvelle version du projet
+de reliure :
+
+```bash
+git -C ~/orca/workspaces/reliure-fderanty pull
+node scripts/deployer-demo-reliure.mjs            # --sans-envoi pour s'arrêter avant la mise en ligne
+```
+
+⚠ **Le script REFUSE de déployer** s'il reste un seul chemin qui s'échapperait du
+sous-chemin, ou une page sans `noindex`. C'est délibéré : une démo dont les liens
+ramènent sur l'agence se découvre trois semaines plus tard, par hasard. Il
+sauvegarde aussi `/var/www/kanyro/demo/` avant d'écrire.
 
 > **`git push` ne déploie rien.** Aucun webhook, aucune CI — vérifié. GitHub ne
 > sert que de dépôt. La mise en ligne est l'étape ci-dessus, et elle seule.
