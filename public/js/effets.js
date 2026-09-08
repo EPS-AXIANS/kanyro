@@ -1384,6 +1384,109 @@ function initArcTransition() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Le défilement amorti                                                       */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Lenis remplace le défilement du navigateur par une interpolation : la molette
+ * ne saute plus d'un cran à l'autre, elle pousse une valeur qui rattrape sa
+ * cible à chaque cadre.
+ *
+ * C'est la seule ressource du lot qui arrive ENTIÈRE, sans réécriture — elle ne
+ * dépend de rien d'autre qu'elle-même, et son fichier tient dans public/js
+ * comme effets.js. Seuls le chargement et les trois points ci-dessous sont de
+ * notre fait.
+ *
+ * ---- Pourquoi la position réelle ne change pas ----
+ *
+ * Lenis écrit `window.scrollY`, il ne transforme pas la page. Les événements
+ * `scroll` continuent donc d'être émis, et TOUT ce qui vit dans ce fichier — la
+ * frise, la parallaxe, la barre, les arcs — continue de fonctionner sans une
+ * ligne de changement. C'est ce qui distingue cette bibliothèque des défilements
+ * dits « virtuels », qui déplacent un conteneur et cassent au passage toute
+ * mesure faite sur la fenêtre.
+ *
+ * ---- L'instance vit hors du cycle des pages ----
+ *
+ * Elle est créée une fois, au chargement du module, et jamais démontée :
+ * `<ClientRouter />` remplace le <body>, pas la fenêtre. La reconstruire à
+ * chaque navigation empilerait des boucles d'animation concurrentes, toutes
+ * occupées à écrire la même position.
+ */
+let defilement = null;
+
+function initDefilementAmorti() {
+  /*
+   * Mouvement réduit : rien du tout. Amortir le défilement, c'est ajouter du
+   * mouvement là où le visiteur en demande le moins — et contrairement au reste
+   * du fichier, la dégradation est ici parfaite, le navigateur reprenant
+   * exactement la main.
+   */
+  if (MOUVEMENT_DOUX.matches) return;
+
+  // Le fichier peut manquer (mis en cache de travers, bloqué, renommé). La page
+  // défile alors normalement ; c'est un agrément en moins, pas une panne.
+  if (typeof globalThis.Lenis !== 'function') return;
+
+  defilement = new globalThis.Lenis({ autoRaf: true });
+
+  /*
+   * ---- Les ancres, qu'il faut reprendre à la main ----
+   *
+   * `scroll-behavior: smooth` (global.css) et Lenis écrivent la même position à
+   * chaque cadre : laissés ensemble, ils se la disputent et le saut devient
+   * saccadé. Lenis neutralise donc la propriété — et un clic sur `#preuve`
+   * arriverait d'un coup, sans transition, ce qui serait une régression.
+   *
+   * Le clic est donc rendu à `scrollTo`, qui suit l'amortissement de l'instance.
+   * Deux ancres seulement en dépendent aujourd'hui : le lien du tarif de
+   * lancement, et le lien d'évitement en tête de page.
+   */
+  document.addEventListener('click', (evenement) => {
+    if (evenement.defaultPrevented || evenement.button !== 0) return;
+    // Ouvrir dans un onglet, télécharger, ouvrir dans une fenêtre : ces gestes
+    // ne défilent pas la page courante, ils ne nous regardent pas.
+    if (
+      evenement.metaKey ||
+      evenement.ctrlKey ||
+      evenement.shiftKey ||
+      evenement.altKey
+    ) {
+      return;
+    }
+
+    const depart = evenement.target;
+    const lien =
+      depart instanceof Element ? depart.closest('a[href^="#"]') : null;
+    if (!lien) return;
+
+    const id = decodeURIComponent(lien.getAttribute('href').slice(1));
+    const cible = id ? document.getElementById(id) : null;
+    if (!cible) return;
+
+    evenement.preventDefault();
+    defilement.scrollTo(cible);
+    history.pushState(null, '', `#${id}`);
+
+    /*
+     * ⚠ LE FOCUS, À LA MAIN, ET C'EST LA RAISON D'ÊTRE DE CES QUATRE LIGNES.
+     *
+     * Un saut d'ancre natif ne fait pas que défiler : il déplace le focus sur
+     * la cible. C'est tout l'intérêt du lien « Aller au contenu » — sans lui,
+     * la tabulation suivante repartirait du haut de la page et le lien
+     * d'évitement ne servirait plus à rien, alors même que l'écran, lui, aurait
+     * l'air d'avoir bougé. Une panne invisible à l'œil et totale au clavier.
+     *
+     * `tabindex="-1"` parce qu'un <main> ou une <section> n'est pas focusable
+     * par défaut ; `preventScroll` parce que c'est Lenis qui défile, et que le
+     * focus rendrait le saut instantané qu'on vient d'éviter.
+     */
+    if (!cible.hasAttribute('tabindex')) cible.setAttribute('tabindex', '-1');
+    cible.focus({ preventScroll: true });
+  });
+}
+
+/* ------------------------------------------------------------------------- */
 /* Cycle de vie                                                               */
 /* ------------------------------------------------------------------------- */
 
@@ -1423,6 +1526,12 @@ function initialiser() {
     initVideoHero(),
   ].filter(Boolean);
 }
+
+/*
+ * Le défilement amorti, hors du cycle des pages : une fois, et pour de bon.
+ * Voir l'en-tête de `initDefilementAmorti`.
+ */
+initDefilementAmorti();
 
 /*
  * L'appel direct couvre le premier chargement quoi qu'il arrive. `astro:page-load`
