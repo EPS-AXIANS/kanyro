@@ -19,7 +19,16 @@ const classesBandeau = 'bandeau-alerte mb-8';
   description="Décrivez votre activité en quelques lignes. Réponse sous 48 h, avec un avis honnête sur ce qu'un site peut vous apporter."
   jsonLd={jsonLd}
 >
-  <section class="contenu sous-navbar grid gap-16 pb-24 lg:grid-cols-[1.25fr_1fr]">
+  {/*
+    `data-reveal-fondu` : les révélations de cette page se contentent d'un
+    fondu, sans la montée de 32 px du reste du site. Le contenu est un
+    formulaire — faire glisser des champs vers le haut pendant qu'on s'apprête
+    à cliquer dedans déplace une cible que la main vise déjà.
+  */}
+  <section
+    data-reveal-fondu
+    class="contenu sous-navbar grid gap-16 pb-24 lg:grid-cols-[1.25fr_1fr]"
+  >
     <div>
       <p class="surtitre reveal">Contact</p>
       <h1 class="titre-page reveal mt-6 [--retard:80ms]">

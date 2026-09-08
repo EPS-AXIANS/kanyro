@@ -377,6 +377,27 @@
 }
 
 /*
+ * La même révélation, sans la montée.
+ *
+ * Sur une page dont le contenu est un formulaire, la cascade qui monte fait
+ * bouger les champs pendant qu'on s'apprête à cliquer dedans. Le fondu seul dit
+ * la même chose — « ceci vient d'arriver » — sans déplacer une cible que la
+ * main vise déjà.
+ *
+ * Aucun `transform` ici, et ce n'est pas un oubli : l'état de repos d'un
+ * `.reveal` est une simple opacité nulle (voir le bloc `scripting: enabled`
+ * plus bas), donc rien n'a à être ramené à zéro.
+ */
+@keyframes reveal-fondu {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
  * Le rideau — ce que `--ease-rideau` annonçait depuis le début sans que rien ne
  * le fasse. Le texte se découvre du haut vers le bas pendant qu'il monte, comme
  * s'il remontait de derrière une règle.
@@ -423,6 +444,16 @@
 /* Déclenchées par effets.js quand l'élément entre dans le champ. */
 .reveal.revealed {
   animation: reveal-up 0.8s var(--ease-rideau) var(--retard, 0ms) forwards;
+}
+
+/*
+ * `data-reveal-fondu` posé sur un conteneur retire la montée à tout ce qu'il
+ * abrite. Seul le NOM de l'animation change : la durée, la courbe et les
+ * retards en cascade restent ceux de la règle ci-dessus, et un décalage réglé
+ * dans le balisage continue de valoir.
+ */
+[data-reveal-fondu] .reveal.revealed {
+  animation-name: reveal-fondu;
 }
 .rideau.revealed {
   animation: rideau 1.1s var(--ease-rideau) var(--retard, 0ms) forwards;
