@@ -215,6 +215,25 @@ const colonneDroite = [
         }
       </div>
     </div>
+
+    {/*
+      Le raccord avec la section d'avant, et c'est le même que celui de l'offre
+      pris à l'envers.
+
+      « Comment ça se passe » est sur le noir de la page, la Q&R sur le brique :
+      la couture est là aussi une droite pleine largeur. `data-arc-mode="envers"`
+      colle l'arc en HAUT de la section, plein au départ, et le vide vers le
+      haut — c'est donc le noir d'avant qui s'attarde sur les questions avant de
+      se retirer, en creusant vers le bas là où l'autre bombait vers le haut.
+
+      Pas de `data-arc-fin` ici, volontairement : un arc à l'envers cache du
+      texte le temps de se retirer. Sur la course par défaut — une hauteur
+      d'écran — il a fini de dégager quand le haut de la section atteint le haut
+      de la fenêtre, soit avant la première question. Le pointer plus loin le
+      ferait traîner sur ce qu'on essaie de lire.
+    */}
+    <div class="arc-transition arc-transition--envers" data-arc data-arc-mode="envers" aria-hidden="true">
+    </div>
   </section>
 
   {/*

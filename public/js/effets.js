@@ -1246,6 +1246,24 @@ function initVideoHero() {
  * brique à l'écran et le reste du remplissage se joue hors champ. Chercher à
  * faire coïncider les deux raccourcirait la course, donc accélérerait la
  * montée — c'est-à-dire exactement le défaut qu'on vient d'écarter.
+ *
+ * ---- Les deux sens ----
+ *
+ * Par défaut l'arc RECOUVRE : il est collé au bas de sa section, se remplit du
+ * bas vers le haut, et sa bosse pointe vers le haut. C'est la couleur de la
+ * section suivante qui monte.
+ *
+ * `data-arc-mode="envers"` le RETOURNE : il est collé au HAUT de sa section,
+ * part plein et se vide vers le haut, et sa bosse pointe vers le bas. C'est
+ * alors la couleur de la section PRÉCÉDENTE qui s'attarde sur celle-ci avant
+ * de se retirer. Même mécanisme, courbure opposée — les deux modes de la
+ * ressource, `cover` et `reveal`.
+ *
+ * ⚠ Un arc à l'envers MASQUE du contenu le temps de se retirer, là où l'autre
+ * ne recouvre que ce qu'on vient de lire. Sa course doit donc rester courte :
+ * laissé sur le défaut d'un écran, il a fini de dégager pile quand le haut de
+ * la section atteint le haut de la fenêtre. Lui donner un `data-arc-fin`
+ * lointain le ferait traîner sur le texte, ce qui n'est plus un raccord.
  */
 function initArcTransition() {
   const hotes = [...document.querySelectorAll('[data-arc]')];
@@ -1284,6 +1302,7 @@ function initArcTransition() {
         ? document.querySelector(hote.dataset.arcFin)
         : null,
       courbe: Number.isFinite(courbe) ? courbe : COURBE_ARC,
+      envers: hote.dataset.arcMode === 'envers',
     };
   });
 
@@ -1303,23 +1322,39 @@ function initArcTransition() {
     // de se remplir à plat, sans que la courbe ait à se résorber d'un coup.
     const bosse = profondeur * Math.sin(p * Math.PI);
 
+    /*
+     * L'arête est à la même hauteur dans les deux sens — c'est ce qui reste de
+     * part et d'autre qui change. À l'endroit, la matière pend sous l'arête et
+     * s'accroche au bas du repère ; à l'envers, elle est au-dessus et s'accroche
+     * au haut. D'où le seul bord à choisir, et le seul signe à retourner.
+     */
+    const bord = arc.envers ? 0 : REPERE_ARC;
     const arete = arrondir(REPERE_ARC - REPERE_ARC * p);
+
     // Le sommet d'une quadratique est à mi-chemin de son point de contrôle :
     // celui-ci s'écarte donc du DOUBLE de la profondeur voulue.
-    const controle = arrondir(arete - bosse * 2);
+    const controle = arrondir(arc.envers ? arete + bosse * 2 : arete - bosse * 2);
 
     arc.trace.setAttribute(
       'd',
-      `M0 ${REPERE_ARC} L0 ${arete} Q${REPERE_ARC / 2} ${controle} ${REPERE_ARC} ${arete} L${REPERE_ARC} ${REPERE_ARC} Z`
+      `M0 ${bord} L0 ${arete} Q${REPERE_ARC / 2} ${controle} ${REPERE_ARC} ${arete} L${REPERE_ARC} ${bord} Z`
     );
   };
 
   const placer = () => {
     for (const arc of arcs) {
-      const bas = arc.section.getBoundingClientRect().bottom;
+      const boite = arc.section.getBoundingClientRect();
 
       /*
-       * `fin.top - bas` est une distance de MISE EN PAGE : les deux boîtes
+       * Le bord d'où part la course. À l'endroit c'est le BAS de la section :
+       * l'arc raccorde avec ce qui vient après, il n'a rien à faire tant que la
+       * fin de la section n'est pas en vue. À l'envers c'est son HAUT, puisque
+       * le raccord se joue à l'entrée.
+       */
+      const depart = arc.envers ? boite.top : boite.bottom;
+
+      /*
+       * `fin.top - depart` est une distance de MISE EN PAGE : les deux boîtes
        * défilent ensemble, leur écart ne dépend donc pas de l'endroit où on se
        * trouve dans la page. La relire à chaque cadre coûte une mesure de plus
        * et dispense de la réviser au redimensionnement, à l'arrivée des fontes
@@ -1330,10 +1365,10 @@ function initArcTransition() {
        * écran de la ressource.
        */
       const portee = arc.fin
-        ? Math.max(arc.fin.getBoundingClientRect().top - bas, 1)
+        ? Math.max(arc.fin.getBoundingClientRect().top - depart, 1)
         : window.innerHeight;
 
-      const brut = (window.innerHeight - bas) / portee;
+      const brut = (window.innerHeight - depart) / portee;
       dessiner(arc, Math.min(Math.max(brut, 0), 1));
     }
   };

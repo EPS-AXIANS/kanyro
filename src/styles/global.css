@@ -1355,6 +1355,16 @@
   pointer-events: none;
 }
 
+/*
+ * L'arc à l'envers se colle au HAUT de sa section : il n'annonce plus la
+ * suivante, il retient la précédente. Le reste — hauteur, couleur, tracé — ne
+ * change pas ; c'est le script qui retourne la courbure.
+ */
+.arc-transition--envers {
+  top: 0;
+  bottom: auto;
+}
+
 .arc-transition svg {
   display: block;
   width: 100%;
