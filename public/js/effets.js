@@ -62,6 +62,16 @@ const PAS_CASCADE = 90;
  */
 const ACTIVATION_FRISE = 0.6;
 
+/**
+ * Profondeur de la bosse de l'arc de raccord, en pourcentage de sa LARGEUR — et
+ * non de sa hauteur. Exprimée ainsi, la courbe garde la même allure sur un
+ * téléphone et sur un grand écran ; 0 donnerait une arête droite.
+ */
+const COURBE_ARC = 10;
+
+/** Côté du repère carré dans lequel le chemin de l'arc est tracé. */
+const REPERE_ARC = 100;
+
 /* ------------------------------------------------------------------------- */
 /* Défilement : une seule boucle pour tout le monde                           */
 /* ------------------------------------------------------------------------- */
@@ -1196,6 +1206,149 @@ function initVideoHero() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* L'arc de raccord entre deux sections                                       */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Deux aplats de couleur qui se suivent — le brique de l'offre, le noir de la
+ * page — se touchent sur une droite qui traverse tout l'écran. L'arc remplace
+ * cette droite par une courbe qui monte avec le défilement : le noir de la
+ * section d'après vient recouvrir la fin de la section brique, en avançant par
+ * le milieu.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * La forme et son pilotage viennent de la ressource Osmo « Arc Scroll
+ * Transition » : un chemin à quatre points dont l'arête remonte, avec un point
+ * de contrôle qui s'écarte à mi-course et revient à plat aux deux bouts.
+ *
+ * LE MOTEUR est refait, comme pour le curseur magnétique et le libellé des
+ * boutons. La ressource repose sur GSAP et son greffon ScrollTrigger servis par
+ * jsDelivr — donc bloqués par `script-src 'self'`. Le suivi passe par la boucle
+ * de défilement commune de ce fichier, et la course est calculée à la main.
+ *
+ * ---- La course, qui est le seul vrai réglage ----
+ *
+ * Elle commence quand le bas de la section hôte atteint le bas de la fenêtre,
+ * et se termine à l'arrivée de l'élément désigné par `data-arc-fin`.
+ *
+ * Sa longueur décide de la VITESSE. L'arête remonte pour deux raisons à la
+ * fois : elle se remplit, et sa boîte défile avec la page. Elle avance donc de
+ * (1 + hauteur de la boîte / longueur de la course) fois la vitesse du
+ * défilement. Sur une course d'un écran — le défaut de la ressource, dont les
+ * sections font une hauteur d'écran — ça fait deux fois trop vite, et le bas de
+ * la section est avalé d'un coup. Visée sur la Q&R, deux sections plus bas, la
+ * course dure environ trois écrans : la courbe monte alors à peine plus vite
+ * que le texte qu'elle recouvre.
+ *
+ * ⚠ L'arc finit de TRAVERSER L'ÉCRAN bien avant sa fin de course, et c'est
+ * normal : une fois l'arête sortie par le haut, il ne reste plus un pixel de
+ * brique à l'écran et le reste du remplissage se joue hors champ. Chercher à
+ * faire coïncider les deux raccourcirait la course, donc accélérerait la
+ * montée — c'est-à-dire exactement le défaut qu'on vient d'écarter.
+ */
+function initArcTransition() {
+  const hotes = [...document.querySelectorAll('[data-arc]')];
+  if (!hotes.length) return null;
+
+  /*
+   * Mouvement réduit : aucune forme n'est construite, et le balisage reste la
+   * boîte vide qu'il est. Le raccord redevient la coupure droite d'avant, ce
+   * qui est un défaut d'ornement et rien d'autre.
+   */
+  if (MOUVEMENT_DOUX.matches) return null;
+
+  const NS_SVG = 'http://www.w3.org/2000/svg';
+  const arrondir = (v) => Math.round(v * 100) / 100;
+
+  const arcs = hotes.map((hote) => {
+    const svg = document.createElementNS(NS_SVG, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${REPERE_ARC} ${REPERE_ARC}`);
+    // La forme s'étire à sa boîte, quelles que soient ses proportions ; c'est
+    // `dessiner` qui rétablit celles de la courbe.
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+
+    const trace = document.createElementNS(NS_SVG, 'path');
+    svg.append(trace);
+    hote.append(svg);
+
+    const courbe = Number.parseFloat(hote.dataset.arcCourbe);
+
+    return {
+      hote,
+      svg,
+      trace,
+      section: hote.closest('section') ?? hote.parentElement,
+      fin: hote.dataset.arcFin
+        ? document.querySelector(hote.dataset.arcFin)
+        : null,
+      courbe: Number.isFinite(courbe) ? courbe : COURBE_ARC,
+    };
+  });
+
+  const dessiner = (arc, p) => {
+    const boite = arc.hote.getBoundingClientRect();
+
+    /*
+     * Le repère est carré, la boîte ne l'est pas, et l'étirement est libre :
+     * une profondeur donnée en pourcentage de la largeur doit être ramenée dans
+     * l'échelle verticale. Sans ce rapport, la bosse s'aplatirait à mesure que
+     * la fenêtre s'élargit.
+     */
+    const profondeur =
+      boite.height > 0 ? arc.courbe * (boite.width / boite.height) : 0;
+
+    // Nulle aux deux bouts, maximale à mi-course : la section commence et finit
+    // de se remplir à plat, sans que la courbe ait à se résorber d'un coup.
+    const bosse = profondeur * Math.sin(p * Math.PI);
+
+    const arete = arrondir(REPERE_ARC - REPERE_ARC * p);
+    // Le sommet d'une quadratique est à mi-chemin de son point de contrôle :
+    // celui-ci s'écarte donc du DOUBLE de la profondeur voulue.
+    const controle = arrondir(arete - bosse * 2);
+
+    arc.trace.setAttribute(
+      'd',
+      `M0 ${REPERE_ARC} L0 ${arete} Q${REPERE_ARC / 2} ${controle} ${REPERE_ARC} ${arete} L${REPERE_ARC} ${REPERE_ARC} Z`
+    );
+  };
+
+  const placer = () => {
+    for (const arc of arcs) {
+      const bas = arc.section.getBoundingClientRect().bottom;
+
+      /*
+       * `fin.top - bas` est une distance de MISE EN PAGE : les deux boîtes
+       * défilent ensemble, leur écart ne dépend donc pas de l'endroit où on se
+       * trouve dans la page. La relire à chaque cadre coûte une mesure de plus
+       * et dispense de la réviser au redimensionnement, à l'arrivée des fontes
+       * ou à l'ouverture d'une réponse de la Q&R.
+       *
+       * Le plancher à 1 évite la division par zéro le temps qu'une mise en page
+       * incomplète se stabilise ; sans cible, on retombe sur la course d'un
+       * écran de la ressource.
+       */
+      const portee = arc.fin
+        ? Math.max(arc.fin.getBoundingClientRect().top - bas, 1)
+        : window.innerHeight;
+
+      const brut = (window.innerHeight - bas) / portee;
+      dessiner(arc, Math.min(Math.max(brut, 0), 1));
+    }
+  };
+
+  placer();
+
+  auDefilement.push(placer);
+  auRedimensionnement.push(placer);
+
+  return () => {
+    for (const arc of arcs) arc.svg.remove();
+  };
+}
+
+/* ------------------------------------------------------------------------- */
 /* Cycle de vie                                                               */
 /* ------------------------------------------------------------------------- */
 
@@ -1222,6 +1375,7 @@ function initialiser() {
     initValidationDevis(),
     initRevelations(),
     initFrise(),
+    initArcTransition(),
     initBarre(),
     initSurvolDirectionnel(),
     // ⚠ `initBoutonsAnimes` REMPLACE le contenu des boutons qu'il découpe

@@ -17,7 +17,14 @@ const secteurs = [
 ];
 ---
 
-<section id="offre" class="bg-brique px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
+{/*
+  `relative` et `overflow-hidden` sont là pour l'arc de raccord posé en fin de
+  section : le premier lui sert d'ancrage, le second l'empêche de déborder.
+*/}
+<section
+  id="offre"
+  class="bg-brique relative overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32"
+>
   <div class="mx-auto max-w-5xl">
     <p class="surtitre reveal text-center text-white/40">L'offre</p>
     <h2
@@ -165,6 +172,34 @@ const secteurs = [
     <div class="reveal mt-12 text-center">
       <a href="/contact" data-bouton-anime class="bouton-primaire">Demander un devis</a>
     </div>
+  </div>
+
+  {/*
+    Le raccord avec la section suivante.
+
+    Le brique s'arrête ici et le noir de la page reprend juste en dessous : la
+    coupure est droite, pleine largeur, et se voit d'autant plus que les deux
+    aplats sont larges. L'arc la remplace par une courbe qui monte avec le
+    défilement — c'est le noir de la section d'après qui vient recouvrir la fin
+    de celle-ci, en avançant par le milieu, pas une bande décorative posée entre
+    les deux.
+
+    `data-arc-fin` désigne l'élément dont l'arrivée termine la course. C'est le
+    seul réglage qui compte, parce que la longueur de la course fixe la vitesse
+    de la montée : visée sur la Q&R, deux sections plus bas, la courbe monte à
+    peine plus vite que le texte qu'elle recouvre, là où le défaut de la
+    ressource (un écran) l'aurait fait passer deux fois trop vite.
+
+    La forme est construite par le script — voir `initArcTransition` dans
+    effets.js. Le balisage ne porte qu'une boîte vide, et sous mouvement réduit
+    elle reste vide.
+  */}
+  <div
+    class="arc-transition"
+    data-arc
+    data-arc-fin="#questions"
+    aria-hidden="true"
+  >
   </div>
 </section>
 

@@ -1318,6 +1318,53 @@
   }
 }
 
+/* ---- L'arc de raccord entre deux sections ---- */
+
+/*
+ * Une bande collée au bas de la section, dans laquelle le script dessine un
+ * chemin SVG qui se remplit par le bas en bombant au milieu. Voir
+ * `initArcTransition` dans effets.js pour le tracé et pour la course.
+ *
+ * `color` porte la couleur du raccord, et c'est celle de la section SUIVANTE :
+ * l'arc est ce qui vient la recouvrir, pas une bande posée entre les deux. Le
+ * tracé se peint en `currentcolor`, donc changer la couleur d'à côté se règle
+ * ici et nulle part dans le script.
+ *
+ * ⚠ La section hôte doit porter `relative` ET `overflow-hidden` : le premier
+ * ancre la bande, le second la coupe quand la section est plus courte qu'un
+ * écran — sans quoi elle déborderait par le HAUT, sur la section d'avant.
+ */
+
+.arc-transition {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+
+  /*
+   * Une hauteur d'écran, et surtout PAS la hauteur de la section : c'est ce qui
+   * règle la vitesse de la montée. L'arête remonte à la fois parce qu'elle se
+   * remplit et parce que sa boîte défile — une boîte de trois écrans de haut
+   * ferait donc un balayage trois fois plus rapide que la page, qui se lirait
+   * comme un volet qui claque et non comme un raccord.
+   */
+  height: 100svh;
+
+  color: var(--color-fond);
+  pointer-events: none;
+}
+
+.arc-transition svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.arc-transition path {
+  fill: currentcolor;
+}
+
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
 @media (prefers-reduced-motion: reduce) {
   html {
