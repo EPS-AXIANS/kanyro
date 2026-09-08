@@ -25,11 +25,13 @@ const classesBandeau = 'bandeau-alerte mb-8';
     formulaire — faire glisser des champs vers le haut pendant qu'on s'apprête
     à cliquer dedans déplace une cible que la main vise déjà.
   */}
-  <section
-    data-reveal-fondu
-    class="contenu sous-navbar grid gap-16 pb-24 lg:grid-cols-[1.25fr_1fr]"
-  >
-    <div>
+  {/*
+    Une seule colonne depuis que la carte de coordonnées a été retirée. La
+    largeur maximale reprend celle qu'occupait la colonne du formulaire : sans
+    elle, le titre s'étirerait sur les 78 rem de `.contenu`.
+  */}
+  <section data-reveal-fondu class="contenu sous-navbar pb-24">
+    <div class="max-w-2xl">
       <p class="surtitre reveal">Contact</p>
       <h1 class="titre-page reveal mt-6 [--retard:80ms]">
         Parlons de votre activité
@@ -245,56 +247,5 @@ const classesBandeau = 'bandeau-alerte mb-8';
         </p>
       </form>
     </div>
-
-    <aside class="reveal lg:pt-32">
-      <div class="carte bg-brique p-8">
-        <h2 class="font-titre text-2xl tracking-wide">Écrire directement</h2>
-        <p class="mt-4">
-          <a
-            href={`mailto:${SITE.contact.email}`}
-            class="font-texte text-sm break-all text-signal-vif hover:text-texte"
-          >
-            {SITE.contact.email}
-          </a>
-        </p>
-
-        {
-          SITE.contact.telephoneAffiche && (
-            <p class="mt-4">
-              <a
-                href={`tel:${SITE.contact.telephone}`}
-                class="font-texte text-sm text-signal-vif hover:text-texte"
-              >
-                {SITE.contact.telephoneAffiche}
-              </a>
-            </p>
-          )
-        }
-
-        <hr class="my-8 border-white/15" />
-
-        <h2 class="font-titre text-2xl tracking-wide">Quand je suis joignable</h2>
-        <p class="font-texte mt-4 text-xs leading-relaxed text-white/60">
-          Le samedi matin, à coup sûr. Et certains soirs en semaine, mais pas tous :
-          je suis en alternance, donc je termine à 16 h une semaine et à 22 h la
-          suivante.
-        </p>
-        <p class="font-texte mt-3 text-xs leading-relaxed text-white/60">
-          {
-            SITE.rendezVous.url
-              ? 'Plutôt que de vous faire deviner, le calendrier n’affiche que les créneaux réellement ouverts.'
-              : 'Dites-moi simplement quand vous joindre dans le formulaire, je m’adapte.'
-          }
-        </p>
-
-        <hr class="my-8 border-white/15" />
-
-        <h2 class="font-titre text-2xl tracking-wide">Le secteur</h2>
-        <p class="font-texte mt-4 text-xs leading-relaxed text-white/60">
-          L'Arrageois, le bassin minier et la métropole lilloise. Je me déplace sur
-          vos chantiers, c'est là que se prennent les photos qui font signer.
-        </p>
-      </div>
-    </aside>
   </section>
 </Base>
