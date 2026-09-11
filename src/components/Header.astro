@@ -4,12 +4,22 @@ import { SITE } from '../config/site.js';
 /*
  * Barre flottante centrée, en liquid glass.
  *
- * Le site tient en une page tant qu'il n'y a pas de premier client : les quatre
- * entrées pointent donc vers des ancres de l'accueil, sauf Contact. Elles sont
+ * Les entrées pointent vers des ancres de l'accueil, sauf Contact. Elles sont
  * préfixées par « / » pour rester valides depuis les pages internes.
  *
- * Les tailles et l'interlettrage sont resserrés sous 640 px pour que les quatre
- * libellés tiennent sur une ligne sans faire déborder la pastille.
+ * ---- Lisibilité et cibles ----
+ *
+ * Les libellés étaient en 9 px sous 640 px, et chaque lien faisait 15 px de
+ * haut. Ils passent à 11 px (le plus que permettent quatre libellés sur une
+ * ligne à 360 px de large, avec « Réalisation »), et chaque lien reçoit une
+ * hauteur minimale de 44 px : la pastille grandit un peu, la cible du pouce
+ * devient réelle.
+ *
+ * ---- Repères ----
+ *
+ * `aria-label` est sur le <nav> et plus sur le <header> : c'est la navigation
+ * qu'un lecteur d'écran liste parmi les repères, et le pied de page en a une
+ * seconde (« Pied de page »), qu'il faut pouvoir distinguer.
  */
 const gauche = [
   { texte: 'Offre', href: '/#offre' },
@@ -21,16 +31,13 @@ const droite = [
   { texte: 'Contact', href: '/contact' },
 ];
 
-const actuel = Astro.url.pathname.replace(/\.html$/, '');
+const actuel = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
 
 const classeLien =
-  'whitespace-nowrap text-[9px] sm:text-xs font-medium uppercase tracking-[0.1em] sm:tracking-[0.2em] no-underline transition-colors duration-300';
+  'inline-flex min-h-11 items-center whitespace-nowrap px-1 text-[11px] sm:text-xs font-medium uppercase tracking-[0.06em] sm:tracking-[0.2em] no-underline transition-colors duration-300';
 ---
 
-<header
-  class="fixed top-4 left-1/2 z-50 -translate-x-1/2 sm:top-6"
-  aria-label="Navigation principale"
->
+<header class="fixed top-3 left-1/2 z-50 -translate-x-1/2 sm:top-6">
   {/*
     `data-barre` est la prise de effets.js, `barre` porte l'état dense.
 
@@ -40,20 +47,25 @@ const classeLien =
   */}
   <nav
     data-barre
-    class="liquid-glass barre flex items-center gap-3 rounded-full px-4 py-2.5 sm:gap-12 sm:px-10 sm:py-3"
+    aria-label="Navigation principale"
+    class="liquid-glass barre flex items-center gap-1.5 rounded-full px-3 sm:gap-10 sm:px-8"
   >
     {
       gauche.map((l) => (
         <a
           href={l.href}
-          class:list={[classeLien, 'text-white/85 hover:text-white']}
+          class:list={[classeLien, 'text-white/90 hover:text-white']}
         >
           {l.texte}
         </a>
       ))
     }
 
-    <a href="/" aria-label={`${SITE.nom}, retour à l'accueil`} class="shrink-0">
+    <a
+      href="/"
+      aria-label={`${SITE.nom}, retour à l'accueil`}
+      class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center"
+    >
       <svg
         viewBox="0 0 256 256"
         class="h-5 w-5 transition-transform duration-300 hover:scale-110 sm:h-7 sm:w-7"
@@ -73,7 +85,7 @@ const classeLien =
           aria-current={actuel === l.href ? 'page' : undefined}
           class:list={[
             classeLien,
-            actuel === l.href ? 'text-white' : 'text-white/85 hover:text-white',
+            actuel === l.href ? 'text-white' : 'text-white/90 hover:text-white',
           ]}
         >
           {l.texte}

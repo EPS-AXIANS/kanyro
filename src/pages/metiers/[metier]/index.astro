@@ -37,7 +37,7 @@ const jsonLd = filAriane([
   description={`Création de site et référencement local pour ${metier.pluriel} des Hauts-de-France. ${metier.accroche}`}
   jsonLd={jsonLd}
 >
-  <nav class="contenu sous-navbar font-texte pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase" aria-label="Fil d'Ariane">
+  <nav class="contenu sous-navbar font-texte pb-6 text-xs tracking-[0.2em] text-texte-faible uppercase" aria-label="Fil d'Ariane">
     <a href="/metiers" class="hover:text-texte">Métiers</a>
     <span class="mx-2" aria-hidden="true">·</span>
     <span class="text-texte-doux">{metier.nom}</span>
@@ -87,7 +87,7 @@ const jsonLd = filAriane([
         <ul class="reveal mt-7 flex flex-wrap gap-2.5">
           {
             metier.recherches.map((r) => (
-              <li class="rounded-full border border-white/20 px-4 py-2 font-mono text-[11px] text-white/70">
+              <li class="rounded-full border border-white/20 px-4 py-2 font-mono text-xs text-white/70">
                 {r}
               </li>
             ))
@@ -120,7 +120,7 @@ const jsonLd = filAriane([
               <span class="font-titre text-xl tracking-wide">
                 {metier.nom} à {c.nom}
               </span>
-              <span class="font-texte mt-2 text-[10px] tracking-[0.2em] text-texte-faible uppercase">
+              <span class="font-texte mt-2 text-xs tracking-[0.2em] text-texte-faible uppercase">
                 {c.secteur}
               </span>
             </a>

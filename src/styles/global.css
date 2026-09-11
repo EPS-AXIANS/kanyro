@@ -18,7 +18,14 @@
   --color-surface-haute: #1e1a17;
   --color-texte: #ffffff;
   --color-texte-doux: rgba(255, 255, 255, 0.62);
-  --color-texte-faible: rgba(255, 255, 255, 0.38);
+  /*
+   * 56 % et plus 38 % : à 38, ce gris faisait 3,5:1 sur le fond et 3,3:1 sur la
+   * brique, sous les 4,5:1 exigés pour du texte courant (WCAG 1.4.3). 37 textes
+   * de l'accueil échouaient, plus les étiquettes et les indications du
+   * formulaire. À 56 : 6,4:1 sur le fond, 5,8:1 sur la brique. Il reste plus
+   * doux que `texte-doux`, la hiérarchie est gardée.
+   */
+  --color-texte-faible: rgba(255, 255, 255, 0.56);
   --color-brique: #410c01;
   --color-brique-haute: #4d1002;
   --color-signal: #d94f04;
@@ -317,9 +324,11 @@
 
   .surtitre {
     font-family: var(--font-texte);
-    font-size: 0.625rem;
+    /* 12 px et plus 10 : des capitales espacées de 10 px ne se lisaient pas sur
+       un téléphone. L'interlettrage recule d'autant pour garder la longueur. */
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--color-texte-faible);
   }
@@ -1000,9 +1009,10 @@
 .champ-etiquette {
   display: block;
   font-family: var(--font-texte);
-  font-size: 0.625rem;
+  /* 12 px : c'est le nom du champ, il doit se lire sans effort. */
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-texte-faible);
   transition: color 0.3s var(--ease-rideau);

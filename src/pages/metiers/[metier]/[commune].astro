@@ -75,7 +75,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
 
 <Base titre={titre} description={description} jsonLd={jsonLd}>
   <nav
-    class="contenu sous-navbar font-texte pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
+    class="contenu sous-navbar font-texte pb-6 text-xs tracking-[0.2em] text-texte-faible uppercase"
     aria-label="Fil d'Ariane"
   >
     <a href="/metiers" class="hover:text-texte">Métiers</a>
@@ -112,7 +112,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
         <p class="font-texte reveal mt-6 text-sm leading-relaxed text-white/70">
           {commune.contexte}
         </p>
-        <p class="font-texte reveal mt-4 text-xs text-white/45">
+        <p class="font-texte reveal mt-4 text-xs text-white/60">
           Commune {commune.repere}, dans {commune.secteur.toLowerCase()}.
         </p>
         <p class="font-texte reveal mt-8 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
@@ -132,7 +132,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
         <ul class="reveal mt-7 flex flex-wrap gap-2.5">
           {
             metier.recherches.map((r) => (
-              <li class="rounded-full border border-white/20 px-4 py-2 font-mono text-[11px] text-white/70">
+              <li class="rounded-full border border-white/20 px-4 py-2 font-mono text-xs text-white/70">
                 {r} {commune.nom.toLowerCase()}
               </li>
             ))

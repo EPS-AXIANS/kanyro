@@ -85,10 +85,14 @@ const classeLien =
     </div>
   </div>
 
-  <div class="contenu border-t border-trait py-6">
-    <p class="font-texte text-sm text-texte-faible">
-      © {annee} {SITE.nom} ·{' '}
-      <a href="/mentions-legales" class="text-texte-faible underline-offset-4 hover:text-texte">
+  <div class="contenu border-t border-trait py-3">
+    <p class="font-texte flex flex-wrap items-center gap-x-2 text-sm text-texte-faible">
+      <span>© {annee} {SITE.nom}</span>
+      <span aria-hidden="true">·</span>
+      <a
+        href="/mentions-legales"
+        class="inline-flex min-h-11 items-center text-texte-faible underline-offset-4 hover:text-texte"
+      >
         Mentions légales
       </a>
     </p>

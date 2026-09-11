@@ -25,7 +25,7 @@ const secteurs = [
   class="bg-brique relative overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32"
 >
   <div class="mx-auto max-w-5xl">
-    <p class="surtitre reveal text-center text-white/40">L'offre</p>
+    <p class="surtitre reveal text-center text-white/60">L'offre</p>
     <h2
       class="font-titre rideau mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
     >
@@ -52,7 +52,7 @@ const secteurs = [
         passer en serif l'annulerait.
       */}
       <div class="text-center">
-        <p class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
+        <p class="font-texte text-xs tracking-[0.25em] text-white/60 uppercase">
           Le prix
         </p>
         <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
@@ -85,7 +85,7 @@ const secteurs = [
              montants ici ajouteraient une grille au milieu de l'offre, et le
              tableau est deux sections plus bas. */
           offreMensuelle.actif && (
-            <p class="font-texte mt-3 text-xs text-white/45">
+            <p class="font-texte mt-3 text-xs text-white/60">
               <a href="#suivi" class="underline underline-offset-4">
                 Puis, en option, dès {offreMensuelle.formules[0].prix} à partir de
                 la deuxième année pour l’hébergement et la maintenance
@@ -98,7 +98,7 @@ const secteurs = [
       <div class="pointer-events-none hidden h-16 w-px bg-white/15 sm:block" aria-hidden="true"></div>
 
       <div class="text-center">
-        <p class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
+        <p class="font-texte text-xs tracking-[0.25em] text-white/60 uppercase">
           Le délai
         </p>
         <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
@@ -169,7 +169,7 @@ const secteurs = [
         sans qu'on génère des pages qu'il est trop tôt pour tenir à jour.
         Groupé par secteur — douze noms à la file ne se lisent pas. */}
     <div class="mt-16 text-center">
-      <p class="reveal font-texte text-xs leading-relaxed text-white/45">
+      <p class="reveal font-texte text-xs leading-relaxed text-white/60">
         Pensé pour les {metiers.map((m) => m.nom.toLowerCase()).join(', ')}.
       </p>
 
@@ -177,7 +177,7 @@ const secteurs = [
         {
           secteurs.map(([secteur, villes]) => (
             <div class="reveal">
-              <dt class="font-texte text-[10px] tracking-[0.25em] text-white/40 uppercase">
+              <dt class="font-texte text-xs tracking-[0.25em] text-white/60 uppercase">
                 {secteur}
               </dt>
               <dd class="font-texte mt-2 text-xs leading-relaxed text-white/60">
