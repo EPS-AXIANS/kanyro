@@ -2,10 +2,20 @@
 import Base from '../layouts/Base.astro';
 import Champ from '../components/Champ.astro';
 import LienTelephone from '../components/LienTelephone.astro';
-import { CircleAlert, Mail, Phone } from 'lucide-astro';
+import { Check, CircleAlert, Mail, Phone } from 'lucide-astro';
 import { SITE } from '../config/site.js';
 import { filAriane } from '../config/schema.js';
 import metiers from '../data/metiers.json';
+import { offre } from '../data/offres.js';
+
+/* Trois raisons de ne pas hésiter à écrire, qui ne disent rien de plus que
+   l'accueil : l'absence d'engagement, le devis ferme (Q&R) et le prix de
+   départ (offres.js). */
+const reassurance = [
+  'Sans engagement',
+  'Devis ferme, le prix ne bouge plus une fois signé',
+  `À partir de ${offre.prixDepart}, première année comprise`,
+];
 
 const jsonLd = filAriane([
   { nom: 'Accueil', chemin: '/' },
@@ -49,6 +59,15 @@ const classesBandeau = 'bandeau-alerte mb-8';
         Quelques lignes suffisent. Je réponds sous 48 heures, et je vous dis
         franchement si un site vous rapportera quelque chose.
       </p>
+
+      <ul class="font-texte reveal mx-auto mt-6 flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-texte-doux [--retard:180ms]">
+        {reassurance.map((texte) => (
+          <li class="flex items-center gap-2">
+            <Check class="h-4 w-4 shrink-0 text-signal-vif" stroke-width={2} aria-hidden="true" />
+            <span class="chiffres">{texte}</span>
+          </li>
+        ))}
+      </ul>
 
       {/*
         Le téléphone et l'email AVANT le formulaire. Beaucoup d'artisans
@@ -277,9 +296,9 @@ const classesBandeau = 'bandeau-alerte mb-8';
 
         {
           SITE.rendezVous.url && (
-            <p class="font-texte mt-4 text-center text-xs text-texte-faible">
-              Le calendrier n'affiche que des créneaux réellement ouverts —{' '}
-              {SITE.rendezVous.duree}, par téléphone ou sur votre chantier.
+            <p class="font-texte mt-4 text-center text-sm text-texte-faible">
+              Le calendrier n'affiche que des créneaux réellement ouverts. Le
+              rendez-vous dure {SITE.rendezVous.duree}, par téléphone ou sur votre chantier.
             </p>
           )
         }
