@@ -10,10 +10,14 @@ import { SITE } from '../config/site.js';
  * ---- Lisibilité et cibles ----
  *
  * Les libellés étaient en 9 px sous 640 px, et chaque lien faisait 15 px de
- * haut. Ils passent à 11 px (le plus que permettent quatre libellés sur une
- * ligne à 360 px de large, avec « Réalisation »), et chaque lien reçoit une
- * hauteur minimale de 44 px : la pastille grandit un peu, la cible du pouce
- * devient réelle.
+ * haut. Ils sont en 12 px, et chaque lien a une hauteur minimale de 44 px : la
+ * pastille grandit un peu, la cible du pouce devient réelle.
+ *
+ * Quatre libellés et le logo ne tiennent pas sur 360 px à cette taille : la
+ * pastille en faisait 373, et débordait des deux côtés de l'écran. Sous
+ * 640 px, « Contact » est donc masqué : la barre d'action fixée en bas de
+ * l'écran (BarreAction.astro) propose déjà « Demander un devis » et
+ * « Appeler » sur chaque page. La pastille fait alors 319 px.
  *
  * ---- Repères ----
  *
@@ -28,13 +32,13 @@ const gauche = [
 
 const droite = [
   { texte: 'Réalisation', href: '/#realisation' },
-  { texte: 'Contact', href: '/contact' },
+  { texte: 'Contact', href: '/contact', ecranLarge: true },
 ];
 
 const actuel = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
 
 const classeLien =
-  'inline-flex min-h-11 items-center whitespace-nowrap px-1 text-[11px] sm:text-xs font-medium uppercase tracking-[0.06em] sm:tracking-[0.2em] no-underline transition-colors duration-300';
+  'inline-flex min-h-11 items-center whitespace-nowrap px-1 text-xs font-medium uppercase tracking-[0.06em] max-[359px]:tracking-[0.02em] sm:tracking-[0.2em] no-underline transition-colors duration-300';
 ---
 
 <header class="fixed top-3 left-1/2 z-50 -translate-x-1/2 sm:top-6">
@@ -83,8 +87,10 @@ const classeLien =
         <a
           href={l.href}
           aria-current={actuel === l.href ? 'page' : undefined}
+          data-mesure={l.href === '/contact' ? 'devis' : undefined}
           class:list={[
             classeLien,
+            l.ecranLarge && 'max-sm:hidden',
             actuel === l.href ? 'text-white' : 'text-white/90 hover:text-white',
           ]}
         >
