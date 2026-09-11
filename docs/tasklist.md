@@ -11,6 +11,13 @@
 > ligne publique (4.6), soit une décision ou un
 > chantier pas encore lancés (1.2, 4.2, 5.2, 5.4, 7.1).
 >
+> **Mise à jour du 11/09/2026**, après l'audit interne
+> (`docs/audit-2026-09-11.md`) et sa correction : 4.2, 5.2 et 7.1 sont faits,
+> 3.1 et 4.1 le sont en partie (une réalisation réelle montrée comme une
+> maquette, les pages métier en ligne, les pages par commune toujours éteintes),
+> 1.2 est préparé sans outil branché. Restent bloqués sur une donnée ou une
+> action externe : 0.1 (SIREN, adresse), 3.2, 4.6, 5.4 (vrai téléphone).
+>
 > *(Le total annoncé était « 42 » jusqu'au 19/08 : en énumérant les points
 > numérotés, de 0.1 à 7.6, il y en a 37.)*
 >
@@ -39,6 +46,12 @@
   → **Reste le SIREN**, seul champ encore vide : l'encart d'avertissement des
   mentions légales s'est réduit à lui. Une ligne dans `src/config/site.js` le
   fera disparaître.
+  → **11/09/2026 :** l'adresse de contact est `contact@kanyro.tech`. Les
+  mentions légales n'affichent plus que les données réelles (l'adresse fictive
+  « Arras, 62000 » de la zone et du JSON-LD a été retirée) ; l'encart ne
+  s'affiche plus qu'en développement, et le build liste les champs manquants.
+  **Manquent toujours : SIREN, adresse, téléphone de l'hébergeur**, et le
+  régime de TVA est à confirmer.
 
 - [x] **0.2 — Fonte « Arsenica Trial » non licenciée** 🔍 *Trouvé en plus.*
 
@@ -208,6 +221,11 @@ réponds sous 48 heures. »
     mode cookieless) pour garder la promesse RGPD. Impose de : ajouter l'hôte
     dans `HOTES_MEDIAS`/`.htaccess` (`script-src`, `connect-src`) **et**
     mettre à jour la section Cookies des mentions légales.
+  → **11/09/2026 : préparé, pas branché.** Quatre événements (`clic-appel`,
+    `clic-devis`, `formulaire-envoye`, `demande-recue`) sont posés dans
+    `effets.js` et partent vers Plausible ou Umami dès que l'un des deux est
+    chargé. Le choix de l'outil reste au propriétaire ; la marche à suivre est
+    dans le README, « Mesure d'audience ».
 
 ---
 
@@ -348,6 +366,12 @@ réponds sous 48 heures. »
     déjà, voir 4.1.
   → ⚠️ Ne jamais présenter une maquette comme un client. La section actuelle
     tire toute sa force de ça.
+  → **11/09/2026 : en partie.** L'accueil a une section « Réalisation » qui
+    montre le site livré à l'atelier de reliure, avec deux captures réelles de
+    la maquette et la mention « pas encore en ligne ». Ce n'est pas un chantier
+    du bâtiment, et la section le dit. Aucun avis, aucun chiffre de résultat
+    n'a été ajouté : il n'en existe pas encore. À faire : l'accord écrit de
+    l'artisane, puis une vraie référence dans le bâtiment.
 
 - [ ] **3.2 — Faire des 3 premiers clients un actif marketing** ✅ *Décision commerciale.*
 
@@ -373,8 +397,12 @@ réponds sous 48 heures. »
   → **Décision à prendre :** basculer `pagesLocales` à `true` (le contenu est
     réellement différencié, il tient la route), ou assumer et adoucir la
     promesse jusqu'au premier client.
+  → **11/09/2026 : tranché à moitié.** L'interrupteur est coupé en deux :
+    `pagesMetiers` (les six pages métier, en ligne et au sitemap) et
+    `pagesCommunes` (les 36 pages par commune, toujours éteintes, voir le
+    README). Les pages métier sont liées depuis l'offre et le pied de page.
 
-- [ ] **4.2 — Aucune image de partage (`og:image`)** ✅ *Confirmé.*
+- [x] **4.2 — Aucune image de partage (`og:image`)** ✅ *Confirmé.*
 
   Aucune page ne passe la prop `image` au layout (`grep image= src/pages/` →
   vide), donc aucune balise `og:image` n'est émise. Un lien Kanyro partagé sur
@@ -382,6 +410,9 @@ réponds sous 48 heures. »
   rectangle gris.
   → Créer une image 1200×630 dans `public/`, la passer via `image` sur
     l'accueil et le contact.
+  → **Fait le 11/09/2026** : `public/images/partage-kanyro.jpg` (1 200 × 630,
+    43 Ko), émise par défaut sur toutes les pages avec `og:image:alt`, ses
+    dimensions et `twitter:card` en grand format.
 
 - [x] **4.3 — Le reste de la checklist SEO : déjà en place** ❌ *Rien à faire.*
 
@@ -435,7 +466,7 @@ réponds sous 48 heures. »
   → Viser 44 px de hauteur tactile partout (le padding suffit, la taille du
     texte peut rester).
 
-- [ ] **5.2 — La vidéo d'accueil ignore `prefers-reduced-motion`** 🔍
+- [x] **5.2 — La vidéo d'accueil ignore `prefers-reduced-motion`** 🔍
 
   `effets.js` respecte scrupuleusement la préférence pour les révélations et
   la parallaxe, mais la vidéo `autoplay loop` du Hero, elle, tourne quoi qu'il
@@ -451,6 +482,15 @@ réponds sous 48 heures. »
   injoignable : la vidéo restait figée. `effets.js` relance `play()` au
   premier geste de l'utilisateur n'importe où sur la page. Le test sur un
   vrai téléphone reste à faire (voir 5.4).
+  → **11/09/2026 : fait, sur consigne du propriétaire** (mission de correction
+  de l'audit : « version mobile sans vidéo », « respecter réellement
+  `prefers-reduced-motion` », « la vidéo ne doit pas continuer à boucler »),
+  ce qui remplace la décision du 23/08. La vidéo (réencodée, 6 Mo → 588 Ko)
+  n'est chargée qu'à partir de 768 px, jamais en mouvement réduit ni en
+  économie de données ; une image fixe tirée de sa première image s'affiche
+  sinon. Elle a un bouton pause (WCAG 2.2.2) et s'arrête hors de l'écran. Le
+  contournement de l'autoplay bloqué n'a plus lieu d'être sur mobile, où la
+  vidéo n'est plus servie.
 
 - [x] **5.3 — Longueur du formulaire** ⚠️ *À nuancer.*
 
@@ -469,6 +509,10 @@ réponds sous 48 heures. »
     avec la vidéo en 4G et pas en Wi-Fi.
   → Le figement de la vidéo signalé par le propriétaire (voir 5.2) est corrigé.
   Le test complet sur un vrai appareil reste à faire.
+  → **11/09/2026 :** parcours vérifié en émulation (Chromium, 360 et 390 px,
+    tactile, 4G lente simulée) : barre d'appel fixe, navigation, offre, contact,
+    validation du formulaire. Un vrai téléphone et un vrai envoi restent à
+    faire.
 
 ---
 
@@ -491,7 +535,7 @@ réponds sous 48 heures. »
 
 ## 7. Dette technique repérée au passage 🔍
 
-- [ ] **7.1 — La CSP est écrite en triple** — `Base.astro:41`, `netlify.toml:19`,
+- [x] **7.1 — La CSP est écrite en triple** — `Base.astro:41`, `netlify.toml:19`,
 
   `public/.htaccess:38`. Trois copies à maintenir à la main, avec des
   commentaires qui se rappellent mutuellement de rester synchronisées : ça
@@ -501,6 +545,11 @@ réponds sous 48 heures. »
   → **Réduit de trois copies à deux avec 0.5** : `netlify.toml` a disparu du
   dépôt. Restent `Base.astro` et `public/.htaccess`, toujours à synchroniser à
   la main — la génération automatique proposée n'est pas faite.
+  → **11/09/2026 :** `public/.htaccess`, que Caddy ne lisait pas, est supprimé.
+  Les deux copies sont désormais celles qui s'appliquent vraiment : la balise
+  de `Base.astro` et l'en-tête de `deploy/caddy/kanyro.caddy` (qui ajoute
+  `frame-ancestors` et `upgrade-insecure-requests`). Toujours à tenir
+  identiques à la main ; les deux fichiers le rappellent.
 
 - [x] **7.2 — Code mort** — `src/components/Tarif.astro` n'est importé nulle part
 
@@ -551,13 +600,13 @@ réponds sous 48 heures. »
 ## Ordre suggéré
 
 **Cette semaine** — 0.1, ~~1.1a, 1.1b, 1.1c, 0.5~~
-*Le tunnel doit être irréprochable avant d'envoyer un seul prospect dessus. Ne reste que 0.1 (SIREN).*
+*Le tunnel doit être irréprochable avant d'envoyer un seul prospect dessus. Ne reste que 0.1 (SIREN, adresse).*
 
 **Ensuite** — ~~2.1, 2.2, 2.3, 2.4~~
 *Le premier écran et la lisibilité du prix : le plus gros gain pour le moins d'effort. Entièrement fait.*
 
-**Avant la mise en ligne publique** — ~~0.2, 0.3, 0.4~~, 4.2, ~~4.4, 5.1~~
-*Les blocages juridiques et le poids de la page. Ne reste que 4.2 (og:image).*
+**Avant la mise en ligne publique** — ~~0.2, 0.3, 0.4, 4.2, 4.4, 5.1~~
+*Les blocages juridiques et le poids de la page. Entièrement fait le 11/09/2026.*
 
 **Après le premier client** — 3.1, 3.2, 4.1
 *Tout ce qui a besoin d'un vrai chantier livré pour exister.*
