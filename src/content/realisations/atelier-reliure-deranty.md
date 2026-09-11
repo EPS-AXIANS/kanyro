@@ -126,8 +126,8 @@ Cette partie-là n'est pas qu'un formulaire de plus. Une facture est une pièce
 comptable, et trois règles sont tenues par le code plutôt que par la vigilance
 d'un vendredi soir : une facture émise ne se modifie plus, elle ne se supprime
 pas (on l'annule par un avoir), et son numéro est attribué à l'émission et non
-à la création, pour que la suite reste continue comme l'exige l'article 242
-nonies A de l'annexe II du Code général des impôts. Un brouillon abandonné ne
+à la création, pour que la suite reste continue, comme la loi l'exige pour les
+factures. Un brouillon abandonné ne
 creuse donc aucun trou dans la numérotation, et un trou dans une numérotation est
 exactement ce qu'un contrôle cherche.
 
