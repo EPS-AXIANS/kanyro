@@ -35,9 +35,12 @@ export const offre = {
     'Vous voulez des demandes de devis, pas une carte de visite en ligne',
   ],
 
+  /* Les titres disent ce que l'artisan y gagne, plus le nom de la fonction
+     (« Visibilité locale », « Vous êtes propriétaire ») : le détail dessous
+     garde la fonction, le titre porte le bénéfice. */
   contenu: [
     {
-      titre: 'Un site construit autour du devis',
+      titre: 'Les demandes arrivent chez vous',
       detail:
         'Cinq pages, écrites avec vous. Le bouton « demander un devis » est visible partout, le formulaire arrive directement dans votre boîte mail, et votre numéro est cliquable sur téléphone.',
     },
@@ -47,12 +50,12 @@ export const offre = {
         'Vous m’envoyez celles de vos chantiers finis, je fais le tri. Pas de photos ? Je me déplace pour en faire, en supplément. Dans le bâtiment, c’est la photo qui signe le devis, pas le texte.',
     },
     {
-      titre: 'Visibilité locale',
+      titre: 'Visible là où vous travaillez',
       detail:
         'Fiche Google Business créée ou reprise et optimisée, et des pages pensées pour les recherches réelles de vos clients, votre métier associé à vos communes.',
     },
     {
-      titre: 'Vous êtes propriétaire',
+      titre: 'Le site est à vous',
       detail:
         'Nom de domaine et contenu à votre nom dès le premier jour. Hébergement, certificat et nom de domaine inclus la première année.',
     },
@@ -276,6 +279,8 @@ export const offreMensuelle = {
 
   /* Repris tel quel dans la Q&R et dans le devis : c'est le chiffre auquel le
      forfait se compare, et le taire donnerait l'impression de le cacher. */
-  alternative:
-    'une trentaine d’euros par an si vous reprenez l’hébergement à votre nom',
+  /* Le seul montant : chaque endroit qui la cite dit lui-même de quoi il
+     s'agit (reprendre l'hébergement à son nom). Elle portait la condition
+     dans la chaîne, et les phrases qui l'entouraient la répétaient. */
+  alternative: 'une trentaine d’euros par an',
 };

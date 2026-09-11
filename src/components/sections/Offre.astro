@@ -1,5 +1,6 @@
 ---
 import { offre, tarifReference, offreMensuelle } from '../../data/offres.js';
+import { FONCTIONS, mentionTva } from '../../config/site.js';
 import metiers from '../../data/metiers.json';
 import communes from '../../data/communes.json';
 
@@ -14,6 +15,9 @@ const secteurs = [
     return acc;
   }, new Map()),
 ];
+
+const tva = mentionTva();
+const lancement = tarifReference.actif && tarifReference.restants > 0;
 ---
 
 {/*
@@ -25,99 +29,126 @@ const secteurs = [
   class="bg-brique relative overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32"
 >
   <div class="mx-auto max-w-5xl">
-    <p class="surtitre reveal text-center text-white/60">L'offre</p>
-    <h2
-      class="font-titre rideau mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
-    >
-      {offre.nom}
+    <p class="surtitre reveal text-center text-white/70">L'offre</p>
+    {/* Le titre disait « Site orienté devis » : le nom du produit, dans le
+        jargon du produit. Il dit maintenant ce que le site fait pour l'artisan.
+        `offre.nom` reste le nom de l'offre (devis, données structurées). */}
+    <h2 class="titre-section rideau mx-auto mt-6 max-w-3xl text-center">
+      Un site construit pour recevoir des demandes de devis
     </h2>
     <p
-      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-white/70 [--retard:120ms] sm:text-base"
+      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-base leading-relaxed text-white/80 [--retard:120ms]"
     >
-      {offre.promesse}
+      {offre.introduction}
     </p>
 
-    {/* Prix et délai côte à côte : ce sont les deux questions posées en premier. */}
-    <div class="reveal mt-12 flex flex-col items-center gap-8 sm:flex-row sm:justify-center sm:gap-16">
-      {/*
-        Prix et délai en serif, pas en sans.
+    {/*
+      ---- Le prix et le délai ----
 
-        Ils étaient en Archivo `font-semibold tracking-tight` — le registre exact
-        d'une grille tarifaire SaaS, et ce qui faisait le plus « site à 500 € »
-        dans toute la section. Un chiffre en Cormorant Light annonce un devis
-        d'atelier, pas un abonnement.
+      Deux colonnes alignées par le HAUT (`items-start`). Elles étaient
+      centrées verticalement, et la colonne du prix portait deux lignes de plus
+      (le tarif de lancement, le suivi) : les étiquettes « LE PRIX » et
+      « LE DÉLAI » se retrouvaient 28 px l'une sous l'autre, et le séparateur
+      128 px à droite du centre. Ces deux lignes descendent dans l'explication
+      en dessous, où elles ont la place de dire leur règle.
 
-        Les étiquettes au-dessus (« LE PRIX », « LE DÉLAI ») restent en petites
-        capitales sans : c'est le contraste entre les deux qui fait l'effet, tout
-        passer en serif l'annulerait.
-      */}
-      <div class="text-center">
-        <p class="font-texte text-xs tracking-[0.25em] text-white/60 uppercase">
-          Le prix
-        </p>
-        <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
+      Prix et délai en Cormorant Light, chiffres alignés (`chiffres`) : les
+      elzéviriens par défaut de la fonte faisaient lire « 1 2oo ».
+    */}
+    <div class="reveal mt-12 grid grid-cols-1 items-start gap-10 text-center sm:grid-cols-[1fr_auto_1fr] sm:gap-12">
+      <div>
+        <p class="surtitre text-white/70">Le prix</p>
+        <p class="font-titre chiffres mt-3 text-4xl font-light whitespace-nowrap sm:text-5xl">
           {offre.prix}
         </p>
-        <p class="font-texte mt-2 text-xs text-white/50">{offre.mention}</p>
-        {
-          /* Le tarif de lancement est annoncé ici, et pas seulement deux sections
-             plus bas : c'est en lisant le prix normal qu'on se demande pourquoi
-             l'autre existe. Répondre sur place évite que l'écart passe pour une
-             marge de négociation. */
-          tarifReference.actif && tarifReference.restants > 0 && (
-            <p class="font-texte mt-3 text-xs text-signal-vif">
-              <a href="#lancement" class="underline underline-offset-4">
-                {tarifReference.prix} pour les {tarifReference.quota} premiers
-              </a>
-            </p>
-          )
-        }
-        {
-          /* Même raison que pour le tarif de lancement : un prix récurrent
-             découvert trois sections plus bas, sans y avoir été préparé, se lit
-             comme un supplément caché. Annoncé ici, il devient une suite.
-
-             En blanc discret et non en orange : le tarif de lancement juste
-             au-dessus est ce qui doit déclencher l'appel, et deux accents de la
-             même couleur se neutralisent.
-
-             « Dès » et le prix de la première formule seulement : les deux
-             montants ici ajouteraient une grille au milieu de l'offre, et le
-             tableau est deux sections plus bas. */
-          offreMensuelle.actif && (
-            <p class="font-texte mt-3 text-xs text-white/60">
-              <a href="#suivi" class="underline underline-offset-4">
-                Puis, en option, dès {offreMensuelle.formules[0].prix} à partir de
-                la deuxième année pour l’hébergement et la maintenance
-              </a>
-            </p>
-          )
-        }
+        <p class="font-texte mt-3 text-sm text-white/75">{offre.mention}</p>
       </div>
 
-      <div class="pointer-events-none hidden h-16 w-px bg-white/15 sm:block" aria-hidden="true"></div>
+      <div class="pointer-events-none hidden h-24 w-px self-center bg-white/15 sm:block" aria-hidden="true"></div>
 
-      <div class="text-center">
-        <p class="font-texte text-xs tracking-[0.25em] text-white/60 uppercase">
-          Le délai
-        </p>
-        <p class="font-titre mt-2 text-4xl font-light tracking-[0.01em] sm:text-5xl">
+      <div>
+        <p class="surtitre text-white/70">Le délai</p>
+        <p class="font-titre chiffres mt-3 text-4xl font-light whitespace-nowrap sm:text-5xl">
           {offre.delai}
         </p>
-        <p class="font-texte mt-2 text-xs text-white/50">annoncé, et tenu</p>
+        {/* « annoncé, et tenu » affirmait un historique qui n'existe pas encore.
+            Ce qui est vrai : le délai est écrit dans le devis, et il court à
+            partir de l'acompte et des éléments reçus (docs/devis-modele.md). */}
+        <p class="font-texte mt-3 text-sm text-white/75">
+          écrit dans le devis, à compter de l'acompte et de vos photos
+        </p>
       </div>
     </div>
 
     {/*
-      `data-cascade` remplace le tableau de délais littéraux qui vivait en tête
-      de ce fichier. effets.js observe la GRILLE, puis décale ses enfants
-      directs de 90 ms les uns après les autres à partir du moment où elle
-      entre — ce qui est la seule façon d'obtenir une cascade, un délai posé sur
-      un enfant observé pour lui-même n'étant qu'une attente.
+      ---- Ce qu'il faut savoir sur le prix ----
 
-      Quatre blocs qui tiennent à l'écran d'un seul coup : c'est le cas où une
-      cascade a du sens. La Q&R, haute de deux écrans, est le contre-exemple —
-      voir le bloc de tête de QandA.astro.
+      Tout ce qui entoure le prix, dit une fois et au même endroit : ce qui le
+      fait varier, comment on le paie, ce qui se passe après la première année,
+      et le tarif de lancement. Chaque ligne vient d'une décision écrite :
+      offres.js pour les montants, docs/devis-modele.md pour l'acompte, la
+      fermeté du devis et le reportage photo en supplément.
+
+      ⚠ La ligne « Après la première année » n'est pas facultative : un prix
+      récurrent découvert trois sections plus bas, sans y avoir été préparé, se
+      lit comme un supplément caché (voir le README, forfait Suivi). Elle reste
+      donc sous le prix, mais en une phrase et un lien, plus en troisième prix
+      empilé dans la colonne.
+    */}
+    <dl class="reveal mx-auto mt-12 grid max-w-3xl gap-x-10 gap-y-6 text-left sm:grid-cols-2">
+      <div>
+        <dt class="font-texte text-sm font-semibold text-white">Ce qui fait varier le prix</dt>
+        <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+          Ce que vous avez déjà : des textes et des photos exploitables, ou tout à faire. Le
+          reportage photo, si vous n'en avez aucune, est en supplément. Le devis est ferme :
+          une fois signé, le prix ne bouge plus.
+        </dd>
+      </div>
+      <div>
+        <dt class="font-texte text-sm font-semibold text-white">Le paiement</dt>
+        <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+          30 % à la signature du devis, le solde à la mise en ligne.
+          {tva && <span class="block text-sm text-white/70">{tva}.</span>}
+        </dd>
+      </div>
+      {
+        offreMensuelle.actif && (
+          <div>
+            <dt class="font-texte text-sm font-semibold text-white">Après la première année</dt>
+            <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+              Vous reprenez l'hébergement à votre nom, pour {offreMensuelle.alternative}, ou
+              je continue à m'en occuper, dès{' '}
+              <span class="chiffres whitespace-nowrap">{offreMensuelle.formules[0].prix}</span>.
+              Rien à décider aujourd'hui.
+              <a href="#suivi" class="flex min-h-11 w-fit items-center text-white underline underline-offset-4">
+                Voir le suivi
+              </a>
+            </dd>
+          </div>
+        )
+      }
+      {
+        lancement && (
+          <div>
+            <dt class="font-texte text-sm font-semibold text-signal-vif">Tarif de lancement</dt>
+            <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+              <span class="chiffres whitespace-nowrap">{tarifReference.prix}</span> pour les{' '}
+              {tarifReference.quota} premiers artisans, en échange de l'utilisation de leur
+              chantier comme référence.
+              <a href="#lancement" class="flex min-h-11 w-fit items-center text-white underline underline-offset-4">
+                Les conditions
+              </a>
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+
+    {/*
+      `data-cascade` : effets.js observe la GRILLE, puis décale ses enfants
+      directs de 90 ms les uns après les autres à partir du moment où elle
+      entre. Quatre blocs qui tiennent à l'écran d'un seul coup : c'est le cas
+      où une cascade a du sens.
     */}
     <ul
       data-cascade
@@ -127,7 +158,7 @@ const secteurs = [
         offre.contenu.map((bloc) => (
           <li class="reveal bg-brique p-8">
             <h3 class="font-titre text-[1.75rem] leading-snug tracking-wide">{bloc.titre}</h3>
-            <p class="font-texte mt-3 text-sm leading-relaxed text-white/60">
+            <p class="font-texte mt-3 text-[0.9375rem] leading-relaxed text-white/80">
               {bloc.detail}
             </p>
           </li>
@@ -141,8 +172,8 @@ const secteurs = [
         <ul data-cascade="70" class="mt-5 space-y-3">
           {
             offre.pour.map((p) => (
-              <li class="font-texte reveal flex gap-3 text-sm text-white/70">
-                <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
+              <li class="font-texte reveal flex gap-3 text-[0.9375rem] text-white/85">
+                <span class="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                 <span>{p}</span>
               </li>
             ))
@@ -155,8 +186,8 @@ const secteurs = [
         <ul data-cascade="70" class="mt-5 space-y-3">
           {
             offre.horsPerimetre.map((h) => (
-              <li class="font-texte reveal flex gap-3 text-sm text-white/50">
-                <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
+              <li class="font-texte reveal flex gap-3 text-[0.9375rem] text-white/70">
+                <span class="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-white/40" />
                 <span>{h}</span>
               </li>
             ))
@@ -165,23 +196,43 @@ const secteurs = [
       </div>
     </div>
 
-    {/* Les métiers et les communes en texte, sans lien : la cible se reconnaît
-        sans qu'on génère des pages qu'il est trop tôt pour tenir à jour.
-        Groupé par secteur — douze noms à la file ne se lisent pas. */}
+    {/*
+      Les métiers, au pluriel (« les couvreur, maçon… » était une faute
+      d'accord : `pluriel` existe dans les données), et liés à leur page quand
+      les pages métier sont publiées. Les communes, groupées par secteur, en
+      liste souple : jointes par « · », elles laissaient un « · Béthune » seul
+      en début de ligne.
+    */}
     <div class="mt-16 text-center">
-      <p class="reveal font-texte text-xs leading-relaxed text-white/60">
-        Pensé pour les {metiers.map((m) => m.nom.toLowerCase()).join(', ')}.
+      <p class="reveal font-texte mx-auto max-w-2xl text-sm leading-relaxed text-white/80">
+        Pensé pour les{' '}
+        {
+          metiers.map((m, i) => (
+            <>
+              {FONCTIONS.pagesMetiers ? (
+                <a href={`/metiers/${m.slug}`} class="text-white underline decoration-white/40 underline-offset-4 hover:decoration-white">
+                  {m.pluriel}
+                </a>
+              ) : (
+                m.pluriel
+              )}
+              {i < metiers.length - 2 ? ', ' : i === metiers.length - 2 ? ' et ' : ''}
+            </>
+          ))
+        }.
       </p>
 
       <dl data-cascade class="mt-8 grid gap-6 sm:grid-cols-3">
         {
           secteurs.map(([secteur, villes]) => (
             <div class="reveal">
-              <dt class="font-texte text-xs tracking-[0.25em] text-white/60 uppercase">
+              <dt class="font-texte text-xs tracking-[0.2em] text-white/70 uppercase">
                 {secteur}
               </dt>
-              <dd class="font-texte mt-2 text-xs leading-relaxed text-white/60">
-                {villes.map((v) => v.nom).join(' · ')}
+              <dd class="mt-2">
+                <ul class="font-texte flex flex-wrap justify-center gap-x-3 gap-y-1 text-sm text-white/80">
+                  {villes.map((v) => <li>{v.nom}</li>)}
+                </ul>
               </dd>
             </div>
           ))
@@ -190,7 +241,9 @@ const secteurs = [
     </div>
 
     <div class="reveal mt-12 text-center">
-      <a href="/contact" data-bouton-anime class="bouton-primaire">Demander un devis</a>
+      <a href="/contact" data-bouton-anime data-mesure="devis" class="bouton-primaire">
+        Demander un devis
+      </a>
     </div>
   </div>
 
@@ -206,8 +259,8 @@ const secteurs = [
 
     `data-arc-fin` désigne l'élément dont l'arrivée termine la course. C'est le
     seul réglage qui compte, parce que la longueur de la course fixe la vitesse
-    de la montée : visée sur la Q&R, deux sections plus bas, la courbe monte à
-    peine plus vite que le texte qu'elle recouvre, là où le défaut de la
+    de la montée : visée sur la Q&R, plusieurs sections plus bas, la courbe
+    monte à peine plus vite que le texte qu'elle recouvre, là où le défaut de la
     ressource (un écran) l'aurait fait passer deux fois trop vite.
 
     La forme est construite par le script — voir `initArcTransition` dans
