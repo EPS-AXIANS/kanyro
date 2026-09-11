@@ -26,8 +26,8 @@ if (BETA.actif && BETA.url === SITE.urlPublique) {
       '',
       "Le build produirait le site de l'agence en noindex, avec un robots.txt",
       'interdisant toute exploration. Pour ouvrir au public, passez',
-      'BETA.actif à false — et pensez alors au verrou htpasswd de',
-      'public/.htaccess, qui protégeait la bêta.',
+      'BETA.actif à false, et retirez alors le basic_auth du Caddyfile qui',
+      'protégeait la bêta.',
     ].join('\n')
   );
 }
