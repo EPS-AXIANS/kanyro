@@ -181,13 +181,29 @@ export const offreMensuelle = {
      lettres, dès la première phrase : un nom de forfait seul ne dit pas ce
      qu'on achète, et c'est ce qu'on doit comprendre sans rien lire d'autre. */
   promesse:
-    'Un abonnement pour l’hébergement et la maintenance de votre site, une fois créé, en deux formules. Il reste en ligne, à jour et surveillé, sans que vous ayez à y penser.',
+    'Un abonnement, après la première année, pour que votre site reste en ligne, à jour et surveillé sans que vous ayez à y penser. Deux formules, sans engagement de durée.',
 
   /* La première formule est aussi le prix d'appel : Offre.astro et la Q&R
      l'annoncent en « à partir de ». Garder la moins chère en tête. */
+  /* `resume` est la phrase de la carte, visible sans ouvrir le tableau. Elle
+     ne dit RIEN que le `comparatif` plus bas ne dise déjà, et la borne des
+     modifications « illimitées » y est écrite en toutes lettres : c'est elle
+     qui porte le calcul de marge (voir plus haut). */
   formules: [
-    { nom: 'Maintenance', prix: '29 €/mois', prixAnnuel: '290 €/an' },
-    { nom: 'Accompagnement', prix: '59 €/mois', prixAnnuel: '590 €/an' },
+    {
+      nom: 'Maintenance',
+      prix: '29 €/mois',
+      prixAnnuel: '290 €/an',
+      resume:
+        'Le site en ligne et surveillé : hébergement, nom de domaine, certificat, sauvegarde chaque nuit, corrections techniques, et deux modifications de textes ou de photos par mois.',
+    },
+    {
+      nom: 'Accompagnement',
+      prix: '59 €/mois',
+      prixAnnuel: '590 €/an',
+      resume:
+        'Tout Maintenance, plus des modifications sans limite de nombre (une demande à la fois, sur les pages existantes), les petites évolutions, un relevé chaque mois, la visibilité locale et vos demandes en priorité.',
+    },
   ],
   mentionAnnuel: 'deux mois offerts',
 

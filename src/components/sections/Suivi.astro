@@ -1,5 +1,7 @@
 ---
+import { ChevronDown } from 'lucide-astro';
 import { offreMensuelle } from '../../data/offres.js';
+import { mentionTva } from '../../config/site.js';
 
 /*
  * Le suivi, en vitrine : Kanyro Maintenance et Kanyro Accompagnement.
@@ -8,81 +10,66 @@ import { offreMensuelle } from '../../data/offres.js';
  *
  * Le point 2.2 de la tasklist est formel : deux tarifs sur la même page sans
  * règle qui les relie, et le prospect n'en retient qu'une chose — que le prix
- * se négocie. C'est ce qui avait fait garder le forfait hors de la vitrine.
- *
- * La parade retenue n'est pas de le cacher, c'est d'écrire la règle. Elle tient
- * en deux endroits, et les deux comptent :
- *
- *   1. Sous le prix du site, dans Offre.astro, une ligne annonce ce suivi et
- *      pointe ici — de la même façon que le prix normal annonce le tarif de
- *      lancement. Un prix qu'on découvre plus bas sans y avoir été préparé se
- *      lit comme un supplément caché.
- *   2. Ici, `demarrage` dit que la première année est déjà payée. Les montants
- *      ne sont donc jamais en concurrence avec celui du site : ils ne portent
- *      pas sur la même période. C'est ça, la règle qui les relie.
+ * se négocie. La parade retenue n'est pas de le cacher, c'est d'écrire la
+ * règle, à deux endroits : sous le prix du site (Offre.astro), et ici, où
+ * `demarrage` dit que la première année est déjà payée. Les montants ne
+ * portent donc jamais sur la même période.
  *
  * ---- Pourquoi l'alternative à ~30 €/an est affichée ----
  *
  * Elle est le meilleur argument dont on dispose, et la taire serait le pire
  * calcul. Un artisan qui découvre seul qu'il pouvait s'héberger pour trente
  * euros ne se dit pas qu'il a mal lu : il se dit qu'on lui a caché quelque
- * chose. Affichée, elle transforme le forfait en choix — et quelqu'un qui a le
- * choix et qui reste, reste.
+ * chose. Affichée, elle transforme le forfait en choix.
  *
- * ---- Un tableau, cette fois ----
+ * ---- Un résumé, et le tableau replié ----
  *
- * La version à un seul forfait refusait la grille tarifaire : il n'y avait rien
- * à comparer, on vérifiait une couverture. Avec deux formules, la question du
- * lecteur devient « laquelle ? », et c'est celle à laquelle un tableau répond
- * d'un coup d'œil — deux listes l'obligeraient à faire la différence de tête.
+ * Le tableau comparatif occupait 2 950 px sur un téléphone, onze lignes de
+ * 130 px sous un en-tête collant qui prenait le quart de l'écran, pour une
+ * décision qui ne se prend qu'au onzième mois. Deux cartes disent désormais
+ * l'essentiel de chaque formule (`resume`, dans offres.js, qui ne dit rien que
+ * le tableau ne dise déjà), et le tableau complet se déplie à la demande, dans
+ * un <details> : rien n'est caché, rien n'est imposé. Déplié, il reste compact
+ * sur mobile — trois colonnes étroites, plus une ligne par cellule.
  *
- * La structure vient de la ressource Osmo « Comparison Table (Basic) » : une
- * rangée d'en-têtes collante, une ligne par prestation, les rôles ARIA de
- * tableau posés sur des blocs. Ce qui a été refait :
+ * Les engagements et les conditions de sortie restent visibles, eux : c'est ce
+ * qui distingue ce suivi d'une revente d'hébergement, et c'est ce qu'un
+ * artisan méfiant veut lire avant tout le reste.
  *
- *   — La mise en page. Les largeurs que la ressource calcule en flex sont
- *     devenues une grille pilotée par `--formules`, le nombre de colonnes. Même
- *     principe — une seule variable —, mais l'empilement mobile, le nom
- *     au-dessus et les valeurs dessous, se réduit à un `col-span-full`.
- *   — Les prix. La ressource glisse une mention sous le nom de chaque formule ;
- *     ici elle porte le prix. L'en-tête collant garde donc les montants sous
- *     les yeux pendant qu'on descend, soit exactement le rôle qu'avait la
- *     colonne collante de la version à un forfait.
- *   — L'accessibilité. Le coin de l'en-tête était `aria-hidden` : la rangée
- *     d'en-têtes comptait une cellule de moins que les lignes, et un lecteur
- *     d'écran rattachait chaque colonne à l'en-tête d'à côté. C'est devenu un
- *     vrai en-tête de colonne, qui ne se masque qu'à l'œil sur mobile —
- *     `sr-only`, jamais `display: none`, qui le retirerait aussi de l'arbre
- *     d'accessibilité.
- *   — Les couleurs. Coches en blanc, tirets au gris des « hors périmètre ».
- *     Pas d'orange : dans cette section, il veut dire « engagement ». Pas de
- *     vert non plus, réservé à la validation du formulaire (`--color-valide`).
- *   — Aucune formule mise en avant. Ni pastille « recommandé », ni colonne
- *     surlignée : c'est le registre des grilles SaaS que la note de Offre.astro
- *     écarte, et pousser vers la plus chère un an avant la question se verrait.
+ * ---- Le tableau lui-même ----
  *
- * Le survol des lignes vient d'une seconde ressource Osmo, « Directional List
- * Hover », déjà adaptée pour la Q&R : voir le commentaire du groupe de rangées.
+ * Structure de la ressource Osmo « Comparison Table (Basic) » : une rangée
+ * d'en-têtes collante, une ligne par prestation, les rôles ARIA de tableau
+ * posés sur des blocs. Le coin de l'en-tête est un vrai en-tête de colonne,
+ * masqué à l'œil seulement sur mobile (`sr-only`, jamais `display: none`). Le
+ * mot « Kanyro » qui surmontait chaque nom de formule, en 10 px, a disparu :
+ * il ne disait rien que la page ne dise déjà.
  *
- * Le fond reste `surface` et non `brique` : la brique est la couleur de l'offre
- * principale, la reprendre remettrait les deux au même rang.
+ * Aucune formule mise en avant — ni pastille « recommandé », ni colonne
+ * surlignée : pousser vers la plus chère un an avant la question se verrait.
  *
- * Les prix sont en Cormorant Light, comme celui du site. Un abonnement facturé
- * comme un artisan doit s'afficher comme tel, pas en sans-serif grasse.
+ * Le survol des lignes vient de la ressource Osmo « Directional List Hover » :
+ * voir `initSurvolDirectionnel` dans effets.js.
  */
 
 const { formules, comparatif } = offreMensuelle;
+const tva = mentionTva();
 
 /*
  * ⚠ `--formules` PASSE PAR UNE CLASSE, PAS PAR UN ATTRIBUT `style`.
  *
  * La CSP de Base.astro pose `style-src 'self'`, sans 'unsafe-inline' : un
  * `style="--formules: 2"` est bloqué sans bruit, la variable reste vide, et la
- * grille retombe sur une seule colonne. C'est ce qui s'est passé au premier
- * rendu. Les classes sont écrites en entier pour que Tailwind les trouve à la
- * compilation — une troisième formule demande une troisième entrée ici.
+ * grille retombe sur une seule colonne. Les classes sont écrites en entier pour
+ * que Tailwind les trouve à la compilation — une troisième formule demande une
+ * troisième entrée ici.
  */
 const colonnes = { 2: '[--formules:2]', 3: '[--formules:3]' }[formules.length];
+
+/* Les colonnes du tableau : un intitulé souple, puis une colonne étroite par
+   formule sur mobile, plus large sur grand écran. */
+const grille =
+  'grid grid-cols-[minmax(0,1fr)_repeat(var(--formules),6.5rem)] md:grid-cols-[minmax(0,1.4fr)_repeat(var(--formules),minmax(0,1fr))]';
 ---
 
 {
@@ -90,194 +77,199 @@ const colonnes = { 2: '[--formules:2]', 3: '[--formules:3]' }[formules.length];
     <section id="suivi" class="bg-surface px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32">
       <div class="mx-auto max-w-6xl">
         <p class="surtitre reveal">Une fois le site en ligne</p>
-        <h2 class="font-titre rideau mt-6 max-w-2xl text-4xl tracking-wide sm:text-5xl">
-          Hébergement et maintenance
-        </h2>
-        <p class="font-texte reveal mt-6 max-w-xl text-sm leading-relaxed text-texte-doux sm:text-base">
+        <h2 class="titre-section rideau mt-6 max-w-3xl">Hébergement et maintenance</h2>
+        <p class="font-texte reveal mt-6 max-w-2xl text-base leading-relaxed text-texte-doux">
           {offreMensuelle.promesse}
         </p>
 
         {/*
           La phrase qui empêche les prix de la page de se concurrencer. Elle
           répond au « donc le site coûte 3 900 € PLUS 29 € par mois ? » qui se
-          pose sinon en silence, et qu'on n'entendra jamais poser. Elle vient
-          avant le tableau, pas en note dessous : c'est en lisant les montants
-          qu'on se pose la question.
+          pose sinon en silence. Elle vient avant les montants : c'est en les
+          lisant qu'on se pose la question.
         */}
-        <p class="font-texte reveal mt-4 max-w-xl text-xs leading-relaxed text-texte-doux">
+        <p class="font-texte reveal mt-4 max-w-2xl text-[0.9375rem] leading-relaxed text-texte">
           Rien à régler aujourd'hui, et rien à signer. Le forfait démarre{' '}
-          {offreMensuelle.demarrage}, et seulement si vous le décidez à ce
-          moment-là.
+          {offreMensuelle.demarrage}, et seulement si vous le décidez à ce moment-là.
         </p>
 
-        <div
-          role="table"
-          aria-label="Les deux formules de suivi, comparées"
-          class:list={['reveal', colonnes]}
-        >
-          {/*
-            L'en-tête est un enfant DIRECT du tableau, et ce n'est pas un détail :
-            un élément collant ne glisse que dans la hauteur de son parent. Posé
-            dans un groupe de rangées à lui, il n'aurait eu que sa propre hauteur
-            comme course, et ne collerait jamais.
+        <ul class="reveal mt-10 grid gap-4 md:grid-cols-2">
+          {formules.map((f) => (
+            <li class="carte flex flex-col p-6 sm:p-8">
+              <p class="font-titre text-2xl tracking-wide sm:text-3xl">{f.nom}</p>
+              <p class="mt-3 flex flex-wrap items-baseline gap-x-3">
+                <span class="font-titre chiffres text-4xl font-light">{f.prix}</span>
+                <span class="font-texte chiffres text-sm text-texte-faible">
+                  ou {f.prixAnnuel}, {offreMensuelle.mentionAnnuel}
+                </span>
+              </p>
+              <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+                {f.resume}
+              </p>
+            </li>
+          ))}
+        </ul>
+        {tva && <p class="font-texte reveal mt-3 text-sm text-texte-faible">{tva}.</p>}
 
-            ⚠ `top-0`, et la place de la barre de navigation est DANS l'en-tête
-            (`pt-20` / `sm:pt-24`), pas dans son décalage. Avec un `top-24`, les
-            lignes défilaient dans la bande laissée libre au-dessus et passaient
-            derrière la pastille, à moitié lisibles. Un fond plein jusqu'en haut
-            de l'écran les masque. Hors défilement, ce même rembourrage tient
-            lieu de marge entre l'introduction et le tableau.
-          */}
+        <details class="group reveal mt-8">
+          <summary class="font-texte inline-flex min-h-12 cursor-pointer list-none items-center gap-3 rounded-bouton border border-white/40 px-6 text-sm font-medium tracking-[0.08em] text-texte transition-colors hover:border-white [&::-webkit-details-marker]:hidden">
+            <span class="group-open:hidden">Comparer les deux formules en détail</span>
+            <span class="hidden group-open:inline">Replier le tableau</span>
+            <ChevronDown class="h-4 w-4 transition-transform duration-300 group-open:rotate-180" stroke-width={1.5} aria-hidden="true" />
+          </summary>
+
           <div
-            role="row"
-            class="sticky top-0 z-10 grid grid-cols-[repeat(var(--formules),minmax(0,1fr))] border-b border-trait bg-surface pt-20 sm:pt-24 md:grid-cols-[minmax(0,1.4fr)_repeat(var(--formules),minmax(0,1fr))]"
+            role="table"
+            aria-label="Les deux formules de suivi, comparées"
+            class:list={['mt-6', colonnes]}
           >
+            {/*
+              L'en-tête est un enfant DIRECT du tableau : un élément collant ne
+              glisse que dans la hauteur de son parent. `top-0`, et la place de la
+              barre de navigation est DANS l'en-tête (`pt-16`), pas dans son
+              décalage : un fond plein jusqu'en haut de l'écran masque les lignes
+              qui défilent dessous.
+            */}
             <div
-              role="columnheader"
-              class="font-texte flex items-end px-5 pb-6 text-xs tracking-[0.25em] text-texte-faible uppercase max-md:sr-only"
+              role="row"
+              class:list={[grille, 'sticky top-0 z-10 border-b border-trait bg-surface pt-16 sm:pt-24']}
             >
-              Ce qui est compris
-            </div>
-            {formules.map((f) => (
               <div
                 role="columnheader"
-                class="flex flex-col items-center px-2 pb-5 text-center sm:pb-7"
+                class="font-texte flex items-end px-3 pb-4 text-xs tracking-[0.2em] text-texte-faible uppercase max-md:sr-only sm:px-5 sm:pb-6"
               >
-                <p class="font-texte text-xs tracking-[0.25em] text-texte-faible uppercase">
-                  Kanyro
-                </p>
-                <p class="font-titre mt-1 text-xl leading-tight tracking-wide sm:text-3xl">
-                  {f.nom}
-                </p>
-                <p class="font-titre mt-3 text-3xl leading-none font-light tracking-[0.01em] sm:text-4xl">
-                  {f.prix}
-                </p>
-                <p class="font-texte mt-2 text-xs text-texte-faible">
-                  ou <span class="text-texte-doux">{f.prixAnnuel}</span>
-                </p>
+                Ce qui est compris
               </div>
-            ))}
-          </div>
-
-          {/*
-            Survol directionnel : la ligne s'éclaire par le bord que franchit le
-            curseur, en haut ou en bas (`"y"`), comme les questions de la Q&R. Le
-            mécanisme est dans effets.js, la course dans global.css.
-
-            ⚠ Le cran est un voile blanc et pas `--color-surface-haute`, le
-            pendant sur ce fond de la `brique-haute` de la Q&R. Une ligne sur
-            deux porte déjà un voile de 2,5 % : un fond plein à peine plus clair
-            que `surface` y aurait été invisible. Un voile s'ajoute à ce qu'il
-            recouvre, et éclaire donc d'autant les deux sortes de lignes.
-          */}
-          <div
-            role="rowgroup"
-            data-survol-directionnel="y"
-            class="[--survol-fond:rgb(255_255_255/0.05)]"
-          >
-            {comparatif.map((ligne) => (
-              <div
-                role="row"
-                data-survol-item
-                class="relative grid grid-cols-[repeat(var(--formules),minmax(0,1fr))] overflow-hidden border-b border-trait even:bg-white/[0.025] md:grid-cols-[minmax(0,1.4fr)_repeat(var(--formules),minmax(0,1fr))]"
-              >
-                {/*
-                  Positionnée, donc hors de la grille : elle ne prend pas de
-                  cellule. Les cellules qui suivent sont en `relative` pour
-                  passer au-dessus d'elle. `-inset-px` pour la même raison que
-                  dans la Q&R — voir le commentaire de QandA.astro.
-                */}
+              {formules.map((f, i) => (
                 <div
-                  data-survol-tuile
-                  class="survol-tuile pointer-events-none absolute -inset-px"
-                  aria-hidden="true"
+                  role="columnheader"
+                  class:list={[
+                    'flex flex-col items-center px-1 pb-4 text-center sm:px-2 sm:pb-6',
+                    i === 0 && 'max-md:col-start-2',
+                  ]}
                 >
-                </div>
-
-                {/*
-                  Un paragraphe et pas un h3 : onze titres dans un tableau
-                  noieraient le plan de la page, et le rôle `rowheader` dit déjà
-                  aux lecteurs d'écran ce que la ligne nomme.
-                */}
-                <div
-                  role="rowheader"
-                  class="relative col-span-full flex flex-col justify-center px-5 pt-6 pb-1 md:col-span-1 md:py-6"
-                >
-                  <p class="font-titre text-xl leading-snug tracking-wide sm:text-2xl">
-                    {ligne.titre}
+                  <p class="font-titre text-[0.8125rem] leading-tight break-words sm:text-2xl sm:tracking-wide">{f.nom}</p>
+                  <p class="font-titre chiffres mt-1.5 text-lg leading-none font-light sm:mt-2 sm:text-3xl">
+                    {f.prix}
                   </p>
-                  {ligne.detail && (
-                    <p class="font-texte mt-1 text-xs leading-relaxed text-texte-faible">
-                      {ligne.detail}
-                    </p>
-                  )}
                 </div>
+              ))}
+            </div>
 
-                {ligne.valeurs.map((v) => (
-                  <div role="cell" class="relative flex items-center justify-center px-2 pt-3 pb-6 text-center md:py-6">
-                    {v === true ? (
-                      <>
-                        <svg
-                          class="h-5 w-5 text-texte"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.6"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          aria-hidden="true"
-                        >
-                          <polyline points="5 12 10 17 19 7" />
-                        </svg>
-                        <span class="sr-only">Compris</span>
-                      </>
-                    ) : v === false ? (
-                      <>
-                        <svg
-                          class="h-5 w-5 text-white/45"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.6"
-                          stroke-linecap="round"
-                          aria-hidden="true"
-                        >
-                          <line x1="6" y1="12" x2="18" y2="12" />
-                        </svg>
-                        <span class="sr-only">Non compris</span>
-                      </>
-                    ) : (
-                      /* Texte et astérisque sur la même ligne du gabarit : un
-                         saut de ligne entre les deux devient une espace au
-                         rendu, et l'astérisque se décolle du mot. */
-                      <p class="font-texte text-sm font-medium text-texte">
-                        {v.texte ?? v}{v.note && (<a href="#suivi-note" class="text-texte-doux no-underline" aria-label="voir la note sous le tableau">*</a>)}
+            {/*
+              Survol directionnel : la ligne s'éclaire par le bord que franchit le
+              curseur. Le cran est un voile blanc : une ligne sur deux porte déjà un
+              voile de 2,5 %, un fond plein à peine plus clair y serait invisible.
+            */}
+            <div
+              role="rowgroup"
+              data-survol-directionnel="y"
+              class="[--survol-fond:rgb(255_255_255/0.05)]"
+            >
+              {comparatif.map((ligne) => (
+                <div
+                  role="row"
+                  data-survol-item
+                  class:list={[grille, 'relative overflow-hidden border-b border-trait even:bg-white/[0.025]']}
+                >
+                  <div
+                    data-survol-tuile
+                    class="survol-tuile pointer-events-none absolute -inset-px"
+                    aria-hidden="true"
+                  >
+                  </div>
+
+                  <div role="rowheader" class="relative flex flex-col justify-center px-3 py-4 sm:px-5 md:py-5">
+                    <p class="font-titre text-lg leading-snug tracking-wide sm:text-2xl">{ligne.titre}</p>
+                    {ligne.detail && (
+                      <p class="font-texte mt-1 text-sm leading-relaxed text-texte-faible">
+                        {ligne.detail}
                       </p>
                     )}
                   </div>
-                ))}
-              </div>
-            ))}
+
+                  {ligne.valeurs.map((v) => (
+                    <div role="cell" class="relative flex items-center justify-center px-1 py-4 text-center md:py-5">
+                      {v === true ? (
+                        <>
+                          <svg
+                            class="h-5 w-5 text-texte"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="5 12 10 17 19 7" />
+                          </svg>
+                          <span class="sr-only">Compris</span>
+                        </>
+                      ) : v === false ? (
+                        <>
+                          <svg
+                            class="h-5 w-5 text-white/45"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                            aria-hidden="true"
+                          >
+                            <line x1="6" y1="12" x2="18" y2="12" />
+                          </svg>
+                          <span class="sr-only">Non compris</span>
+                        </>
+                      ) : v.note ? (
+                        /* Le renvoi à la note porte sur tout le mot, pas sur le
+                           seul astérisque : une cible de 6 px de large n'en est
+                           pas une. */
+                        <a
+                          href="#suivi-note"
+                          class="font-texte inline-flex min-h-11 items-center text-sm font-medium text-texte underline decoration-dotted underline-offset-4"
+                          aria-label={`${v.texte}, voir la condition sous le tableau`}
+                        >
+                          {v.texte}*
+                        </a>
+                      ) : (
+                        <p class="font-texte text-sm font-medium text-texte">{v.texte ?? v}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div class="font-texte reveal mt-6 max-w-2xl space-y-2 text-xs leading-relaxed text-texte-faible">
-          <p id="suivi-note">
-            <span aria-hidden="true">* </span>
-            {offreMensuelle.note}
-          </p>
-          <p>
-            À l'année, en un seul règlement :{' '}
-            <span class="text-signal-vif">{offreMensuelle.mentionAnnuel}</span> sur
-            chaque formule.
-          </p>
-        </div>
-
-        <div class="mt-20 grid gap-12 md:grid-cols-2 lg:gap-20">
-          <div class="reveal">
-            <p class="font-texte text-xs tracking-[0.25em] text-texte-faible uppercase">
-              Ce sur quoi je m'engage, dans les deux formules
+          <div class="font-texte mt-6 max-w-2xl space-y-2 text-sm leading-relaxed text-texte-faible">
+            <p id="suivi-note">
+              <span aria-hidden="true">* </span>
+              {offreMensuelle.note}
             </p>
+            <p>
+              À l'année, en un seul règlement :{' '}
+              <span class="text-signal-vif">{offreMensuelle.mentionAnnuel}</span> sur chaque
+              formule.
+            </p>
+          </div>
+
+          <div class="mt-10 max-w-2xl">
+            <p class="surtitre">Ce qui n'est pas compris</p>
+            <ul class="mt-4 space-y-3">
+              {offreMensuelle.horsPerimetre.map((h) => (
+                <li class="font-texte flex gap-3 text-[0.9375rem] text-texte-faible">
+                  <span class="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-white/40" />
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+
+        <div class="mt-16 grid gap-12 md:grid-cols-2 lg:gap-20">
+          <div class="reveal">
+            <p class="surtitre">Ce sur quoi je m'engage, dans les deux formules</p>
             {/*
               En orange, et seuls de la section à l'être avec la remise à
               l'année. C'est ce qui sépare ce suivi d'une revente d'hébergement
@@ -286,35 +278,23 @@ const colonnes = { 2: '[--formules:2]', 3: '[--formules:3]' }[formules.length];
             */}
             <ul class="mt-4 space-y-3">
               {offreMensuelle.engagement.map((e) => (
-                <li class="font-texte flex gap-3 text-sm leading-relaxed text-texte-doux">
-                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
+                <li class="font-texte flex gap-3 text-[0.9375rem] leading-relaxed text-texte-doux">
+                  <span class="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                   <span>{e}</span>
                 </li>
               ))}
             </ul>
-
-            <p class="font-texte mt-10 border-t border-trait pt-6 text-xs leading-relaxed text-texte-faible">
-              {offreMensuelle.sortie}
-            </p>
           </div>
 
           <div class="reveal">
-            <p class="font-texte text-xs tracking-[0.25em] text-texte-faible uppercase">
-              Ce qui n'est pas compris
+            <p class="surtitre">Pour partir, ou ne rien prendre</p>
+            <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+              {offreMensuelle.sortie}
             </p>
-            <ul class="mt-4 space-y-3">
-              {offreMensuelle.horsPerimetre.map((h) => (
-                <li class="font-texte flex gap-3 text-sm text-texte-faible">
-                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/25" />
-                  <span>{h}</span>
-                </li>
-              ))}
-            </ul>
-
-            <p class="font-texte mt-10 border-t border-trait pt-6 text-xs leading-relaxed text-texte-faible">
-              Vous préférez ne rien prendre ? Comptez {offreMensuelle.alternative} pour
-              garder le site en ligne à votre nom. Je vous aide à faire le transfert, et le
-              site est à vous.
+            <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+              Vous préférez ne rien prendre ? Comptez {offreMensuelle.alternative} pour garder
+              le site en ligne à votre nom. Je vous aide à faire le transfert, et le site est
+              à vous.
             </p>
           </div>
         </div>
