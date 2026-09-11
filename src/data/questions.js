@@ -26,9 +26,10 @@ import { offre, offreMensuelle } from './offres.js';
  * hésite, et sans rapport avec la question. La disponibilité est dite, sans
  * détour, dans la section « Qui suis-je », où elle a sa place.
  *
- * Quatre objections qui restaient sans réponse sont ajoutées : le paiement, un
- * résultat qui ne plaît pas, les modifications après la mise en ligne, et la
- * crainte que le prestataire disparaisse.
+ * Six objections qui restaient sans réponse sont ajoutées : le paiement, un
+ * résultat qui ne plaît pas, les modifications après la mise en ligne, la
+ * crainte que le prestataire disparaisse, le nombre de demandes à attendre (sans
+ * aucun chiffre promis) et le site fait soi-même.
  */
 export const questions = [
   {
@@ -45,7 +46,7 @@ export const questions = [
   },
   {
     q: 'Et si le résultat ne me plaît pas ?',
-    r: 'Vous validez les textes avant que je dessine quoi que ce soit. Après la maquette, deux séries de modifications sont comprises. Le moment de tout dire, c’est celui-là.',
+    r: 'Vous validez les textes avant que je dessine quoi que ce soit. Après la maquette, deux séries de modifications sont comprises : c’est le moment de tout dire.',
   },
   {
     q: "Je n'ai pas de belles photos de mes chantiers",
@@ -64,8 +65,16 @@ export const questions = [
     r: "Non, et fuyez ceux qui la garantissent. Personne ne contrôle Google. Ce que je garantis, c'est un site rapide, lisible sur téléphone, écrit avec les mots que vos clients tapent vraiment.",
   },
   {
+    q: 'Combien de demandes vais-je recevoir ?',
+    r: 'Je ne peux pas vous le promettre : ça dépend de votre métier, de votre secteur et de vos avis. Un mois après la mise en ligne, je vous envoie les premiers chiffres, les vrais.',
+  },
+  {
     q: 'Je travaille déjà au bouche-à-oreille, pourquoi un site ?',
     r: "La recommandation reste ce qui marche le mieux, et un site ne la remplace pas. Mais avant d'appeler, on tape votre nom sur son téléphone. Si on ne trouve rien, on appelle aussi le suivant.",
+  },
+  {
+    q: 'Pourquoi pas un site Wix, que je ferais moi-même ?',
+    r: "Vous pouvez. Mais les textes, les photos et les réglages Google, c'est vous qui les faites, le soir après le chantier. Ici, on écrit les textes ensemble, je m'occupe du reste, et le site est à vous.",
   },
   // Seulement si le suivi est proposé : sans lui, la réponse citerait un prix
   // qui n'existe nulle part sur la page.
