@@ -12,7 +12,7 @@
 export const offre = {
   nom: 'Site orienté devis',
   promesse: 'Être trouvé sur votre métier et votre commune, et recevoir des demandes de devis.',
-  prix: '1 900 – 2 900 €',
+  prix: '1 900 à 3 900 €',
   mention: 'une seule fois, tout compris la première année',
   delai: '1 à 2 semaines',
 
@@ -71,7 +71,7 @@ export const offre = {
  * Le quota répond à « pourquoi lui et pas moi ? » — parce qu'il était dans les
  * trois premiers — et il crée la seule urgence honnête dont on dispose quand on
  * n'a rien à montrer. `prixBarre` reprend le bas de la fourchette normale, pas
- * un prix gonflé pour l'occasion : afficher 2 900 € barré serait un faux rabais.
+ * un prix gonflé pour l'occasion : afficher 3 900 € barré serait un faux rabais.
  *
  * `restants` se décrémente à la main après chaque signature. À zéro, l'offre
  * disparaît d'elle-même — c'est ce qui la rend crédible. La laisser tourner
