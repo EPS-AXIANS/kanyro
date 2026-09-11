@@ -1,4 +1,6 @@
 ---
+import LienTelephone from './LienTelephone.astro';
+
 const {
   titre = 'On en parle vingt minutes ?',
   texte = "Vous décrivez votre activité et vos chantiers, je vous dis franchement si un site vous rapportera quelque chose. Si la réponse est non, je vous le dirai.",
@@ -8,8 +10,8 @@ const {
 
 /*
  * L'échange de lettres au survol est réservé au « Demander un devis ». Le
- * libellé étant une prop, la décision se prend ici plutôt que dans les cinq
- * pages qui posent ce bloc — dont aucune, aujourd'hui, ne le remplace.
+ * libellé étant une prop, la décision se prend ici plutôt que dans les pages
+ * qui posent ce bloc — dont aucune, aujourd'hui, ne le remplace.
  *
  * ⚠ `undefined` ET NON `false`. Astro écrit `data-bouton-anime="false"` pour un
  * attribut de données faux, et le sélecteur `[data-bouton-anime]` l'attraperait
@@ -19,6 +21,9 @@ const {
  * Et chaîne vide plutôt que `true`, qui ferait écrire `data-bouton-anime="true"`
  * — sans conséquence pour le sélecteur, mais la valeur laisserait croire qu'elle
  * est lue. C'est la forme que pose déjà `bouton.dataset.boutonDecoupe = ''`.
+ *
+ * Le téléphone accompagne toujours le devis : sur les pages internes comme sur
+ * l'accueil, l'appel est l'autre chemin naturel d'un artisan.
  */
 const anime = libelle === 'Demander un devis' ? '' : undefined;
 ---
@@ -30,9 +35,12 @@ const anime = libelle === 'Demander un devis' ? '' : undefined;
     <h2 class="font-titre mx-auto max-w-2xl text-3xl tracking-wide sm:text-4xl md:text-5xl">
       {titre}
     </h2>
-    <p class="font-texte mx-auto mt-6 max-w-xl text-xs leading-relaxed text-white/60 sm:text-sm">
+    <p class="font-texte mx-auto mt-6 max-w-xl text-base leading-relaxed text-white/80">
       {texte}
     </p>
-    <a href={href} data-bouton-anime={anime} class="bouton-primaire mt-10">{libelle}</a>
+    <div class="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+      <a href={href} data-bouton-anime={anime} data-mesure="devis" class="bouton-primaire">{libelle}</a>
+      <LienTelephone class="bouton-secondaire inline-flex items-center justify-center gap-2.5 tracking-[0.12em]" />
+    </div>
   </div>
 </section>

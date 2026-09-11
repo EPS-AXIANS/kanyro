@@ -20,22 +20,39 @@ import { SITE } from '../config/site.js';
  *   class    classes du lien (le composant n'impose aucun style)
  *   libelle  texte affiché ; par défaut, le numéro lui-même
  *   icone    affiche le combiné devant le texte (vrai par défaut)
+ *
+ * Un contenu passé en slot remplace l'icône et le texte : c'est ce qui permet
+ * une mise en forme riche (la carte de /contact) sans recopier le `tel:`. Le
+ * nom accessible est alors celui du contenu, qui doit contenir le numéro.
  */
 const { class: classe, libelle, icone = true } = Astro.props;
 const { telephone, telephoneAffiche } = SITE.contact;
 const texte = libelle ?? telephoneAffiche;
+const avecSlot = Astro.slots.has('default');
+
+/*
+ * Le nom accessible contient toujours le texte visible (critère 2.5.3) : « Appeler,
+ * 06 49… » quand le libellé est « Appeler », « Appeler le 06 49… » quand le
+ * libellé est le numéro lui-même.
+ */
+const nomAccessible = avecSlot
+  ? undefined
+  : libelle
+    ? `${libelle}, ${telephoneAffiche}`
+    : `Appeler le ${telephoneAffiche}`;
 ---
 
 {
   telephone && (
-    <a
-      href={`tel:${telephone}`}
-      class={classe}
-      data-mesure="appel"
-      aria-label={libelle ? `${libelle}, ${telephoneAffiche}` : `Appeler le ${telephoneAffiche}`}
-    >
-      {icone && <Phone class="h-4 w-4 shrink-0" stroke-width={1.5} aria-hidden="true" />}
-      <span>{texte}</span>
+    <a href={`tel:${telephone}`} class={classe} data-mesure="appel" aria-label={nomAccessible}>
+      {avecSlot ? (
+        <slot />
+      ) : (
+        <>
+          {icone && <Phone class="h-4 w-4 shrink-0" stroke-width={1.5} aria-hidden="true" />}
+          <span>{texte}</span>
+        </>
+      )}
     </a>
   )
 }

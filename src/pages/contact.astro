@@ -1,7 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import Champ from '../components/Champ.astro';
-import { CircleAlert } from 'lucide-astro';
+import LienTelephone from '../components/LienTelephone.astro';
+import { CircleAlert, Mail, Phone } from 'lucide-astro';
 import { SITE } from '../config/site.js';
 import { filAriane } from '../config/schema.js';
 import metiers from '../data/metiers.json';
@@ -47,6 +48,36 @@ const classesBandeau = 'bandeau-alerte mb-8';
       >
         Quelques lignes suffisent. Je réponds sous 48 heures, et je vous dis
         franchement si un site vous rapportera quelque chose.
+      </p>
+
+      {/*
+        Le téléphone et l'email AVANT le formulaire. Beaucoup d'artisans
+        préfèrent appeler que remplir des champs, et la page ne l'affichait
+        qu'en pied de page, sous le formulaire. Deux cartes de même hauteur, qui
+        passent l'une sous l'autre sur un téléphone.
+      */}
+      <div class="reveal mx-auto mt-10 grid max-w-2xl gap-3 text-left [--retard:200ms] sm:grid-cols-2">
+        <LienTelephone class="carte flex min-h-[4.5rem] items-center gap-4 px-5 py-4 no-underline transition-colors duration-300 hover:border-white/30 hover:bg-surface-haute">
+          <Phone class="h-5 w-5 shrink-0 text-signal-vif" stroke-width={1.5} aria-hidden="true" />
+          <span class="flex flex-col">
+            <span class="font-texte text-xs tracking-[0.2em] text-texte-faible uppercase">Par téléphone</span>
+            <span class="font-texte mt-0.5 text-lg text-texte">{SITE.contact.telephoneAffiche}</span>
+          </span>
+        </LienTelephone>
+        <a
+          href={`mailto:${SITE.contact.email}`}
+          class="carte flex min-h-[4.5rem] items-center gap-4 px-5 py-4 no-underline transition-colors duration-300 hover:border-white/30 hover:bg-surface-haute"
+        >
+          <Mail class="h-5 w-5 shrink-0 text-signal-vif" stroke-width={1.5} aria-hidden="true" />
+          <span class="flex min-w-0 flex-col">
+            <span class="font-texte text-xs tracking-[0.2em] text-texte-faible uppercase">Par email</span>
+            <span class="font-texte mt-0.5 text-lg break-all text-texte">{SITE.contact.email}</span>
+          </span>
+        </a>
+      </div>
+
+      <p class="font-texte reveal mt-10 text-sm text-texte-doux [--retard:220ms]">
+        Ou décrivez votre activité ci-dessous, je vous réponds par écrit.
       </p>
 
       <!--
