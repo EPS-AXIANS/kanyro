@@ -61,6 +61,9 @@ import { offreMensuelle } from '../../data/offres.js';
  *     surlignée : c'est le registre des grilles SaaS que la note de Offre.astro
  *     écarte, et pousser vers la plus chère un an avant la question se verrait.
  *
+ * Le survol des lignes vient d'une seconde ressource Osmo, « Directional List
+ * Hover », déjà adaptée pour la Q&R : voir le commentaire du groupe de rangées.
+ *
  * Le fond reste `surface` et non `brique` : la brique est la couleur de l'offre
  * principale, la reprendre remettrait les deux au même rang.
  *
@@ -156,12 +159,41 @@ const colonnes = { 2: '[--formules:2]', 3: '[--formules:3]' }[formules.length];
             ))}
           </div>
 
-          <div role="rowgroup">
+          {/*
+            Survol directionnel : la ligne s'éclaire par le bord que franchit le
+            curseur, en haut ou en bas (`"y"`), comme les questions de la Q&R. Le
+            mécanisme est dans effets.js, la course dans global.css.
+
+            ⚠ Le cran est un voile blanc et pas `--color-surface-haute`, le
+            pendant sur ce fond de la `brique-haute` de la Q&R. Une ligne sur
+            deux porte déjà un voile de 2,5 % : un fond plein à peine plus clair
+            que `surface` y aurait été invisible. Un voile s'ajoute à ce qu'il
+            recouvre, et éclaire donc d'autant les deux sortes de lignes.
+          */}
+          <div
+            role="rowgroup"
+            data-survol-directionnel="y"
+            class="[--survol-fond:rgb(255_255_255/0.05)]"
+          >
             {comparatif.map((ligne) => (
               <div
                 role="row"
-                class="grid grid-cols-[repeat(var(--formules),minmax(0,1fr))] border-b border-trait even:bg-white/[0.025] md:grid-cols-[minmax(0,1.4fr)_repeat(var(--formules),minmax(0,1fr))]"
+                data-survol-item
+                class="relative grid grid-cols-[repeat(var(--formules),minmax(0,1fr))] overflow-hidden border-b border-trait even:bg-white/[0.025] md:grid-cols-[minmax(0,1.4fr)_repeat(var(--formules),minmax(0,1fr))]"
               >
+                {/*
+                  Positionnée, donc hors de la grille : elle ne prend pas de
+                  cellule. Les cellules qui suivent sont en `relative` pour
+                  passer au-dessus d'elle. `-inset-px` pour la même raison que
+                  dans la Q&R — voir le commentaire de QandA.astro.
+                */}
+                <div
+                  data-survol-tuile
+                  class="survol-tuile pointer-events-none absolute -inset-px"
+                  aria-hidden="true"
+                >
+                </div>
+
                 {/*
                   Un paragraphe et pas un h3 : onze titres dans un tableau
                   noieraient le plan de la page, et le rôle `rowheader` dit déjà
@@ -169,7 +201,7 @@ const colonnes = { 2: '[--formules:2]', 3: '[--formules:3]' }[formules.length];
                 */}
                 <div
                   role="rowheader"
-                  class="col-span-full flex flex-col justify-center px-5 pt-6 pb-1 md:col-span-1 md:py-6"
+                  class="relative col-span-full flex flex-col justify-center px-5 pt-6 pb-1 md:col-span-1 md:py-6"
                 >
                   <p class="font-titre text-xl leading-snug tracking-wide sm:text-2xl">
                     {ligne.titre}
@@ -182,7 +214,7 @@ const colonnes = { 2: '[--formules:2]', 3: '[--formules:3]' }[formules.length];
                 </div>
 
                 {ligne.valeurs.map((v) => (
-                  <div role="cell" class="flex items-center justify-center px-2 pt-3 pb-6 text-center md:py-6">
+                  <div role="cell" class="relative flex items-center justify-center px-2 pt-3 pb-6 text-center md:py-6">
                     {v === true ? (
                       <>
                         <svg

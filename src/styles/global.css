@@ -817,9 +817,15 @@
  * L'assouplissement est `--ease-rideau` et non le `cubic-bezier(.16,1,.3,1)` de
  * la ressource d'origine : les deux courbes sont des sorties exponentielles
  * quasi superposables, et le site a déjà son jeton.
+ *
+ * ⚠ LE FOND PASSE PAR `--survol-fond`, À POSER SUR LE CONTENEUR. Ce bloc est
+ * hors couche : un `bg-*` Tailwind posé sur la tuile perdrait contre lui, quelle
+ * que soit sa spécificité (voir le bloc des animations). La tuile doit monter
+ * d'un cran au-dessus de SON fond — la brique pour la Q&R, qui prend le repli,
+ * `surface` pour le tableau des formules de Suivi.astro, qui pose le sien.
  */
 .survol-tuile {
-  background: var(--color-brique-haute);
+  background: var(--survol-fond, var(--color-brique-haute));
   transform: translateY(-100%);
   transition: transform 0.5s var(--ease-rideau);
   will-change: transform;
