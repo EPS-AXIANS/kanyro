@@ -1,6 +1,6 @@
 # Processus de livraison
 
-Six étapes, 4 à 6 semaines, en soirée et le week-end. L'objectif de ce document
+Six étapes, 1 à 2 semaines, en soirée et le week-end. L'objectif de ce document
 est qu'un chantier se déroule toujours pareil : c'est ce qui fait tomber le temps
 passé d'un client au suivant, et c'est ce qui permettra d'industrialiser plus tard.
 
@@ -32,7 +32,7 @@ dire au client dès le devis évite le reproche d'un retard qui vient de son cô
 > Faire valider les textes seuls, sans design. Un client à qui on montre une
 > maquette ne lit plus les textes : il regarde les couleurs.
 
-## Étape 2 — Reportage photo (semaine 1 ou 2)
+## Étape 2 — Reportage photo (semaine 1)
 
 - [ ] Une demi-journée, 2 à 3 chantiers finis
 - [ ] Lumière : tôt le matin ou fin d'après-midi, jamais en plein midi
@@ -41,7 +41,7 @@ dire au client dès le devis évite le reproche d'un retard qui vient de son cô
 - [ ] Autorisation du propriétaire si le chantier est chez un particulier
 - [ ] Tri, recadrage, export en WebP
 
-## Étape 3 — Réalisation (semaines 2 à 4)
+## Étape 3 — Réalisation (semaines 1 et 2)
 
 - [ ] Site monté sur le socle Astro
 - [ ] Formulaire de devis branché et testé
@@ -50,13 +50,13 @@ dire au client dès le devis évite le reproche d'un retard qui vient de son cô
 - [ ] JSON-LD `LocalBusiness` renseigné avec les vraies coordonnées
 - [ ] Aperçu envoyé au client sur une adresse temporaire
 
-## Étape 4 — Ajustements (semaine 4 ou 5)
+## Étape 4 — Ajustements (semaine 2)
 
 - [ ] Première série de modifications
 - [ ] Deuxième série de modifications
 - [ ] Rappeler par écrit que les suivantes sont facturées, sans en faire un sujet
 
-## Étape 5 — Mise en ligne (semaine 5 ou 6)
+## Étape 5 — Mise en ligne (fin de semaine 2)
 
 Cahier de recette — à parcourir **avant** d'annoncer la mise en ligne :
 

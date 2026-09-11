@@ -70,7 +70,7 @@ qui évite le « je croyais que c'était inclus » au moment de la facture.
 
 ## Modalités
 
-**Délai** — [4 à 6] semaines à compter du versement de l'acompte et de la
+**Délai** — [1 à 2] semaines à compter du versement de l'acompte et de la
 réception des éléments demandés (photos, logo, accès). Toute prestation est
 réalisée en soirée et le week-end ; les échanges se font sur ces créneaux.
 
