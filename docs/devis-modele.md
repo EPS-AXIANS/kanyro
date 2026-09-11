@@ -116,8 +116,12 @@ n'engage rien de récurrent.
 
 **Objet** — Maintien en ligne, entretien et suivi du site livré.
 
-**Prix** — 25 € par mois, ou 250 € pour douze mois réglés en une fois (deux mois
-offerts). TVA non applicable, article 293 B du CGI.
+**Formule choisie** — ☐ Maintenance  ☐ Accompagnement
+
+**Prix** — Maintenance : 29 € par mois, ou 290 € pour douze mois réglés en une
+fois. Accompagnement : 59 € par mois, ou 590 € pour douze mois réglés en une
+fois (deux mois offerts dans les deux cas). TVA non applicable, article 293 B
+du CGI.
 
 **Point de départ** — Le premier jour du treizième mois suivant la mise en ligne.
 Les douze premiers mois d'hébergement, de nom de domaine et de certificat sont
@@ -126,18 +130,31 @@ annexe.
 
 ## Ce que le forfait comprend
 
-| # | Prestation | Détail |
-|---|---|---|
-| 1 | Hébergement, nom de domaine et certificat | Renouvelés à échéance à la charge du prestataire |
-| 2 | Sauvegarde | Quotidienne, conservée 30 jours ; restauration à la charge du prestataire |
-| 3 | Sécurité et disponibilité | Mises à jour du serveur, surveillance automatique de la disponibilité |
-| 4 | Relevé mensuel | Positions sur les recherches visées, fréquentation, demandes reçues |
-| 5 | Ajout de chantiers | Deux chantiers par trimestre, à partir des photos fournies par le client |
+Le même tableau que la section Suivi du site (`src/data/offres.js`,
+`comparatif`). Les deux changent ensemble, ou pas du tout.
+
+| Prestation | Détail | Maintenance | Accompagnement |
+|---|---|:---:|:---:|
+| Hébergement | Sur un serveur tenu à jour, à la charge du prestataire | ✓ | ✓ |
+| Nom de domaine | Renouvelé à échéance, toujours au nom du client | ✓ | ✓ |
+| Certificat SSL | | ✓ | ✓ |
+| Sauvegardes | Chaque nuit, trente jours d'historique | ✓ | ✓ |
+| Surveillance | Alerte automatique en cas d'indisponibilité | ✓ | ✓ |
+| Corrections techniques | | ✓ | ✓ |
+| Modifications de textes et de photos | À partir des textes et photos fournis par le client | 2 par mois | Illimitées* |
+| Petites évolutions | | | ✓ |
+| Suivi des performances | Un relevé chaque mois : positions, demandes reçues | | ✓ |
+| Visibilité locale et référencement | | | ✓ |
+| Support prioritaire | Les demandes passent avant les autres | | ✓ |
+
+\* Sur les pages existantes, une demande à la fois : la suivante part dès que
+la précédente est en ligne. Les nouvelles pages et les refontes restent sur
+devis.
 
 ## Engagements de délai
 
-Ces deux délais sont fermes et constituent la contrepartie du prix. Ils
-s'entendent en heures ouvrées, du lundi au vendredi.
+Ces deux délais sont fermes, valent pour les deux formules et constituent la
+contrepartie du prix. Ils s'entendent en heures ouvrées, du lundi au vendredi.
 
 - **Réponse** aux demandes du client sous 24 heures ouvrées.
 - **Remise en ligne** sous 24 heures ouvrées en cas d'indisponibilité du site,
@@ -182,7 +199,7 @@ publiquement : elle absorbe l'incertitude avant signature, pas après.
 
 > Remise de lancement : −[ ] €, en contrepartie de l'utilisation du chantier
 > comme référence (photographies, chiffres de fréquentation et raison sociale
-> publiés sur kanyro.fr), avec accord écrit distinct.
+> publiés sur kanyro.tech), avec accord écrit distinct.
 
 Le formuler comme une contrepartie, jamais comme une remise commerciale : ce
 n'est pas un rabais, c'est le prix du risque pris par un client sans références à
@@ -200,7 +217,7 @@ sur des relevés, pas sur une promesse, et il se vend beaucoup mieux au bout d'u
 an avec des chiffres en main.
 
 **L'alternative à 30 €/an se cite en premier, toujours.** Un artisan qui découvre
-seul qu'il aurait pu s'héberger pour 30 € par an au lieu de 300 € ne se dit pas
+seul qu'il aurait pu s'héberger pour 30 € par an au lieu de 290 € ne se dit pas
 qu'il a mal lu : il se dit qu'on lui a caché quelque chose, et c'est le genre de
 chose qui se raconte dans un tissu local. Dit d'emblée, l'écart s'explique en une
 phrase — ce qui se paie, c'est de n'avoir à y penser jamais, et les deux délais
@@ -216,3 +233,5 @@ délai qu'il faut allonger : un délai annoncé et raté vaut moins que pas de d
 **Le coût réel est d'environ 3 € par mois** (part de VPS et nom de domaine). Le
 détail du calcul de marge — et pourquoi la liste des prestations comprises ne
 peut pas s'allonger sans changer le prix — est dans `src/data/offres.js`.
+⚠ La note sous « Illimitées » est la seule borne de la formule Accompagnement :
+elle ne se retire ni du site ni du devis.
