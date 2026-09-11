@@ -273,8 +273,25 @@ const retraitsDroite = ['md:ml-[2.5%]', 'md:ml-[7.5%]', 'md:ml-[12.5%]'];
       d'écran — il a fini de dégager quand le haut de la section atteint le haut
       de la fenêtre, soit avant la première question. Le pointer plus loin le
       ferait traîner sur ce qu'on essaie de lire.
+
+      ⚠ LA COULEUR DÉPEND DE LA SECTION D'AVANT, ET ELLE A CHANGÉ. L'arc a été
+      dessiné quand la Q&R suivait « Comment ça se passe », sur le noir. La
+      section Suivi s'est glissée entre les deux, sur `surface` : un arc noir
+      arrivait alors sous un fond qui ne l'était pas, et se lisait comme une
+      bande de plus au lieu d'un raccord. Il prend donc la couleur de Suivi
+      quand elle est affichée, le noir par défaut sinon — elle disparaît avec
+      `offreMensuelle.actif`. Si l'ordre des sections change dans index.astro,
+      c'est ici qu'il faut suivre.
     */}
-    <div class="arc-transition arc-transition--envers" data-arc data-arc-mode="envers" aria-hidden="true">
+    <div
+      class:list={[
+        'arc-transition arc-transition--envers',
+        offreMensuelle.actif && '[--arc-couleur:var(--color-surface)]',
+      ]}
+      data-arc
+      data-arc-mode="envers"
+      aria-hidden="true"
+    >
     </div>
   </section>
 

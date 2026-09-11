@@ -1378,7 +1378,14 @@
    */
   height: 100svh;
 
-  color: var(--color-fond);
+  /*
+   * Le noir de la page par défaut. Quand la section voisine a un autre fond, la
+   * section hôte pose `--arc-couleur` sur l'arc : c'est le cas de la Q&R,
+   * précédée par la section Suivi sur `surface`. Même raison que pour
+   * `--survol-fond` : ce bloc est hors couche, et un `text-*` Tailwind posé dans
+   * le balisage perdrait contre lui.
+   */
+  color: var(--arc-couleur, var(--color-fond));
   pointer-events: none;
 }
 
