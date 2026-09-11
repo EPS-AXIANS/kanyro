@@ -112,6 +112,26 @@ const colonneDroite = [
  * (Le décalage n'a d'ailleurs jamais eu lieu : `[animation-delay:…]` était
  * écrasé par le raccourci `animation:` de `.reveal.revealed`. Voir global.css.)
  */
+
+/*
+ * ---- Les textes glissent, les blocs restent ----
+ *
+ * Chaque question est un peu plus en retrait que celle d'au-dessus. Le retrait
+ * porte sur le TEXTE, pas sur l'article : les blocs, et donc leurs tuiles de
+ * survol, gardent leurs deux colonnes nettes, et seul le contenu dérive.
+ *
+ * L'ordre suivi est celui de l'œil, pas celui du balisage. La colonne de droite
+ * descend de six rem, donc de haut en bas on lit gauche, droite, gauche… Elle
+ * prend les demi-pas : 0, 2,5, 5, 7,5 % et ainsi de suite, en zigzag. Chaque
+ * texte est ainsi un peu plus loin que celui qu'on vient de lire, quelle que
+ * soit sa colonne.
+ *
+ * En pourcentage de l'article, pour que le glissement reste proportionné de la
+ * tablette au grand écran. Rien sous `md` : en une seule colonne, l'ordre de
+ * lecture n'est plus le zigzag, et chaque pixel de largeur y sert la lecture.
+ */
+const retraitsGauche = ['', 'md:ml-[5%]', 'md:ml-[10%]', 'md:ml-[15%]'];
+const retraitsDroite = ['md:ml-[2.5%]', 'md:ml-[7.5%]', 'md:ml-[12.5%]'];
 ---
 
 <div class="relative">
@@ -146,7 +166,7 @@ const colonneDroite = [
     >
       <div class="space-y-3 lg:space-y-4">
         {
-          colonneGauche.map((item) => (
+          colonneGauche.map((item, i) => (
             <article
               data-survol-item
               class="reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6"
@@ -174,7 +194,7 @@ const colonneDroite = [
               >
               </div>
 
-              <div class="relative">
+              <div class:list={['relative', retraitsGauche[i]]}>
                 <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                   {item.q}
                 </h3>
@@ -189,7 +209,7 @@ const colonneDroite = [
 
       <div class="space-y-3 md:mt-24 lg:space-y-4">
         {
-          colonneDroite.map((item) => (
+          colonneDroite.map((item, i) => (
             <article
               data-survol-item
               class="reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6"
@@ -217,7 +237,7 @@ const colonneDroite = [
               >
               </div>
 
-              <div class="relative">
+              <div class:list={['relative', retraitsDroite[i]]}>
                 <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
                   {item.q}
                 </h3>
