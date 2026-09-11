@@ -79,7 +79,27 @@ const echapperJsonLd = (json) =>
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
 
-const { titre, description, image, jsonLd, noindex = false } = Astro.props;
+/*
+ * `image` : l'image de partage (Open Graph, X). Par défaut celle du site,
+ * 1200 × 630 : sans elle, un lien partagé sur WhatsApp, LinkedIn ou Facebook
+ * sortait sans aucune image. Son gabarit est scripts/image-partage.html.
+ */
+const IMAGE_PARTAGE = {
+  chemin: '/images/partage-kanyro.jpg',
+  largeur: 1200,
+  hauteur: 630,
+  alt: 'Kanyro, création de sites internet pour artisans du bâtiment, Arrageois, bassin minier et Lille',
+};
+
+const {
+  titre,
+  description,
+  image = IMAGE_PARTAGE.chemin,
+  imageAlt = IMAGE_PARTAGE.alt,
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+const imageParDefaut = image === IMAGE_PARTAGE.chemin;
 
 /*
  * Sur /contact, la barre d'action mobile ne propose que l'appel : son bouton de
@@ -221,7 +241,11 @@ const csp = [
     <meta name="twitter:title" content={titreComplet} />
     <meta name="twitter:description" content={description} />
     {imageAbsolue && <meta property="og:image" content={imageAbsolue} />}
+    {imageAbsolue && <meta property="og:image:alt" content={imageAlt} />}
+    {imageAbsolue && imageParDefaut && <meta property="og:image:width" content={String(IMAGE_PARTAGE.largeur)} />}
+    {imageAbsolue && imageParDefaut && <meta property="og:image:height" content={String(IMAGE_PARTAGE.hauteur)} />}
     {imageAbsolue && <meta name="twitter:image" content={imageAbsolue} />}
+    {imageAbsolue && <meta name="twitter:image:alt" content={imageAlt} />}
 
     {
       jsonLd && (

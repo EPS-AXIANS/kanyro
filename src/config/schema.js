@@ -1,4 +1,5 @@
 import { SITE, adresseLegale, reseauxActifs, urlAbsolue } from './site.js';
+import { offre } from '../data/offres.js';
 
 /**
  * JSON-LD de l'agence.
@@ -17,7 +18,40 @@ export function agenceJsonLd(communes = []) {
     description: SITE.baseline,
     url: SITE.url,
     email: SITE.contact.email,
+    /*
+     * Logo et image : le carré de l'icône (180 px, au-dessus des 112 px que
+     * demande Google) et l'image de partage. Le fondateur est le directeur de
+     * la publication, avec son profil LinkedIn, tous deux déjà publics.
+     */
+    logo: urlAbsolue('/apple-touch-icon.png'),
+    image: urlAbsolue('/images/partage-kanyro.jpg'),
+    founder: {
+      '@type': 'Person',
+      name: SITE.legal.directeurPublication,
+      ...(SITE.reseaux.linkedin && { sameAs: SITE.reseaux.linkedin }),
+    },
     priceRange: '€€',
+    /*
+     * L'offre, avec la fourchette réellement affichée sur la page. Pas de
+     * `valueAddedTaxIncluded` : le régime de TVA reste à confirmer à
+     * l'immatriculation (voir SITE.legal.tva).
+     */
+    makesOffer: {
+      '@type': 'Offer',
+      name: offre.nom,
+      description: offre.introduction,
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        minPrice: offre.prixMin,
+        maxPrice: offre.prixMax,
+        priceCurrency: 'EUR',
+      },
+      itemOffered: {
+        '@type': 'Service',
+        name: 'Création de site internet pour artisan du bâtiment',
+        serviceType: 'Création de site internet et référencement local',
+      },
+    },
     areaServed: communes.map((c) => ({
       '@type': 'City',
       name: typeof c === 'string' ? c : c.nom,
@@ -49,6 +83,23 @@ export function agenceJsonLd(communes = []) {
   if (reseaux.length) noeud.sameAs = reseaux;
 
   return noeud;
+}
+
+/**
+ * Les questions de l'accueil en `FAQPage`, lues dans le même fichier que la
+ * section (src/data/questions.js) : elles ne peuvent pas dire autre chose
+ * que ce que le visiteur lit.
+ */
+export function faqJsonLd(questions) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: questions.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.r },
+    })),
+  };
 }
 
 /** Fil d'Ariane — aide Google à afficher le chemin plutôt que l'URL brute. */

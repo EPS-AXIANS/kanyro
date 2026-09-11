@@ -1,0 +1,28 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<!--
+  Gabarit de l’image de partage (public/images/partage-kanyro.jpg, 1200 × 630).
+  Pour la refaire : ouvrir ce fichier dans Chromium à 1200 × 630 (les fontes sont
+  lues dans node_modules, donc après npm ci), en faire une capture, puis la
+  convertir en JPEG qualité 86. Ce n’est pas une photo : un titre, le logo et la
+  zone, rien qu’on puisse prendre pour un client ou un chantier.
+-->
+<style>
+@font-face{font-family:C;src:url(../node_modules/@fontsource-variable/cormorant/files/cormorant-latin-wght-normal.woff2) format('woff2');font-weight:300 700}
+@font-face{font-family:C;font-style:italic;src:url(../node_modules/@fontsource-variable/cormorant/files/cormorant-latin-wght-italic.woff2) format('woff2');font-weight:300 700}
+@font-face{font-family:A;src:url(../node_modules/@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2) format('woff2');font-weight:100 900}
+html,body{margin:0}
+body{width:1200px;height:630px;background:radial-gradient(120% 90% at 85% 10%, #5a1403 0%, #410c01 45%, #1a0600 100%);color:#fff;font-family:A;position:relative;overflow:hidden}
+.cadre{position:absolute;inset:44px;border:1px solid rgba(255,255,255,.18);border-radius:22px}
+.logo{position:absolute;left:92px;top:92px;display:flex;align-items:center;gap:22px}
+.logo svg{width:56px;height:56px}
+.marque{font-family:C;font-size:52px;letter-spacing:.04em}
+.titre{position:absolute;left:92px;top:220px;right:92px}
+.l1{font-family:C;font-size:58px;font-weight:400;letter-spacing:.01em;line-height:1.05}
+.l2{font-family:C;font-style:italic;font-weight:300;font-size:86px;letter-spacing:.06em;text-transform:uppercase;line-height:1.05;margin-top:6px}
+.pied{position:absolute;left:92px;bottom:92px;right:92px;display:flex;justify-content:space-between;align-items:flex-end;font-size:22px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+.pied b{font-weight:600;color:#fff;letter-spacing:.12em}
+</style></head><body><div class="cadre"></div>
+<div class="logo"><svg viewBox="0 0 256 256" fill="white"><path d="M 64 128 L 64.5 128 L 32 95 L 0 64 L 0 0 L 64 0 L 128 64 L 128 64.5 L 161 32 L 192 0 L 256 0 L 256 64 L 192 128 L 128 128 L 128 192 L 96 223 L 63.5 256 L 0 256 L 0 192 Z M 256 192 L 224 223 L 191.5 256 L 128 256 L 128 192 L 192 128 L 256 128 Z"/></svg><span class="marque">Kanyro</span></div>
+<div class="titre"><div class="l1">Création de sites internet pour</div><div class="l2">artisans du bâtiment</div></div>
+<div class="pied"><span>Arrageois · Bassin minier · Lille</span><b>kanyro.tech</b></div>
+</body></html>

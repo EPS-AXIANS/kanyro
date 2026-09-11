@@ -26,6 +26,10 @@ export const offre = {
   /* Le bas de la fourchette, pour les endroits où la fourchette entière ne
      tient pas (le premier écran). Le même nombre que `prix`, jamais un autre. */
   prixDepart: '1 900 €',
+  /* Les mêmes bornes en nombres, pour les données structurées (schema.js).
+     À changer EN MÊME TEMPS que `prix` : c'est la même fourchette. */
+  prixMin: 1900,
+  prixMax: 3900,
   mention: 'une seule fois, tout compris la première année',
   delai: '1 à 2 semaines',
 

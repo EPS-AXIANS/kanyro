@@ -9,7 +9,9 @@ import Processus from '../components/sections/Processus.astro';
 import Suivi from '../components/sections/Suivi.astro';
 import QandA from '../components/sections/QandA.astro';
 import QuoteBanner from '../components/sections/QuoteBanner.astro';
-import { agenceJsonLd } from '../config/schema.js';
+import { agenceJsonLd, faqJsonLd } from '../config/schema.js';
+import { offre } from '../data/offres.js';
+import { questions } from '../data/questions.js';
 import communes from '../data/communes.json';
 
 /*
@@ -17,14 +19,28 @@ import communes from '../data/communes.json';
  * preuve et l'appel à l'action. Tout ce qui viendrait s'ajouter avant le premier
  * client repousserait le moment de vendre.
  */
-const jsonLd = agenceJsonLd(communes);
+/*
+ * Deux blocs de données structurées : l'agence (avec son offre et son
+ * fondateur) et les questions de la page, lues dans le même fichier que la
+ * section Q&R.
+ */
+const jsonLd = [agenceJsonLd(communes), faqJsonLd(questions)];
+
+/*
+ * Le titre et la description que Google affiche.
+ *
+ * Le titre portait « Sites internet pour artisans du bâtiment » : ni
+ * « création », ni lieu, sur une page qui vend du référencement local. Il fait
+ * 58 caractères avant la marque, pour que les mots utiles tiennent dans ce que
+ * Google affiche. La description (151 caractères, sous la troncature) dit
+ * l'offre, le prix et le délai, lus dans offres.js pour ne jamais diverger de la
+ * page, et trois communes de la zone.
+ */
+const titre = 'Création de site internet pour artisans du bâtiment, Arras';
+const description = `Site internet pour artisans du bâtiment, pensé pour recevoir des demandes de devis. De ${offre.prix}, en ligne en ${offre.delai}. Arras, Lens, Lille.`;
 ---
 
-<Base
-  titre="Sites internet pour artisans du bâtiment"
-  description="Un site pensé pour recevoir des demandes de devis, et une visibilité sur votre métier et vos communes. Pour les artisans du bâtiment de l'Arrageois, du bassin minier et de la métropole lilloise."
-  jsonLd={jsonLd}
->
+<Base titre={titre} description={description} jsonLd={jsonLd}>
   <Hero />
   <Showcase />
   <Offre />
