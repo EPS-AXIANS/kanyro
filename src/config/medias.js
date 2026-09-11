@@ -55,6 +55,17 @@ export const MEDIAS = {
   heroAffiche,
   voileBas,
   fondShowcase,
+  /**
+   * La photo de la section « Qui suis-je ». VIDE tant qu'il n'y a pas de vraie
+   * photo : la section s'affiche alors sans image, jamais avec une silhouette
+   * ou un visage de banque d'images. Pour l'ajouter, déposer le fichier dans
+   * src/assets/medias/ puis :
+   *
+   *   import photoFondateur from '../assets/medias/elio-pallois.jpg';
+   *   …
+   *   photoFondateur,
+   */
+  photoFondateur: undefined,
 };
 
 /**

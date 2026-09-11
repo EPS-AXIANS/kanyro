@@ -1,0 +1,90 @@
+---
+import { ExternalLink } from 'lucide-astro';
+import Visuel from '../Visuel.astro';
+import LienTelephone from '../LienTelephone.astro';
+import { MEDIAS } from '../../config/medias.js';
+import { SITE } from '../../config/site.js';
+
+/*
+ * Qui est derrière Kanyro.
+ *
+ * Le site parlait en « je » d'un bout à l'autre sans jamais dire qui était ce
+ * « je » : aucun nom sur l'accueil, aucun visage. Pour un artisan qui s'apprête
+ * à confier deux mille euros à quelqu'un sans références, c'était la première
+ * raison de ne pas appeler.
+ *
+ * Tout ce qui est écrit ici est déjà établi ailleurs : le nom (directeur de la
+ * publication, mentions légales), la zone et le déplacement sur les chantiers
+ * (pied de page, pages métier), le délai de réponse (/contact), l'alternance
+ * (que la Q&R disait, au mauvais endroit : au moment où l'on hésite, en réponse
+ * à une question sur les délais). Elle est dite ici, où elle a sa place : dans
+ * la présentation de la personne, à côté de ce qu'elle implique concrètement.
+ *
+ * La photo n'est affichée que si `MEDIAS.photoFondateur` existe : jamais de
+ * silhouette ni de visage de banque d'images à la place.
+ */
+const photo = MEDIAS.photoFondateur;
+const linkedin = SITE.reseaux.linkedin;
+---
+
+<section id="qui-suis-je" class="bg-surface px-4 py-24 sm:px-8 md:px-16 lg:px-12 lg:py-28">
+  <div
+    class:list={[
+      'mx-auto grid max-w-5xl items-center gap-10',
+      photo && 'md:grid-cols-[16rem_1fr] md:gap-14',
+    ]}
+  >
+    {
+      photo && (
+        <Visuel
+          src={photo}
+          alt={`${SITE.legal.directeurPublication}, fondateur de ${SITE.nom}`}
+          sizes="16rem"
+          largeurs={[320, 640]}
+          class="reveal aspect-[4/5] w-full max-w-64 rounded-2xl border border-trait object-cover"
+        />
+      )
+    }
+
+    <div>
+      <p class="surtitre reveal">Qui suis-je</p>
+      <h2 class="titre-section rideau mt-6 max-w-3xl">
+        Une seule personne, du premier appel à la mise en ligne
+      </h2>
+      <div class="font-texte reveal mt-7 max-w-2xl space-y-4 text-base leading-relaxed text-texte-doux">
+        <p>
+          Je m'appelle <strong class="font-semibold text-texte">{SITE.legal.directeurPublication}</strong>,
+          et {SITE.nom}, c'est moi. Je fais le point avec vous, j'écris les textes avec vous,
+          je construis le site et je m'occupe de votre fiche Google. Vous parlez toujours à la
+          même personne.
+        </p>
+        <p>
+          J'interviens dans l'Arrageois, le bassin minier et la métropole lilloise, et je me
+          déplace sur vos chantiers pour voir votre travail.
+        </p>
+        <p>
+          {SITE.nom} est mon activité, menée en parallèle d'une alternance. Je vous réponds le
+          soir et le samedi, sous 48 heures, et le délai de votre site est écrit dans le devis.
+        </p>
+      </div>
+
+      <div class="reveal mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <LienTelephone class="bouton-secondaire inline-flex items-center justify-center gap-2.5 tracking-[0.12em]" />
+        {
+          linkedin && (
+            <a
+              href={linkedin}
+              target="_blank"
+              rel="me noopener"
+              class="font-texte inline-flex min-h-11 items-center gap-2 text-sm font-medium text-texte underline decoration-white/40 underline-offset-4 hover:decoration-white"
+            >
+              Mon profil LinkedIn
+              <span class="sr-only"> (nouvel onglet)</span>
+              <ExternalLink class="h-4 w-4" stroke-width={1.5} aria-hidden="true" />
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</section>
