@@ -113,7 +113,7 @@ export const FONCTIONS = {
   /** Pages « métier × commune » — à rallumer à l'industrialisation. */
   pagesLocales: false,
   /** Galerie de réalisations — à rallumer dès qu'un chantier est livré. */
-  realisations: false,
+  realisations: true,
 };
 
 /**

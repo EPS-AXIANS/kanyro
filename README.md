@@ -38,8 +38,13 @@ npm run build
 tar -czf ~/kanyro-sauvegarde-$(date +%Y%m%d-%H%M%S).tar.gz -C /var/www kanyro
 
 rsync -rlt --delete --no-perms --no-owner --no-group \
-      --exclude '.htaccess' dist/ /var/www/kanyro/
+      --exclude '.htaccess' --exclude 'demo/' dist/ /var/www/kanyro/
 ```
+
+⚠ **`--exclude 'demo/'` n'est pas facultatif.** `/var/www/kanyro/demo/` contient
+la démonstration du chantier de reliure, qui n'est PAS produite par ce build :
+elle vient d'un autre dépôt. Sans l'exclusion, `--delete` l'efface à chaque mise
+en ligne, et le lien « voir la maquette » de la fiche de réalisation tombe.
 
 Ajouter `--dry-run --itemize-changes` pour voir ce qui bougerait avant de le
 faire. Les trois `--no-*` laissent au répertoire ses permissions et son
@@ -50,6 +55,41 @@ utilisateur, pourrait ne plus passer.
 **`--exclude '.htaccess'` n'est pas un détail.** Caddy ne le lit pas, mais il le
 SERVIRAIT comme un fichier ordinaire : `https://kanyro.tech/.htaccess`
 publierait la politique de sécurité du site.
+
+### La démonstration du chantier de reliure
+
+`/demo/reliure-deranty/` sert le site de l'atelier de reliure, construit depuis
+son propre dépôt avec `base: '/demo/reliure-deranty'` et déposé à la main. C'est
+ce que vise le lien « voir la maquette » de la fiche de réalisation.
+
+Trois choses à savoir avant d'y toucher :
+
+- **Seules les pages publiques y sont.** Le formulaire de rendez-vous et
+  l'espace atelier de ce site-là tournent sur un Worker Cloudflare, absent ici :
+  envoyer le formulaire de la démo tombe en 404.
+- **Les douze pages portent `noindex, nofollow`**, posé sur la sortie construite.
+  Sans ça, Google indexerait le futur site de l'atelier sous le domaine de
+  l'agence et les deux se feraient concurrence le jour de la vraie mise en ligne.
+  Et surtout **pas** de `Disallow` dans `robots.txt` : il empêcherait le robot de
+  lire le `noindex`.
+- **Astro ne préfixe que ce qu'il génère.** Les `href` écrits à la main dans le
+  balisage gardent leur `/` de tête et s'échappent du sous-chemin : ils sont
+  réécrits après le build, dans le balisage comme dans les chaînes compilées
+  dans les scripts.
+
+Ces trois passes sont dans `scripts/deployer-demo-reliure.mjs`. Mettre la démo à
+jour tient donc en une commande, après avoir tiré la nouvelle version du projet
+de reliure :
+
+```bash
+git -C ~/orca/workspaces/reliure-fderanty pull
+node scripts/deployer-demo-reliure.mjs            # --sans-envoi pour s'arrêter avant la mise en ligne
+```
+
+⚠ **Le script REFUSE de déployer** s'il reste un seul chemin qui s'échapperait du
+sous-chemin, ou une page sans `noindex`. C'est délibéré : une démo dont les liens
+ramènent sur l'agence se découvre trois semaines plus tard, par hasard. Il
+sauvegarde aussi `/var/www/kanyro/demo/` avant d'écrire.
 
 > **`git push` ne déploie rien.** Aucun webhook, aucune CI — vérifié. GitHub ne
 > sert que de dépôt. La mise en ligne est l'étape ci-dessus, et elle seule.
@@ -344,7 +384,16 @@ fichier à éditer.
 - [ ] Redirection `kaniro.fr` à ajouter dans le `Caddyfile` si le domaine
       défensif est réservé — le nom sera mal orthographié à l'oral (« Kaniro »).
       Mieux vaut une redirection 301 qu'un second site à maintenir.
-- [ ] Livrer un chantier de référence avant de pousser le site.
+- [x] Chantier de référence — l'atelier de reliure Frédérique Deranty, publié
+      dans `/realisations`. ⚠ La fiche dit qu'il s'agit d'une **maquette livrée
+      et pas encore en ligne**, et la section « Preuve » de l'accueil le répète :
+      c'est ce qui la distingue d'une fausse référence, et ça ne tient que tant
+      que les deux textes disent la même chose. Le jour de la mise en ligne,
+      renseigner `enLigne` et la date dans
+      `src/content/realisations/atelier-reliure-deranty.md` — la mention
+      « maquette livrée en <mois> » bascule alors d'elle-même en
+      « mis en ligne en <mois> », et le lien « voir le site » apparaît.
+- [ ] Accord de l'artisane pour publier son nom sur le site de l'agence.
 
 ---
 

@@ -62,6 +62,16 @@ const PAS_CASCADE = 90;
  */
 const ACTIVATION_FRISE = 0.6;
 
+/**
+ * Profondeur de la bosse de l'arc de raccord, en pourcentage de sa LARGEUR — et
+ * non de sa hauteur. Exprimée ainsi, la courbe garde la même allure sur un
+ * téléphone et sur un grand écran ; 0 donnerait une arête droite.
+ */
+const COURBE_ARC = 10;
+
+/** Côté du repère carré dans lequel le chemin de l'arc est tracé. */
+const REPERE_ARC = 100;
+
 /* ------------------------------------------------------------------------- */
 /* Défilement : une seule boucle pour tout le monde                           */
 /* ------------------------------------------------------------------------- */
@@ -1196,6 +1206,287 @@ function initVideoHero() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* L'arc de raccord entre deux sections                                       */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Deux aplats de couleur qui se suivent — le brique de l'offre, le noir de la
+ * page — se touchent sur une droite qui traverse tout l'écran. L'arc remplace
+ * cette droite par une courbe qui monte avec le défilement : le noir de la
+ * section d'après vient recouvrir la fin de la section brique, en avançant par
+ * le milieu.
+ *
+ * ---- Ce qui vient d'ailleurs, et ce qui a été refait ----
+ *
+ * La forme et son pilotage viennent de la ressource Osmo « Arc Scroll
+ * Transition » : un chemin à quatre points dont l'arête remonte, avec un point
+ * de contrôle qui s'écarte à mi-course et revient à plat aux deux bouts.
+ *
+ * LE MOTEUR est refait, comme pour le curseur magnétique et le libellé des
+ * boutons. La ressource repose sur GSAP et son greffon ScrollTrigger servis par
+ * jsDelivr — donc bloqués par `script-src 'self'`. Le suivi passe par la boucle
+ * de défilement commune de ce fichier, et la course est calculée à la main.
+ *
+ * ---- La course, qui est le seul vrai réglage ----
+ *
+ * Elle commence quand le bas de la section hôte atteint le bas de la fenêtre,
+ * et se termine à l'arrivée de l'élément désigné par `data-arc-fin`.
+ *
+ * Sa longueur décide de la VITESSE. L'arête remonte pour deux raisons à la
+ * fois : elle se remplit, et sa boîte défile avec la page. Elle avance donc de
+ * (1 + hauteur de la boîte / longueur de la course) fois la vitesse du
+ * défilement. Sur une course d'un écran — le défaut de la ressource, dont les
+ * sections font une hauteur d'écran — ça fait deux fois trop vite, et le bas de
+ * la section est avalé d'un coup. Visée sur la Q&R, deux sections plus bas, la
+ * course dure environ trois écrans : la courbe monte alors à peine plus vite
+ * que le texte qu'elle recouvre.
+ *
+ * ⚠ L'arc finit de TRAVERSER L'ÉCRAN bien avant sa fin de course, et c'est
+ * normal : une fois l'arête sortie par le haut, il ne reste plus un pixel de
+ * brique à l'écran et le reste du remplissage se joue hors champ. Chercher à
+ * faire coïncider les deux raccourcirait la course, donc accélérerait la
+ * montée — c'est-à-dire exactement le défaut qu'on vient d'écarter.
+ *
+ * ---- Les deux sens ----
+ *
+ * Par défaut l'arc RECOUVRE : il est collé au bas de sa section, se remplit du
+ * bas vers le haut, et sa bosse pointe vers le haut. C'est la couleur de la
+ * section suivante qui monte.
+ *
+ * `data-arc-mode="envers"` le RETOURNE : il est collé au HAUT de sa section,
+ * part plein et se vide vers le haut, et sa bosse pointe vers le bas. C'est
+ * alors la couleur de la section PRÉCÉDENTE qui s'attarde sur celle-ci avant
+ * de se retirer. Même mécanisme, courbure opposée — les deux modes de la
+ * ressource, `cover` et `reveal`.
+ *
+ * ⚠ Un arc à l'envers MASQUE du contenu le temps de se retirer, là où l'autre
+ * ne recouvre que ce qu'on vient de lire. Sa course doit donc rester courte :
+ * laissé sur le défaut d'un écran, il a fini de dégager pile quand le haut de
+ * la section atteint le haut de la fenêtre. Lui donner un `data-arc-fin`
+ * lointain le ferait traîner sur le texte, ce qui n'est plus un raccord.
+ */
+function initArcTransition() {
+  const hotes = [...document.querySelectorAll('[data-arc]')];
+  if (!hotes.length) return null;
+
+  /*
+   * Mouvement réduit : aucune forme n'est construite, et le balisage reste la
+   * boîte vide qu'il est. Le raccord redevient la coupure droite d'avant, ce
+   * qui est un défaut d'ornement et rien d'autre.
+   */
+  if (MOUVEMENT_DOUX.matches) return null;
+
+  const NS_SVG = 'http://www.w3.org/2000/svg';
+  const arrondir = (v) => Math.round(v * 100) / 100;
+
+  const arcs = hotes.map((hote) => {
+    const svg = document.createElementNS(NS_SVG, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${REPERE_ARC} ${REPERE_ARC}`);
+    // La forme s'étire à sa boîte, quelles que soient ses proportions ; c'est
+    // `dessiner` qui rétablit celles de la courbe.
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+
+    const trace = document.createElementNS(NS_SVG, 'path');
+    svg.append(trace);
+    hote.append(svg);
+
+    const courbe = Number.parseFloat(hote.dataset.arcCourbe);
+
+    return {
+      hote,
+      svg,
+      trace,
+      section: hote.closest('section') ?? hote.parentElement,
+      fin: hote.dataset.arcFin
+        ? document.querySelector(hote.dataset.arcFin)
+        : null,
+      courbe: Number.isFinite(courbe) ? courbe : COURBE_ARC,
+      envers: hote.dataset.arcMode === 'envers',
+    };
+  });
+
+  const dessiner = (arc, p) => {
+    const boite = arc.hote.getBoundingClientRect();
+
+    /*
+     * Le repère est carré, la boîte ne l'est pas, et l'étirement est libre :
+     * une profondeur donnée en pourcentage de la largeur doit être ramenée dans
+     * l'échelle verticale. Sans ce rapport, la bosse s'aplatirait à mesure que
+     * la fenêtre s'élargit.
+     */
+    const profondeur =
+      boite.height > 0 ? arc.courbe * (boite.width / boite.height) : 0;
+
+    // Nulle aux deux bouts, maximale à mi-course : la section commence et finit
+    // de se remplir à plat, sans que la courbe ait à se résorber d'un coup.
+    const bosse = profondeur * Math.sin(p * Math.PI);
+
+    /*
+     * L'arête est à la même hauteur dans les deux sens — c'est ce qui reste de
+     * part et d'autre qui change. À l'endroit, la matière pend sous l'arête et
+     * s'accroche au bas du repère ; à l'envers, elle est au-dessus et s'accroche
+     * au haut. D'où le seul bord à choisir, et le seul signe à retourner.
+     */
+    const bord = arc.envers ? 0 : REPERE_ARC;
+    const arete = arrondir(REPERE_ARC - REPERE_ARC * p);
+
+    // Le sommet d'une quadratique est à mi-chemin de son point de contrôle :
+    // celui-ci s'écarte donc du DOUBLE de la profondeur voulue.
+    const controle = arrondir(arc.envers ? arete + bosse * 2 : arete - bosse * 2);
+
+    arc.trace.setAttribute(
+      'd',
+      `M0 ${bord} L0 ${arete} Q${REPERE_ARC / 2} ${controle} ${REPERE_ARC} ${arete} L${REPERE_ARC} ${bord} Z`
+    );
+  };
+
+  const placer = () => {
+    for (const arc of arcs) {
+      const boite = arc.section.getBoundingClientRect();
+
+      /*
+       * Le bord d'où part la course. À l'endroit c'est le BAS de la section :
+       * l'arc raccorde avec ce qui vient après, il n'a rien à faire tant que la
+       * fin de la section n'est pas en vue. À l'envers c'est son HAUT, puisque
+       * le raccord se joue à l'entrée.
+       */
+      const depart = arc.envers ? boite.top : boite.bottom;
+
+      /*
+       * `fin.top - depart` est une distance de MISE EN PAGE : les deux boîtes
+       * défilent ensemble, leur écart ne dépend donc pas de l'endroit où on se
+       * trouve dans la page. La relire à chaque cadre coûte une mesure de plus
+       * et dispense de la réviser au redimensionnement, à l'arrivée des fontes
+       * ou à l'ouverture d'une réponse de la Q&R.
+       *
+       * Le plancher à 1 évite la division par zéro le temps qu'une mise en page
+       * incomplète se stabilise ; sans cible, on retombe sur la course d'un
+       * écran de la ressource.
+       */
+      const portee = arc.fin
+        ? Math.max(arc.fin.getBoundingClientRect().top - depart, 1)
+        : window.innerHeight;
+
+      const brut = (window.innerHeight - depart) / portee;
+      dessiner(arc, Math.min(Math.max(brut, 0), 1));
+    }
+  };
+
+  placer();
+
+  auDefilement.push(placer);
+  auRedimensionnement.push(placer);
+
+  return () => {
+    for (const arc of arcs) arc.svg.remove();
+  };
+}
+
+/* ------------------------------------------------------------------------- */
+/* Le défilement amorti                                                       */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Lenis remplace le défilement du navigateur par une interpolation : la molette
+ * ne saute plus d'un cran à l'autre, elle pousse une valeur qui rattrape sa
+ * cible à chaque cadre.
+ *
+ * C'est la seule ressource du lot qui arrive ENTIÈRE, sans réécriture — elle ne
+ * dépend de rien d'autre qu'elle-même, et son fichier tient dans public/js
+ * comme effets.js. Seuls le chargement et les trois points ci-dessous sont de
+ * notre fait.
+ *
+ * ---- Pourquoi la position réelle ne change pas ----
+ *
+ * Lenis écrit `window.scrollY`, il ne transforme pas la page. Les événements
+ * `scroll` continuent donc d'être émis, et TOUT ce qui vit dans ce fichier — la
+ * frise, la parallaxe, la barre, les arcs — continue de fonctionner sans une
+ * ligne de changement. C'est ce qui distingue cette bibliothèque des défilements
+ * dits « virtuels », qui déplacent un conteneur et cassent au passage toute
+ * mesure faite sur la fenêtre.
+ *
+ * ---- L'instance vit hors du cycle des pages ----
+ *
+ * Elle est créée une fois, au chargement du module, et jamais démontée :
+ * `<ClientRouter />` remplace le <body>, pas la fenêtre. La reconstruire à
+ * chaque navigation empilerait des boucles d'animation concurrentes, toutes
+ * occupées à écrire la même position.
+ */
+let defilement = null;
+
+function initDefilementAmorti() {
+  /*
+   * Mouvement réduit : rien du tout. Amortir le défilement, c'est ajouter du
+   * mouvement là où le visiteur en demande le moins — et contrairement au reste
+   * du fichier, la dégradation est ici parfaite, le navigateur reprenant
+   * exactement la main.
+   */
+  if (MOUVEMENT_DOUX.matches) return;
+
+  // Le fichier peut manquer (mis en cache de travers, bloqué, renommé). La page
+  // défile alors normalement ; c'est un agrément en moins, pas une panne.
+  if (typeof globalThis.Lenis !== 'function') return;
+
+  defilement = new globalThis.Lenis({ autoRaf: true });
+
+  /*
+   * ---- Les ancres, qu'il faut reprendre à la main ----
+   *
+   * `scroll-behavior: smooth` (global.css) et Lenis écrivent la même position à
+   * chaque cadre : laissés ensemble, ils se la disputent et le saut devient
+   * saccadé. Lenis neutralise donc la propriété — et un clic sur `#preuve`
+   * arriverait d'un coup, sans transition, ce qui serait une régression.
+   *
+   * Le clic est donc rendu à `scrollTo`, qui suit l'amortissement de l'instance.
+   * Deux ancres seulement en dépendent aujourd'hui : le lien du tarif de
+   * lancement, et le lien d'évitement en tête de page.
+   */
+  document.addEventListener('click', (evenement) => {
+    if (evenement.defaultPrevented || evenement.button !== 0) return;
+    // Ouvrir dans un onglet, télécharger, ouvrir dans une fenêtre : ces gestes
+    // ne défilent pas la page courante, ils ne nous regardent pas.
+    if (
+      evenement.metaKey ||
+      evenement.ctrlKey ||
+      evenement.shiftKey ||
+      evenement.altKey
+    ) {
+      return;
+    }
+
+    const depart = evenement.target;
+    const lien =
+      depart instanceof Element ? depart.closest('a[href^="#"]') : null;
+    if (!lien) return;
+
+    const id = decodeURIComponent(lien.getAttribute('href').slice(1));
+    const cible = id ? document.getElementById(id) : null;
+    if (!cible) return;
+
+    evenement.preventDefault();
+    defilement.scrollTo(cible);
+    history.pushState(null, '', `#${id}`);
+
+    /*
+     * ⚠ LE FOCUS, À LA MAIN, ET C'EST LA RAISON D'ÊTRE DE CES QUATRE LIGNES.
+     *
+     * Un saut d'ancre natif ne fait pas que défiler : il déplace le focus sur
+     * la cible. C'est tout l'intérêt du lien « Aller au contenu » — sans lui,
+     * la tabulation suivante repartirait du haut de la page et le lien
+     * d'évitement ne servirait plus à rien, alors même que l'écran, lui, aurait
+     * l'air d'avoir bougé. Une panne invisible à l'œil et totale au clavier.
+     *
+     * `tabindex="-1"` parce qu'un <main> ou une <section> n'est pas focusable
+     * par défaut ; `preventScroll` parce que c'est Lenis qui défile, et que le
+     * focus rendrait le saut instantané qu'on vient d'éviter.
+     */
+    if (!cible.hasAttribute('tabindex')) cible.setAttribute('tabindex', '-1');
+    cible.focus({ preventScroll: true });
+  });
+}
+
+/* ------------------------------------------------------------------------- */
 /* Cycle de vie                                                               */
 /* ------------------------------------------------------------------------- */
 
@@ -1222,6 +1513,7 @@ function initialiser() {
     initValidationDevis(),
     initRevelations(),
     initFrise(),
+    initArcTransition(),
     initBarre(),
     initSurvolDirectionnel(),
     // ⚠ `initBoutonsAnimes` REMPLACE le contenu des boutons qu'il découpe
@@ -1234,6 +1526,12 @@ function initialiser() {
     initVideoHero(),
   ].filter(Boolean);
 }
+
+/*
+ * Le défilement amorti, hors du cycle des pages : une fois, et pour de bon.
+ * Voir l'en-tête de `initDefilementAmorti`.
+ */
+initDefilementAmorti();
 
 /*
  * L'appel direct couvre le premier chargement quoi qu'il arrive. `astro:page-load`
