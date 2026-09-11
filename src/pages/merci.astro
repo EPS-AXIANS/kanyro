@@ -1,5 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
+import LienTelephone from '../components/LienTelephone.astro';
+import { SITE } from '../config/site.js';
+
+/*
+ * Après l'envoi : ce qui va se passer, et ce que le visiteur peut préparer.
+ *
+ * La page remerciait et renvoyait à l'accueil, rien de plus, au moment précis
+ * où l'artisan est le plus disposé à avancer. Elle dit maintenant les trois
+ * choses utiles, sans rien promettre de plus que ce qui est tenu ailleurs : la
+ * réponse sous 48 heures (/contact), l'accusé de réception envoyé par
+ * contact.php, et les éléments que le déroulement demande de toute façon
+ * (photos de chantiers finis, communes où il travaille).
+ */
 ---
 
 <Base
@@ -7,21 +20,51 @@ import Base from '../layouts/Base.astro';
   description="Votre demande de devis est bien arrivée."
   noindex={true}
 >
-  <section class="contenu flex min-h-[80vh] flex-col justify-center py-24 text-center">
-    <p class="surtitre">C'est envoyé</p>
-    <h1 class="titre-page mx-auto mt-6 max-w-3xl">
-      Merci, j'ai bien reçu votre demande
-    </h1>
-    <p
-      class="font-texte mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux"
-    >
-      Je vous réponds sous 48 heures, en soirée ou le samedi. Si c'est urgent,
-      répondez directement à l'email que vous allez recevoir.
-    </p>
+  <section class="contenu sous-navbar pb-24">
+    <div class="mx-auto max-w-2xl text-center">
+      <p class="surtitre">C'est envoyé</p>
+      <h1 class="titre-page mt-6">Merci, votre demande est bien arrivée</h1>
+      <p class="font-texte mx-auto mt-8 max-w-xl text-base leading-relaxed text-texte-doux">
+        Je vous réponds sous 48 heures, le soir ou le samedi. Un email de confirmation
+        vient de partir vers l'adresse que vous avez indiquée ; s'il n'arrive pas,
+        regardez dans les courriers indésirables.
+      </p>
+    </div>
+
+    <div class="carte mx-auto mt-14 max-w-2xl p-6 text-left sm:p-8">
+      <h2 class="font-titre text-2xl tracking-wide sm:text-3xl">En attendant, si vous voulez avancer</h2>
+      <ol class="font-texte mt-6 space-y-5 text-base leading-relaxed text-texte-doux">
+        <li class="flex gap-4">
+          <span class="font-texte chiffres grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal-vif/60 text-sm text-signal-vif" aria-hidden="true">1</span>
+          <span>
+            <strong class="font-semibold text-texte">Surveillez vos emails.</strong> Ma réponse
+            partira de {SITE.contact.email}.
+          </span>
+        </li>
+        <li class="flex gap-4">
+          <span class="font-texte chiffres grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal-vif/60 text-sm text-signal-vif" aria-hidden="true">2</span>
+          <span>
+            <strong class="font-semibold text-texte">Rassemblez quelques photos</strong> de vos
+            chantiers finis, même prises au téléphone. C'est ce qui vendra votre travail.
+          </span>
+        </li>
+        <li class="flex gap-4">
+          <span class="font-texte chiffres grid h-8 w-8 shrink-0 place-items-center rounded-full border border-signal-vif/60 text-sm text-signal-vif" aria-hidden="true">3</span>
+          <span>
+            <strong class="font-semibold text-texte">Notez les communes où vous travaillez</strong> et
+            les chantiers que vous voulez voir arriver. On partira de là.
+          </span>
+        </li>
+      </ol>
+      <p class="font-texte mt-8 border-t border-trait pt-6 text-base text-texte-doux">
+        Pressé ? Appelez-moi :{' '}
+        <LienTelephone icone={false} class="font-semibold text-texte underline underline-offset-4" />
+      </p>
+    </div>
 
     <div class="mt-11 flex flex-wrap justify-center gap-4">
       <a href="/" class="bouton-primaire">Retour à l'accueil</a>
-      <a href="/#offre" class="bouton-secondaire">Revoir l'offre</a>
+      <a href="/realisations" class="bouton-secondaire">Voir la réalisation</a>
     </div>
   </section>
 </Base>

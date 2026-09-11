@@ -102,10 +102,11 @@ const {
 const imageParDefaut = image === IMAGE_PARTAGE.chemin;
 
 /*
- * Sur /contact, la barre d'action mobile ne propose que l'appel : son bouton de
- * devis mènerait à la page où l'on se trouve déjà.
+ * Sur /contact et /merci, la barre d'action mobile ne propose que l'appel : son
+ * bouton de devis mènerait à la page où l'on se trouve déjà, ou le proposerait
+ * à quelqu'un qui vient de l'envoyer.
  */
-const surContact = cheminPropre(Astro.url.pathname) === '/contact';
+const sansDevis = ['/contact', '/merci'].includes(cheminPropre(Astro.url.pathname));
 
 /*
  * Tant que la bêta tourne sur le domaine personnel, AUCUNE page ne doit entrer
@@ -285,7 +286,7 @@ const csp = [
     </main>
 
     <Footer />
-    <BarreAction avecDevis={!surContact} />
+    <BarreAction avecDevis={!sansDevis} />
 
     {/*
       Empaqueté par le build : minifié, haché, publié dans /_astro/.
