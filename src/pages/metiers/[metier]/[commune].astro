@@ -29,7 +29,7 @@ import communes from '../../../data/communes.json';
 export function getStaticPaths() {
   // Désactivé tant qu'il n'y a pas de premier client : voir FONCTIONS dans
   // src/config/site.js. Le code reste, seules les pages ne sont pas générées.
-  if (!FONCTIONS.pagesLocales) return [];
+  if (!FONCTIONS.pagesCommunes) return [];
 
   const chemins = [];
 

@@ -9,12 +9,12 @@ import communes from '../../data/communes.json';
 /*
  * Route attrape-tout plutôt que `index.astro` : une page statique est générée
  * quoi qu'il arrive, alors qu'une route dynamique peut ne rien produire. C'est
- * ce qui permet à cette page d'obéir au même interrupteur que les pages
- * « métier × commune » qu'elle liste — sinon elle survivrait seule, en pointant
+ * ce qui permet à cette page d'obéir au même interrupteur que les pages métier
+ * qu'elle liste (`pagesMetiers`) — sinon elle survivrait seule, en pointant
  * vers des adresses inexistantes.
  */
 export function getStaticPaths() {
-  if (!FONCTIONS.pagesLocales) return [];
+  if (!FONCTIONS.pagesMetiers) return [];
   return [{ params: { page: undefined } }];
 }
 
@@ -35,7 +35,7 @@ const jsonLd = filAriane([
       Chaque métier se cherche différemment
     </h1>
     <p
-      class="font-texte reveal mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-texte-doux [--retard:160ms]"
+      class="font-texte reveal mx-auto mt-8 max-w-2xl text-base leading-relaxed text-texte-doux [--retard:160ms]"
     >
       Une fuite se cherche à 22 h sur un téléphone. Une pompe à chaleur se compare
       pendant trois semaines. Un site qui ignore cette différence rate la moitié de
@@ -50,7 +50,7 @@ const jsonLd = filAriane([
           <li class="carte reveal p-8">
             <h2 class="font-titre text-3xl tracking-wide">{m.nom}</h2>
             <p class="font-texte mt-3 text-sm text-signal-vif">{m.accroche}</p>
-            <p class="font-texte mt-5 text-xs leading-relaxed text-texte-doux">
+            <p class="font-texte mt-5 text-sm leading-relaxed text-texte-doux">
               {m.contexte}
             </p>
 
@@ -72,7 +72,7 @@ const jsonLd = filAriane([
       Où j'interviens
     </h2>
     <p
-      class="font-texte reveal mx-auto mt-5 max-w-xl text-xs leading-relaxed text-texte-doux"
+      class="font-texte reveal mx-auto mt-5 max-w-xl text-sm leading-relaxed text-texte-doux"
     >
       Je me déplace sur vos chantiers. Au-delà de ce périmètre on peut travailler à
       distance, mais autant être honnête : je fais de meilleures photos quand je suis

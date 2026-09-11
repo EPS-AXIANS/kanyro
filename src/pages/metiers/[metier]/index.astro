@@ -5,11 +5,12 @@ import { FONCTIONS } from '../../../config/site.js';
 import { filAriane } from '../../../config/schema.js';
 import metiers from '../../../data/metiers.json';
 import communes from '../../../data/communes.json';
+import { offre } from '../../../data/offres.js';
 
 export function getStaticPaths() {
-  // Désactivé tant qu'il n'y a pas de premier client : voir FONCTIONS dans
-  // src/config/site.js. Le code reste, seules les pages ne sont pas générées.
-  if (!FONCTIONS.pagesLocales) return [];
+  // Voir FONCTIONS dans src/config/site.js : les pages métier ont leur propre
+  // interrupteur, séparé de celui des pages par commune.
+  if (!FONCTIONS.pagesMetiers) return [];
 
   return metiers.map((metier) => ({
     params: { metier: metier.slug },
@@ -23,7 +24,7 @@ const { metier } = Astro.props;
  * Sans article dans le titre : la recherche réelle est « site internet couvreur »,
  * pas « site internet pour un couvreur ». Le h1 garde la tournure naturelle.
  */
-const titrePage = `Site internet pour ${metier.nom.toLowerCase()}`;
+const titrePage = `Site internet pour ${metier.nom.toLowerCase()}, Arras et Lille`;
 
 const jsonLd = filAriane([
   { nom: 'Accueil', chemin: '/' },
@@ -45,12 +46,12 @@ const jsonLd = filAriane([
 
   <section class="contenu pb-20">
     <h1 class="titre-page reveal max-w-4xl">
-      Un site pour {metier.article} {metier.nom.toLowerCase()}
+      Un site internet pour {metier.article} {metier.nom.toLowerCase()}
     </h1>
     <p class="font-titre reveal mt-7 max-w-2xl text-xl text-signal-vif [--retard:80ms] sm:text-2xl">
       {metier.accroche}
     </p>
-    <p class="font-texte reveal mt-6 max-w-2xl text-sm leading-relaxed text-texte-doux [--retard:160ms]">
+    <p class="font-texte reveal mt-6 max-w-2xl text-base leading-relaxed text-texte-doux [--retard:160ms]">
       {metier.contexte}
     </p>
     <a href="/contact" data-bouton-anime class="bouton-primaire reveal mt-10 [--retard:240ms]">
@@ -67,7 +68,7 @@ const jsonLd = filAriane([
         <ul class="mt-8 space-y-4">
           {
             metier.prestations.map((p) => (
-              <li class="font-texte reveal flex gap-3 text-sm text-white/70">
+              <li class="font-texte reveal flex gap-3 text-[0.9375rem] text-white/80">
                 <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-signal-vif" />
                 <span>{p}</span>
               </li>
@@ -94,10 +95,10 @@ const jsonLd = filAriane([
           }
         </ul>
 
-        <p class="font-texte reveal mt-9 border-l border-signal pl-5 text-xs leading-relaxed text-white/60">
+        <p class="font-texte reveal mt-9 border-l border-signal pl-5 text-sm leading-relaxed text-white/60">
           Chantier moyen dans votre métier : <strong class="text-white">{metier.panierMoyen}</strong>.
-          C'est ce qui rend le calcul simple, quelques chantiers gagnés grâce au site
-          le remboursent.
+          C'est l'ordre de grandeur à comparer au prix du site,{' '}
+          <span class="whitespace-nowrap">{offre.prix}</span>, payé une seule fois.
         </p>
       </div>
     </div>
@@ -105,29 +106,46 @@ const jsonLd = filAriane([
 
   <section class="contenu py-20">
     <h2 class="font-titre reveal text-3xl tracking-wide sm:text-4xl">Votre secteur</h2>
-    <p class="font-texte reveal mt-5 max-w-2xl text-sm leading-relaxed text-texte-doux">
-      Le référencement local se joue commune par commune. Voici celles que je couvre
-      pour votre métier.
+    <p class="font-texte reveal mt-5 max-w-2xl text-base leading-relaxed text-texte-doux">
+      Le référencement local se joue commune par commune. Voici celles où
+      j'interviens pour votre métier.
     </p>
-    <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {
-        communes.map((c) => (
-          <li class="reveal">
-            <a
-              href={`/metiers/${metier.slug}/${c.slug}`}
-              class="carte flex h-full flex-col justify-between p-6 no-underline transition-colors duration-500 hover:border-white/30 hover:bg-surface-haute"
-            >
-              <span class="font-titre text-xl tracking-wide">
-                {metier.nom} à {c.nom}
-              </span>
-              <span class="font-texte mt-2 text-xs tracking-[0.2em] text-texte-faible uppercase">
-                {c.secteur}
-              </span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
+    {/*
+      Des cartes cliquables seulement si les pages par commune existent : elles
+      sont éteintes (FONCTIONS.pagesCommunes), et 36 liens vers des pages
+      absentes seraient 36 erreurs 404. En attendant, de simples pastilles :
+      douze cartes pleines faisaient plus de 1 000 px sur un téléphone pour
+      dire douze noms.
+    */}
+    {
+      FONCTIONS.pagesCommunes ? (
+        <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {communes.map((c) => (
+            <li class="reveal">
+              <a
+                href={`/metiers/${metier.slug}/${c.slug}`}
+                class="carte flex h-full flex-col justify-between p-6 no-underline transition-colors duration-500 hover:border-white/30 hover:bg-surface-haute"
+              >
+                <span class="font-titre text-xl tracking-wide">
+                  {metier.nom} à {c.nom}
+                </span>
+                <span class="font-texte mt-2 text-xs tracking-[0.2em] text-texte-faible uppercase">
+                  {c.secteur}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul class="reveal mt-8 flex flex-wrap gap-2.5">
+          {communes.map((c) => (
+            <li class="font-texte rounded-full border border-trait px-4 py-2 text-sm text-texte-doux">
+              {c.nom}
+            </li>
+          ))}
+        </ul>
+      )
+    }
   </section>
 
   <Cta />

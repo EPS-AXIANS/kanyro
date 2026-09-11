@@ -177,14 +177,26 @@ export function champsLegauxManquants() {
  * moment de vendre.
  *
  * Le code des pages locales et des réalisations n'est pas supprimé pour autant,
- * seulement désactivé : le jour où le premier ou le deuxième chantier est livré,
- * ces deux booléens suffisent à tout réactiver. `getStaticPaths` renvoie une
- * liste vide quand l'interrupteur est à false, donc aucune page n'est générée et
- * aucun lien n'est affiché.
+ * seulement désactivé : chaque booléen suffit à rallumer sa partie.
+ * `getStaticPaths` renvoie une liste vide quand l'interrupteur est à false,
+ * donc aucune page n'est générée et aucun lien n'est affiché.
+ *
+ * ---- Pages métier et pages par commune, séparées ----
+ *
+ * Elles partageaient un seul interrupteur, `pagesLocales` : impossible de
+ * publier les six pages métier (déjà écrites dans metiers.json, et seules à
+ * pouvoir se placer sur « site internet couvreur », « site internet
+ * plombier »…) sans publier en même temps les 36 pages métier × commune.
+ * Celles-ci sont le principal risque du site : des pages qui ne diffèrent que
+ * par un toponyme sont ce que Google appelle des doorway pages, et la sanction
+ * frappe le domaine entier (voir [commune].astro et le README).
  */
 export const FONCTIONS = {
-  /** Pages « métier × commune » — à rallumer à l'industrialisation. */
-  pagesLocales: false,
+  /** Les six pages métier et leur index /metiers. */
+  pagesMetiers: true,
+  /** Pages « métier × commune » — à ne rallumer que commune par commune, avec
+   *  un contexte local vrai et propre à chacune. */
+  pagesCommunes: false,
   /** Galerie de réalisations — à rallumer dès qu'un chantier est livré. */
   realisations: true,
 };
