@@ -104,64 +104,14 @@ const colonneDroite = [
  * Une cascade suppose que tout le groupe entre d'un coup. Cette grille fait deux
  * écrans de haut : c'est exactement le cas où elle n'a pas de sens.
  *
- * Les paires ne montent pas ensemble pour autant, et ce n'est pas un hasard :
- * aucun bloc de droite n'est à la hauteur d'un bloc de gauche (voir le
- * quinconce, plus bas), donc chacun entre dans le champ à son moment. C'est la
- * mise en page qui produit l'alternance, gratuitement et à toutes les vitesses
- * de défilement.
+ * Les paires ne montent pas ensemble pour autant, et ce n'est pas un hasard : la
+ * colonne de droite porte `md:mt-24`, donc ses articles sont décalés de six rem
+ * vers le bas et entrent après leurs voisins de gauche. C'est la mise en page
+ * qui produit l'alternance, gratuitement et à toutes les vitesses de défilement.
  *
  * (Le décalage n'a d'ailleurs jamais eu lieu : `[animation-delay:…]` était
  * écrasé par le raccourci `animation:` de `.reveal.revealed`. Voir global.css.)
  */
-
-/*
- * ---- Le quinconce, et pourquoi il est irrégulier ----
- *
- * Il tenait jusqu'ici en un seul décalage : la colonne de droite descendait de
- * six rem. Ça se lisait au premier coup d'œil comme une grille décalée d'un
- * cran — et les deux dernières questions finissaient côte à côte, à trois
- * pixels près, ce qui annulait le décalage là où l'œil s'arrête.
- *
- * Chaque bloc a donc son propre écart : un retrait d'un côté ou de l'autre, un
- * espace au-dessus, tous différents, sans motif qui revienne. Les amplitudes
- * restent petites — de 3 à 11 % de la colonne, de 1,5 à 3,5 rem. Plus
- * grandes, le désordre se lirait comme une intention ; plus petites, comme une
- * erreur d'alignement.
- *
- * Les espacements verticaux ne sont pas pris au jugé. Sur les hauteurs de blocs
- * relevées à 800, 1 024, 1 180, 1 280 et 1 440 px de large, ce jeu est celui qui
- * écarte le plus les blocs d'en face tout en laissant de l'air aux deux
- * colonnes : aucun haut ni aucun bas ne tombe à moins de 60 px de son
- * vis-à-vis, et les deux colonnes ne finissent pas ensemble. Au-delà de
- * 1 440 px la grille est plafonnée, rien ne bouge plus.
- *
- * ⚠ Ces marges hautes NE S'AJOUTENT PAS à l'espacement `space-y` des colonnes :
- * deux marges verticales voisines fusionnent, la plus grande l'emporte. Un
- * `md:mt-4` ne fait donc rien au-delà de 1 024 px, où l'espacement de base vaut
- * déjà 16 px. C'est d'ailleurs ce qui avait faussé le premier calcul, qui les
- * additionnait.
- *
- * ⚠ Des MARGES, pas des `translate`. Une translation ne déplace que le dessin :
- * les espacements resteraient réguliers en dessous, et les blocs finiraient par
- * se chevaucher. Une marge refait la mise en page, et le retrait resserre le
- * texte, ce qui change ses retours à la ligne. Les hauteurs varient alors
- * d'elles-mêmes, et le décalage avec elles.
- *
- * Rien sous `md` : une seule colonne n'a pas de quinconce, et chaque pixel de
- * largeur y sert la lecture.
- *
- * ⚠ C'est la longueur des réponses qui fixe les hauteurs, pas ces valeurs
- * seules. Après toute question ajoutée, retirée ou réécrite, vérifier au rendu
- * qu'aucun bloc ne se retrouve à la hauteur de son voisin d'en face.
- */
-const decalagesGauche = [
-  'md:mr-[6%]',
-  'md:ml-[9%] md:mt-12',
-  'md:mr-[3%] md:mt-14',
-  'md:ml-[5%] md:mt-10',
-];
-/* La colonne elle-même descend de `md:mt-20`, posé sur son conteneur. */
-const decalagesDroite = ['md:ml-[4%]', 'md:mr-[11%] md:mt-6', 'md:ml-[7%] md:mt-9'];
 ---
 
 <div class="relative">
@@ -196,13 +146,10 @@ const decalagesDroite = ['md:ml-[4%]', 'md:mr-[11%] md:mt-6', 'md:ml-[7%] md:mt-
     >
       <div class="space-y-3 lg:space-y-4">
         {
-          colonneGauche.map((item, i) => (
+          colonneGauche.map((item) => (
             <article
               data-survol-item
-              class:list={[
-                'reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6',
-                decalagesGauche[i],
-              ]}
+              class="reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6"
             >
               {/*
                 La tuile est SOUS le texte et ne prend aucun clic : un calque
@@ -240,15 +187,12 @@ const decalagesDroite = ['md:ml-[4%]', 'md:mr-[11%] md:mt-6', 'md:ml-[7%] md:mt-
         }
       </div>
 
-      <div class="space-y-3 md:mt-20 lg:space-y-4">
+      <div class="space-y-3 md:mt-24 lg:space-y-4">
         {
-          colonneDroite.map((item, i) => (
+          colonneDroite.map((item) => (
             <article
               data-survol-item
-              class:list={[
-                'reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6',
-                decalagesDroite[i],
-              ]}
+              class="reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6"
             >
               {/*
                 La tuile est SOUS le texte et ne prend aucun clic : un calque
