@@ -18,74 +18,124 @@ import Visuel from '../Visuel.astro';
  * seul chantier, et ne se paie qu'une fois — et aucun nombre de chantiers
  * gagnés, que personne ne peut promettre. Le prix vient de offres.js.
  *
- * ---- Le décor ----
+ * ---- Le décor : le nuage, la colombe, et ce qui a changé ----
  *
- * Un nuage peint de 1,8 Mo était posé à cheval sur la couture avec le premier
- * écran, pour la cacher. Il remontait sur 530 px à 1 440 de large, jusque sous
- * le titre et le bouton du hero, et c'était l'élément le plus lourd de la page
- * (celui dont le chargement mesurait 22,6 s en 4G lente). Une colombe de 210 Ko
- * volait dans le coin, sans rapport avec le propos.
+ * C'est la direction artistique du site (voir medias.js), et elle reste. Le
+ * nuage peint est posé à cheval sur la couture avec le premier écran, la
+ * colombe vole dans le coin et déborde sur l'offre. Trois défauts relevés par
+ * l'audit du 11 septembre 2026 sont corrigés sans toucher à l'image :
  *
- * Les deux sont retirés. La couture est désormais un fondu vers le noir, des
- * deux côtés : le hero finit sur le noir de la page, et ce fond commence dessus.
- * Le fond lui-même (une brique peinte, la couleur de l'offre qui suit) arrive en
- * différé, en AVIF ou WebP.
+ * 1. Le poids. Le PNG de 1,8 Mo était l'élément le plus lourd de la page (22,6 s
+ *    de LCP en 4G lente). Visuel le sert en AVIF ou WebP à la largeur de
+ *    l'écran, en différé ; la colombe, en 192 à 512 px.
+ *
+ * 2. La remontée dans le hero. Le nuage était décalé de 65 % de sa hauteur
+ *    au-dessus de la couture, pour cacher l'arête entre la vidéo et ce fond :
+ *    530 px à 1 440 de large, jusque sous le titre et le bouton du hero.
+ *    Cette arête n'existe plus (le hero finit sur le noir de la page, ce fond
+ *    commence dessus), le nuage n'a plus rien à cacher : décalé de 25 %
+ *    (`-translate-y-1/4`), il ne remonte que par son quart gauche, le seul plein
+ *    à cette hauteur, et reste sous la ligne « À partir de… » du hero, de
+ *    1 280 × 720 à 2 560 × 1 440.
+ *
+ * 3. Le ruban rouge « coupé net ». Il fait partie de la peinture et pend
+ *    jusqu'au bord bas de l'image, où il s'arrêtait sur une ligne droite. Le
+ *    masque `mask-b-from-78% mask-b-to-98%` l'efface en douceur. Il ne touche que
+ *    le bas : le haut du nuage, qui fait sa matière, reste intact.
+ *
+ * Le texte commence sous la masse du nuage : elle s'effiloche vers 80 % de sa
+ * hauteur, soit 55 % sous la couture, et le nuage mesure 56,6 % de la largeur
+ * de l'écran (2 688 × 1 520). D'où `pt-[calc(31vw+1.5rem)]`. À recalculer si
+ * le décalage change.
+ *
+ * Ordre des calques, dans le contexte de la racine (ni le hero ni cette
+ * section n'en créent) :
+ *
+ *     z-20   la colombe, qui déborde sur la section suivante
+ *     z-10   les textes, du hero comme d'ici
+ *     z-[5]  le nuage         ← au-dessus des fonds, sous les mots
+ *     auto   les fonds, vidéo et images
+ *
+ * ⚠ `pointer-events-none` sur les deux images : un calque transparent reste
+ * cliquable (le navigateur teste la boîte, pas les pixels). Sans lui, le nuage
+ * avalait les clics du bouton du hero.
  */
 ---
 
-<section class="relative w-full overflow-hidden">
+<div class="relative">
+  <section class="relative w-full overflow-hidden">
+    <Visuel
+      src={MEDIAS.fondShowcase}
+      alt=""
+      decoratif
+      sizes="100vw"
+      largeurs={[640, 1280]}
+      class="absolute inset-0 h-full w-full object-cover"
+    />
+    <div class="pointer-events-none absolute inset-0 bg-black/30" aria-hidden="true"></div>
+    <div
+      class="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-fond to-transparent"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div
+      class="relative z-10 flex flex-col items-center px-5 pt-[calc(31vw+1.5rem)] pb-20 text-center text-white sm:pb-28"
+    >
+      <p class="surtitre reveal text-white/80">Le calcul est court</p>
+
+      {/*
+        Le rideau est sur les deux lignes, pas sur le h2 : découvrir l'une puis
+        l'autre est tout l'effet. Les deux lignes sont en Cormorant, et plus en
+        Cormorant puis Archivo gras : deux familles dans un seul titre se lisaient
+        comme deux gabarits collés.
+      */}
+      <h2 class="mt-6 leading-[1.05] drop-shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
+        <span class="rideau font-titre block text-5xl font-light tracking-wide uppercase sm:text-7xl md:text-8xl">
+          Moins qu'un
+        </span>
+        <span
+          class="rideau font-titre block text-5xl font-light tracking-[0.06em] uppercase italic [--retard:150ms] sm:text-7xl md:text-8xl"
+        >
+          chantier
+        </span>
+      </h2>
+
+      <p
+        class="reveal font-texte mt-10 max-w-2xl text-lg leading-relaxed text-white/90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.35)] [--retard:120ms] sm:text-xl"
+      >
+        Un chantier pèse entre cinq et vingt mille euros. Votre site coûte{' '}
+        <span class="chiffres whitespace-nowrap">{offre.prix}</span>, une seule fois. Ensuite,
+        chaque demande qu'il vous apporte, c'est pour vous.
+      </p>
+
+      <a href="/#offre" class="reveal bouton-secondaire mt-12 [--retard:220ms]">Voir l'offre</a>
+    </div>
+
+    {/* Fond du dégradé accordé à la brique de l'offre qui suit. */}
+    <div
+      class="pointer-events-none absolute bottom-0 left-0 h-48 w-full bg-gradient-to-b from-transparent to-brique"
+      aria-hidden="true"
+    >
+    </div>
+  </section>
+
   <Visuel
-    src={MEDIAS.fondShowcase}
+    src={MEDIAS.nuageTransition}
     alt=""
+    priorite="basse"
     decoratif
     sizes="100vw"
-    largeurs={[640, 1280]}
-    class="absolute inset-0 h-full w-full object-cover"
+    largeurs={[640, 1280, 1920, 2688]}
+    class="pointer-events-none absolute inset-x-0 top-0 z-[5] w-full -translate-y-1/4 select-none mask-b-from-78% mask-b-to-98%"
   />
-  <div class="pointer-events-none absolute inset-0 bg-black/30" aria-hidden="true"></div>
-  <div
-    class="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-fond to-transparent"
-    aria-hidden="true"
-  >
-  </div>
-
-  <div
-    class="relative z-10 flex min-h-[70svh] flex-col items-center justify-center px-5 py-20 text-center text-white sm:min-h-[85svh] sm:py-28"
-  >
-    <p class="surtitre reveal text-white/80">Le calcul est court</p>
-
-    {/*
-      Le rideau est sur les deux lignes, pas sur le h2 : découvrir l'une puis
-      l'autre est tout l'effet. Les deux lignes sont en Cormorant, et plus en
-      Cormorant puis Archivo gras : deux familles dans un seul titre se lisaient
-      comme deux gabarits collés.
-    */}
-    <h2 class="mt-6 leading-[1.05] drop-shadow-[0_2px_20px_rgba(0,0,0,0.3)]">
-      <span class="rideau font-titre block text-5xl font-light tracking-wide uppercase sm:text-7xl md:text-8xl">
-        Moins qu'un
-      </span>
-      <span
-        class="rideau font-titre block text-5xl font-light tracking-[0.06em] uppercase italic [--retard:150ms] sm:text-7xl md:text-8xl"
-      >
-        chantier
-      </span>
-    </h2>
-
-    <p
-      class="reveal font-texte mt-10 max-w-2xl text-lg leading-relaxed text-white/90 drop-shadow-[0_2px_16px_rgba(0,0,0,0.35)] [--retard:120ms] sm:text-xl"
-    >
-      Un chantier pèse entre cinq et vingt mille euros. Votre site coûte{' '}
-      <span class="chiffres whitespace-nowrap">{offre.prix}</span>, une seule fois. Ensuite,
-      chaque demande qu'il vous apporte, c'est pour vous.
-    </p>
-
-    <a href="/#offre" class="reveal bouton-secondaire mt-12 [--retard:220ms]">Voir l'offre</a>
-  </div>
-
-  {/* Fond du dégradé accordé à la brique de l'offre qui suit. */}
-  <div
-    class="pointer-events-none absolute bottom-0 left-0 h-48 w-full bg-gradient-to-b from-transparent to-brique"
-    aria-hidden="true"
-  >
-  </div>
-</section>
+  <Visuel
+    src={MEDIAS.colombe}
+    alt=""
+    priorite="basse"
+    decoratif
+    sizes="(min-width: 1024px) 256px, (min-width: 768px) 192px, (min-width: 640px) 128px, 96px"
+    largeurs={[192, 384, 512]}
+    class="pointer-events-none absolute right-4 -bottom-12 z-20 w-24 select-none sm:right-8 sm:-bottom-16 sm:w-32 md:w-48 lg:right-16 lg:w-64"
+  />
+</div>

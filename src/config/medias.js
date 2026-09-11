@@ -38,15 +38,38 @@
  * sur téléphone, en mouvement réduit et avant que la vidéo ne démarre, et la
  * vidéo prend sa place sans saut puisqu'elle commence sur la même image.
  *
- * Retirés le même jour, parce qu'ils ne servaient plus ou desservaient la
- * page : le nuage de transition (1,8 Mo, élément LCP de l'accueil, qui
- * remontait sous le titre et le bouton du premier écran), la colombe, et le
- * ciel pastel de la citation (le blanc y tombait à 2,7:1 de contraste).
+ * ---- Le ciel, les nuages et les colombes : la direction artistique ----
+ *
+ * Le nuage de transition, la colombe et le ciel de la citation avaient été
+ * retirés le 11 septembre 2026 pour leur poids et leur contraste. Ils sont
+ * revenus le même jour : c'est la direction artistique du site, voulue par
+ * le propriétaire. Ce qui posait problème est corrigé, pas l'image :
+ *
+ *   — le nuage (PNG de 1,8 Mo, élément LCP de l'accueil) sort en AVIF et WebP
+ *     à la largeur de l'écran, chargé en différé ;
+ *   — la colombe (210 Ko pour 256 px affichés) sort en 192 à 512 px ;
+ *   — le ciel de la citation reçoit un voile qui met le texte au niveau AA.
+ *
+ * Les réglages de position (Showcase.astro, QuoteBanner.astro) sont calculés
+ * sur le profil d'opacité du nuage, mesuré par bandes de 5 % de sa hauteur :
+ *
+ *    0–35 %   seul le quart gauche est plein (le reste : du vide)
+ *   35–50 %   la moitié droite se remplit peu à peu
+ *   50–70 %   plein sur toute la largeur        ← là où poser une couture
+ *   70–86 %   s'effiloche, surtout au centre
+ *   86–100 %  plus que le ruban rouge, à gauche
+ *
+ * Changer d'image, c'est refaire cette mesure : lire le canal alpha avec
+ * sharp (`.ensureAlpha().raw()`) et compter, par bande, la part de pixels dont
+ * l'alpha dépasse 200.
  */
 import heroVideo from '../assets/medias/hero.mp4';
 import heroAffiche from '../assets/medias/hero-affiche.webp';
 import voileBas from '../assets/medias/voile-bas.png';
 import fondShowcase from '../assets/medias/fond-showcase.webp';
+import nuageTransition from '../assets/medias/nuage-transition.png';
+import colombe from '../assets/medias/colombe.png';
+import fondCitation from '../assets/medias/fond-citation.webp';
 
 export const MEDIAS = {
   /** Une URL (chaîne) : la vidéo n'est pas une image, elle ne passe pas par Visuel. */
@@ -55,6 +78,9 @@ export const MEDIAS = {
   heroAffiche,
   voileBas,
   fondShowcase,
+  nuageTransition,
+  colombe,
+  fondCitation,
   /**
    * La photo de la section « Qui suis-je ». VIDE tant qu'il n'y a pas de vraie
    * photo : la section s'affiche alors sans image, jamais avec une silhouette

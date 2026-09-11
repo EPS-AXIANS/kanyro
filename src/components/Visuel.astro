@@ -26,7 +26,11 @@ import { getImage } from 'astro:assets';
  *   largeurs   les largeurs à produire, plafonnées à celle de la source
  *   class      classes de l'<img>
  *   loading    'lazy' par défaut ; 'eager' pour ce qui est au premier écran
- *   priorite   vrai pour l'image principale du premier écran (fetchpriority)
+ *   priorite   vrai pour l'image principale du premier écran (fetchpriority
+ *              high) ; 'basse' pour un décor qui touche le premier écran sans
+ *              en être le sujet (le nuage, la colombe) : sans elle, le
+ *              navigateur le passe en priorité haute dès qu'il le voit, et il
+ *              dispute la bande passante au titre et aux fontes en 4G lente
  *   decoratif  vrai pour une image purement décorative (aria-hidden)
  */
 const {
@@ -71,7 +75,7 @@ const repli = await getImage({ src, width: utiles[Math.min(1, utiles.length - 1)
     class={classe}
     loading={loading}
     decoding={loading === 'lazy' ? 'async' : undefined}
-    fetchpriority={priorite ? 'high' : undefined}
+    fetchpriority={priorite === 'basse' ? 'low' : priorite ? 'high' : undefined}
     aria-hidden={decoratif ? 'true' : undefined}
   />
 </picture>

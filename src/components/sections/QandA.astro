@@ -26,6 +26,11 @@ import { questions } from '../../data/questions.js';
  * grille, ouvrir une question agrandirait toute sa rangée, et creuserait un trou
  * dans l'autre colonne.
  *
+ * Le bas de la section est la place du nuage de la couture avec la citation
+ * (posé par QuoteBanner.astro, à cheval sur les deux) : il remonte de 25,5 vw
+ * par son quart gauche. `pb-[calc(25.5vw+1.5rem)]` garde les dernières
+ * questions hors de lui. Les deux chiffres changent ensemble.
+ *
  * La question est un <span> dans le <summary>, pas un titre : un titre dans un
  * élément à rôle de bouton perd sa sémantique chez certains lecteurs d'écran,
  * et dix h3 de plus noieraient le plan de la page.
@@ -36,7 +41,7 @@ const colonnes = [questions.slice(0, moitie), questions.slice(moitie)];
 
 <section
   id="questions"
-  class="relative overflow-hidden bg-brique px-4 pt-20 pb-16 sm:px-8 sm:pt-24 sm:pb-20 md:px-16 lg:px-28 lg:pt-32 lg:pb-28"
+  class="relative overflow-hidden bg-brique px-4 pt-20 pb-[calc(25.5vw+1.5rem)] sm:px-8 sm:pt-24 md:px-16 lg:px-28 lg:pt-32"
 >
   <div class="relative z-20 mx-auto max-w-6xl">
     <p class="surtitre reveal text-center text-white/70">Questions fréquentes</p>

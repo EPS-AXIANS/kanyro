@@ -72,9 +72,10 @@ import Visuel from '../Visuel.astro';
     plans clairs de la vidéo et devient illisible. Le contraste ne peut pas
     dépendre de l'image du moment.
 
-    Il finit sur le noir de la page : c'est ce qui raccorde le premier écran à
-    la section suivante, maintenant que le nuage qui masquait la couture a
-    disparu (il remontait sous le titre et le bouton, et pesait 1,8 Mo).
+    Il finit sur le noir de la page, comme la section suivante commence : la
+    couture ne se voit pas, et le nuage peint posé dessus (Showcase.astro) n'a
+    plus à la cacher. Il peut donc remonter moins haut qu'avant, sous la ligne
+    « À partir de… » plutôt que sous le titre.
   */}
   <div
     class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-fond"
