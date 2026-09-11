@@ -426,8 +426,11 @@ par le build (`src/config/medias.js`) : les images sortent en AVIF et WebP à
 plusieurs largeurs par le composant `Visuel.astro`, et la vidéo a été
 réencodée (6 Mo → 588 Ko, 1 280 × 720, lecture progressive), servie aux seuls
 écrans d'au moins 768 px et jamais en économie de données ni en mouvement
-réduit. Le nuage peint (1,8 Mo), la colombe et le fond de citation ont été
-retirés le 11 septembre 2026.
+réduit. Le nuage peint, la colombe et le ciel de la citation, retirés le
+11 septembre 2026 pour leur poids et leur contraste, sont revenus le même jour,
+corrigés : 14 à 100 Ko selon l'écran au lieu de 1,8 Mo, et un voile qui met le
+texte au niveau AA sur le ciel (voir `medias.js`, `Showcase.astro` et
+`QuoteBanner.astro`).
 
 **Le ciel, les nuages et les colombes sont la direction artistique du site**,
 choisie par le propriétaire et confirmée le 11 septembre 2026 : ils ne sont pas
