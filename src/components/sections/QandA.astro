@@ -21,34 +21,41 @@ import { offreMensuelle } from '../../data/offres.js';
  *   — « Et si un site ne me sert à rien ? » n'est pas une question qu'on pose :
  *     c'était une déclaration de principe déguisée en question.
  * Avant d'en rajouter une, vérifier qu'aucune section ne lui répond déjà.
+ *
+ * Réponses courtes, deux ou trois phrases, et sans aucun tiret : ni cadratin,
+ * ni trait d'union, à la demande du propriétaire (11 septembre 2026). Un mot
+ * composé se contourne en reformulant (« en fin de semaine », « dès le premier
+ * échange »), jamais en lui retirant son trait d'union, ce qui ferait une
+ * faute. La question sur le bouche-à-oreille garde le sien : c'est une
+ * question, et c'est l'orthographe du mot.
  */
 const colonneGauche = [
   {
     q: 'Pourquoi une fourchette de prix et pas un tarif fixe ?',
-    r: "Parce qu'un site de cinq pages avec vos photos existantes ne demande pas le même travail qu'un site où il faut tout écrire et venir photographier trois chantiers. Le devis, lui, est ferme : une fois signé, le prix ne bouge plus, quel que soit le temps que ça me prend.",
+    r: "Parce que le travail dépend de ce que vous avez déjà, vos textes et vos photos. Le devis, lui, est ferme. Une fois signé, le prix ne bouge plus.",
   },
   {
     q: 'Combien de temps avant la mise en ligne ?',
-    r: "Une à deux semaines. Je monte cette activité en parallèle d'une alternance, donc je travaille le soir et le week-end.",
+    r: "Une à deux semaines. Je travaille en parallèle d'une alternance, le soir et en fin de semaine.",
   },
   {
     q: "Je n'ai pas de belles photos de mes chantiers",
-    r: "Envoyez-moi quand même ce que vous avez : je fais le tri, et je vous dis franchement si ça suffit. Sinon, je viens en faire : une demi-journée, deux ou trois chantiers finis, tôt le matin ou en fin d'après-midi pour la lumière, des plans larges et des détails d'exécution, et vous au travail, si vous êtes d'accord. C'est du temps en plus, donc je le facture en supplément — mais c'est aussi ce qui change le plus l'allure d'un site.",
+    r: "Envoyez quand même ce que vous avez. Je fais le tri et je vous dis franchement si ça suffit. Sinon, je viens photographier deux ou trois chantiers, en supplément.",
   },
   {
     q: 'Vous pouvez reprendre mon ancien site ?',
-    r: "Le site lui-même, non : je repars d'une base propre, c'est plus rapide que de rattraper le travail d'un autre. Ce qu'on récupère, c'est ce qui a de la valeur — le nom de domaine d'abord, pour que votre adresse ne change pas, et vos textes ou vos photos s'il y en a de bons. Reste à savoir si vous avez la main sur ce domaine : c'est le point qui fait dérailler les chantiers, souvent acheté par quelqu'un qu'on ne joint plus. On le vérifie au premier rendez-vous, pas le jour de la mise en ligne.",
+    r: "Je le refais sur une base propre, c'est plus rapide. Mais on garde votre nom de domaine, pour que votre adresse ne change pas, et vos textes ou photos s'il y en a de bons. On vérifie dès le premier échange que ce domaine est bien à votre nom.",
   },
 ];
 
 const colonneDroite = [
   {
     q: 'Vous garantissez la première place sur Google ?',
-    r: "Non, et méfiez-vous de qui vous la garantit : personne ne contrôle l'algorithme. Ce que je garantis : un site rapide qui s'affiche correctement sur un téléphone, des pages écrites autour des mots que vos clients tapent vraiment, et, la première année, chaque mois un point sur ce qui change — où vous sortez sur Google, combien de personnes sont venues, combien vous ont écrit.",
+    r: "Non, et fuyez ceux qui la garantissent. Personne ne contrôle Google. Ce que je garantis, c'est un site rapide, lisible sur téléphone, écrit avec les mots que vos clients tapent vraiment.",
   },
   {
     q: 'Je travaille déjà au bouche-à-oreille, pourquoi un site ?',
-    r: "Le bouche-à-oreille reste ce qui marche le mieux, et un site ne le remplace pas. Ce qu'il change, c'est ce qui se passe entre la recommandation et l'appel : on donne votre nom à quelqu'un, et cette personne le tape sur son téléphone avant de composer le numéro. Si elle ne trouve rien, ou une page qui date de 2012, elle appelle quand même, mais elle appelle aussi le suivant. Un site sert d'abord à ne pas perdre les clients que vous avez déjà gagnés.",
+    r: "La recommandation reste ce qui marche le mieux, et un site ne la remplace pas. Mais avant d'appeler, on tape votre nom sur son téléphone. Si on ne trouve rien, on appelle aussi le suivant.",
   },
   /*
    * Cette question demandait auparavant « L'abonnement mensuel est obligatoire ? »
@@ -75,7 +82,7 @@ const colonneDroite = [
    */
   {
     q: 'Et après la mise en ligne, il se passe quoi ?',
-    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Au bout d'un an, deux chemins. Vous reprenez la main : le site est à vous, il tourne, comptez ${offreMensuelle.alternative}. Ou je continue à m'en occuper — deux formules, dès ${offreMensuelle.formules[0].prix}, comparées plus haut sur cette page. Dans les deux cas, rien ne se signe aujourd'hui : la question ne se pose qu'au bout d'un an.`,
+    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Ensuite, soit vous vous en chargez, pour ${offreMensuelle.alternative}. Soit je continue, dès ${offreMensuelle.formules[0].prix}, avec l'une des formules présentées plus haut. Rien ne se signe aujourd'hui.`,
   },
 ];
 
