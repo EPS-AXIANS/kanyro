@@ -1,296 +1,101 @@
 ---
+import { Plus } from 'lucide-astro';
 import { offreMensuelle } from '../../data/offres.js';
+import { questions } from '../../data/questions.js';
 
 /*
- * Les questions sont celles qui reviennent réellement en rendez-vous. Les
- * réponses assument les limites de l'agence — activité menée en parallèle
- * d'une alternance, refus de garantir une position Google. Un prospect qui
- * découvre ça après signature devient un litige.
+ * Les questions qui reviennent réellement en rendez-vous. Leur texte vit dans
+ * src/data/questions.js, lu aussi par le JSON-LD `FAQPage` : les règles de
+ * rédaction (réponses courtes, aucun tiret) y sont écrites.
  *
- * ⚠ Le délai y est écrit en toutes lettres, pas tiré de offres.js : la réponse
- * « Combien de temps » est à reprendre à la main s'il change.
+ * ---- Des questions qui se déplient ----
  *
- * Trois questions ont été retirées le 11 septembre 2026, parce qu'une autre
- * partie de la page y répondait déjà, et mieux :
- *   — « Je n'ai pas le temps de m'en occuper » redisait la frise du déroulement,
- *     qui montre les moments du client en orange. Son seul apport, les deux ou
- *     trois heures en tout, est passé dans l'intro de Processus.astro.
- *   — « Le site m'appartient vraiment ? » redisait la carte « Vous êtes
- *     propriétaire » de l'offre et les conditions de sortie du forfait Suivi.
- *   — « Et si un site ne me sert à rien ? » n'est pas une question qu'on pose :
- *     c'était une déclaration de principe déguisée en question.
- * Avant d'en rajouter une, vérifier qu'aucune section ne lui répond déjà.
+ * Toutes les réponses étaient ouvertes, en deux colonnes « en escalier » (chaque
+ * texte décalé de 2,5 % de plus que le précédent). À l'œil, l'escalier se lisait
+ * comme un défaut d'alignement ; sur un téléphone, la section faisait deux
+ * écrans, avec des réponses en 11 px, suivis de 450 px de brique vide réservés
+ * au nuage qui la bordait.
  *
- * Réponses courtes, deux ou trois phrases, et sans aucun tiret : ni cadratin,
- * ni trait d'union, à la demande du propriétaire (11 septembre 2026). Un mot
- * composé se contourne en reformulant (« en fin de semaine », « dès le premier
- * échange »), jamais en lui retirant son trait d'union, ce qui ferait une
- * faute. La question sur le bouche-à-oreille garde le sien : c'est une
- * question, et c'est l'orthographe du mot.
+ * Chaque question est maintenant un <details> : fermée, elle tient sur une
+ * ligne ; ouverte, sa réponse est en 16 px. C'est un élément natif : clavier,
+ * lecteur d'écran et recherche dans la page (Ctrl+F ouvre la bonne réponse)
+ * fonctionnent sans une ligne de script, et le texte reste dans le HTML pour
+ * les moteurs de recherche.
+ *
+ * Deux listes indépendantes sur grand écran, et pas une grille : dans une
+ * grille, ouvrir une question agrandirait toute sa rangée, et creuserait un trou
+ * dans l'autre colonne.
+ *
+ * La question est un <span> dans le <summary>, pas un titre : un titre dans un
+ * élément à rôle de bouton perd sa sémantique chez certains lecteurs d'écran,
+ * et dix h3 de plus noieraient le plan de la page.
  */
-const colonneGauche = [
-  {
-    q: 'Pourquoi une fourchette de prix et pas un tarif fixe ?',
-    r: "Parce que le travail dépend de ce que vous avez déjà, vos textes et vos photos. Le devis, lui, est ferme. Une fois signé, le prix ne bouge plus.",
-  },
-  {
-    q: 'Combien de temps avant la mise en ligne ?',
-    r: "Une à deux semaines. Je travaille en parallèle d'une alternance, le soir et en fin de semaine.",
-  },
-  {
-    q: "Je n'ai pas de belles photos de mes chantiers",
-    r: "Envoyez quand même ce que vous avez. Je fais le tri et je vous dis franchement si ça suffit. Sinon, je viens photographier deux ou trois chantiers, en supplément.",
-  },
-  {
-    q: 'Vous pouvez reprendre mon ancien site ?',
-    r: "Je le refais sur une base propre, c'est plus rapide. Mais on garde votre nom de domaine, pour que votre adresse ne change pas, et vos textes ou photos s'il y en a de bons. On vérifie dès le premier échange que ce domaine est bien à votre nom.",
-  },
-];
-
-const colonneDroite = [
-  {
-    q: 'Vous garantissez la première place sur Google ?',
-    r: "Non, et fuyez ceux qui la garantissent. Personne ne contrôle Google. Ce que je garantis, c'est un site rapide, lisible sur téléphone, écrit avec les mots que vos clients tapent vraiment.",
-  },
-  {
-    q: 'Je travaille déjà au bouche-à-oreille, pourquoi un site ?',
-    r: "La recommandation reste ce qui marche le mieux, et un site ne la remplace pas. Mais avant d'appeler, on tape votre nom sur son téléphone. Si on ne trouve rien, on appelle aussi le suivant.",
-  },
-  /*
-   * Cette question demandait auparavant « L'abonnement mensuel est obligatoire ? »
-   * et répondait « Non ». Elle nommait donc un produit dont la page ne donnait ni
-   * le prix ni le contenu — le prospect repartait avec une question de plus.
-   *
-   * Le suivi a désormais sa propre section (Suivi.astro), et cette réponse ne
-   * la répète pas : elle donne les deux chemins, le prix d'entrée, et renvoie
-   * plus haut pour le tableau des deux formules. Une Q&R qui redit une section
-   * entière fatigue au lieu de rassurer, et les deux textes finissent par
-   * diverger.
-   *
-   * Ce qu'elle redit quand même : qu'on ne signe rien aujourd'hui. C'est la
-   * seule chose que le prospect a besoin d'entendre au moment où il lit un prix
-   * récurrent, et elle vaut d'être dite deux fois.
-   *
-   * Les montants sont lus depuis offres.js et jamais réécrits à la main : un
-   * prix qui vit à trois endroits finit par diverger, et c'est le devis, lui,
-   * qui fera foi devant le client.
-   *
-   * L'alternative à ~30 €/an est citée avant le forfait, volontairement. La
-   * taire donnerait l'impression de la cacher, alors qu'elle est le meilleur
-   * argument dont on dispose : quelqu'un qui a le choix et qui reste, reste.
-   */
-  {
-    q: 'Et après la mise en ligne, il se passe quoi ?',
-    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Ensuite, soit vous reprenez l'hébergement à votre nom, pour ${offreMensuelle.alternative}. Soit je continue, dès ${offreMensuelle.formules[0].prix}, avec l'une des formules présentées plus haut. Rien ne se signe aujourd'hui.`,
-  },
-];
-
-/*
- * ⚠ Les questions sont en capitales et en serif : c'est la combinaison la plus
- * fragile de tout le site. Cormorant est une fonte à contraste marqué, ses
- * déliés font moins d'un pixel en dessous de 16 px, et ils s'effacent sur le
- * fond brique. D'où `font-medium` au lieu de la graisse 400 par défaut, un cran
- * de corps en plus, et de l'interlettrage — une capitale serrée à petit corps se
- * lit encore moins bien.
- *
- * Si la fonte de titre change un jour, c'est ce bloc qu'il faut regarder en
- * premier, avant les grands titres qui, eux, pardonnent tout.
- */
-
-/*
- * ⚠ PAS DE CASCADE ICI, ET C'EST LE CORRECTIF D'UN DÉFAUT RÉEL.
- *
- * Les dix articles portaient un décalage croissant, de 120 à 1 200 ms, pour que
- * les entrées ne montent pas par paires. L'intention était bonne, le résultat
- * ne pouvait pas suivre : chaque article est observé POUR LUI-MÊME, donc son
- * délai était décompté à partir de SON entrée dans le champ, pas de celle du
- * groupe. La dixième question laissait un trou d'une seconde et deux dixièmes à
- * l'écran avant d'apparaître.
- *
- * Une cascade suppose que tout le groupe entre d'un coup. Cette grille fait deux
- * écrans de haut : c'est exactement le cas où elle n'a pas de sens.
- *
- * Les paires ne montent pas ensemble pour autant, et ce n'est pas un hasard : la
- * colonne de droite porte `md:mt-24`, donc ses articles sont décalés de six rem
- * vers le bas et entrent après leurs voisins de gauche. C'est la mise en page
- * qui produit l'alternance, gratuitement et à toutes les vitesses de défilement.
- *
- * (Le décalage n'a d'ailleurs jamais eu lieu : `[animation-delay:…]` était
- * écrasé par le raccourci `animation:` de `.reveal.revealed`. Voir global.css.)
- */
-
-/*
- * ---- Les textes glissent, les blocs restent ----
- *
- * Chaque question est un peu plus en retrait que celle d'au-dessus. Le retrait
- * porte sur le TEXTE, pas sur l'article : les blocs, et donc leurs tuiles de
- * survol, gardent leurs deux colonnes nettes, et seul le contenu dérive.
- *
- * L'ordre suivi est celui de l'œil, pas celui du balisage. La colonne de droite
- * descend de six rem, donc de haut en bas on lit gauche, droite, gauche… Elle
- * prend les demi-pas : 0, 2,5, 5, 7,5 % et ainsi de suite, en zigzag. Chaque
- * texte est ainsi un peu plus loin que celui qu'on vient de lire, quelle que
- * soit sa colonne.
- *
- * En pourcentage de l'article, pour que le glissement reste proportionné de la
- * tablette au grand écran. Rien sous `md` : en une seule colonne, l'ordre de
- * lecture n'est plus le zigzag, et chaque pixel de largeur y sert la lecture.
- */
-const retraitsGauche = ['', 'md:ml-[5%]', 'md:ml-[10%]', 'md:ml-[15%]'];
-const retraitsDroite = ['md:ml-[2.5%]', 'md:ml-[7.5%]', 'md:ml-[12.5%]'];
+const moitie = Math.ceil(questions.length / 2);
+const colonnes = [questions.slice(0, moitie), questions.slice(moitie)];
 ---
 
-<div class="relative">
-  <section
-    id="questions"
-    class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-20 sm:px-8 md:px-16 lg:px-28 lg:pt-32 lg:pb-28"
+<section
+  id="questions"
+  class="relative overflow-hidden bg-brique px-4 pt-24 pb-20 sm:px-8 md:px-16 lg:px-28 lg:pt-32 lg:pb-28"
+>
+  <div class="relative z-20 mx-auto max-w-6xl">
+    <p class="surtitre reveal text-center text-white/70">Questions fréquentes</p>
+    <h2 class="titre-section rideau mt-6 text-center">Vos questions</h2>
+
+    <div class="mt-14 grid items-start gap-x-14 lg:grid-cols-2">
+      {
+        colonnes.map((liste, n) => (
+          <div class:list={['reveal', n === 0 ? 'border-t border-white/20' : 'lg:border-t lg:border-white/20']}>
+            {liste.map((item) => (
+              <details class="group border-b border-white/20">
+                <summary class="flex min-h-16 cursor-pointer list-none items-center justify-between gap-6 py-5 text-left transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
+                  <span class="font-titre text-xl leading-snug tracking-wide text-white sm:text-2xl">
+                    {item.q}
+                  </span>
+                  <Plus
+                    class="h-5 w-5 shrink-0 text-white/80 transition-transform duration-300 group-open:rotate-45"
+                    stroke-width={1.5}
+                    aria-hidden="true"
+                  />
+                </summary>
+                <p class="font-texte pr-6 pb-6 text-base leading-relaxed text-white/85 sm:pr-12">
+                  {item.r}
+                </p>
+              </details>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  {/*
+    Le raccord avec la section d'avant, et c'est le même que celui de l'offre
+    pris à l'envers.
+
+    `data-arc-mode="envers"` colle l'arc en HAUT de la section, plein au départ,
+    et le vide vers le haut — c'est donc la couleur de la section d'avant qui
+    s'attarde sur les questions avant de se retirer, en creusant vers le bas là
+    où l'autre bombait vers le haut.
+
+    Pas de `data-arc-fin` ici, volontairement : un arc à l'envers cache du
+    texte le temps de se retirer. Sur la course par défaut — une hauteur
+    d'écran — il a fini de dégager quand le haut de la section atteint le haut
+    de la fenêtre, soit avant la première question.
+
+    ⚠ LA COULEUR DÉPEND DE LA SECTION D'AVANT. C'est Suivi, sur `surface`,
+    quand elle est affichée, le noir par défaut sinon — elle disparaît avec
+    `offreMensuelle.actif`. Si l'ordre des sections change dans index.astro,
+    c'est ici qu'il faut suivre.
+  */}
+  <div
+    class:list={[
+      'arc-transition arc-transition--envers',
+      offreMensuelle.actif && '[--arc-couleur:var(--color-surface)]',
+    ]}
+    data-arc
+    data-arc-mode="envers"
+    aria-hidden="true"
   >
-    <h2
-      class="rideau font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
-    >
-      <span>Q</span>
-      <span class="text-xl italic text-white/80 sm:text-2xl md:text-3xl lg:text-4xl">
-        &amp;
-      </span>
-      <span>R</span>
-    </h2>
-
-    {/*
-      `data-survol-directionnel="y"` : la tuile de survol entre par le haut ou
-      par le bas selon le bord franchi par le curseur, jamais par les côtés. Ce
-      sont des blocs larges et peu hauts empilés verticalement — c'est
-      verticalement qu'on les traverse. Le mécanisme est dans effets.js.
-
-      ⚠ Les questions ne sont pas des liens, et la tuile ne doit pas leur en
-      donner l'air. D'où un fond qui se contente de monter d'un cran
-      (`--color-brique-haute`, le même que les cartes métiers) plutôt qu'une
-      couleur d'accent : on éclaire ce qu'on lit, on ne promet pas un clic.
-    */}
-    <div
-      data-survol-directionnel="y"
-      class="relative z-20 mx-auto mt-16 grid max-w-6xl gap-4 md:grid-cols-2 md:gap-8 lg:gap-12"
-    >
-      <div class="space-y-3 lg:space-y-4">
-        {
-          colonneGauche.map((item, i) => (
-            <article
-              data-survol-item
-              class="reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6"
-            >
-              {/*
-                La tuile est SOUS le texte et ne prend aucun clic : un calque
-                posé par-dessus avalerait la sélection du texte.
-
-                ⚠ `-inset-px` ET PAS `inset-0`, et ce pixel n'est pas décoratif.
-
-                Au repos la tuile est décalée de sa propre hauteur vers le haut,
-                donc son bord bas tombe pile sur le bord haut du bloc. Les blocs
-                ne sont pas posés sur des pixels entiers — mesuré à 64,34 px —
-                et le rendu anticrénelle alors ce bord commun : un liseré clair
-                d'un pixel restait affiché en haut de chaque question, en
-                permanence, sans que rien ne soit survolé.
-
-                Déborder d'un pixel de tous les côtés sort ce bord de la boîte.
-                Le débordement au repos, lui, est rogné par `overflow-hidden`.
-              */}
-              <div
-                data-survol-tuile
-                class="survol-tuile pointer-events-none absolute -inset-px"
-                aria-hidden="true"
-              >
-              </div>
-
-              <div class:list={['relative', retraitsGauche[i]]}>
-                <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
-                  {item.q}
-                </h3>
-                <p class="font-texte mt-3 text-xs leading-relaxed text-white/60 sm:text-xs md:text-sm">
-                  {item.r}
-                </p>
-              </div>
-            </article>
-          ))
-        }
-      </div>
-
-      <div class="space-y-3 md:mt-24 lg:space-y-4">
-        {
-          colonneDroite.map((item, i) => (
-            <article
-              data-survol-item
-              class="reveal relative overflow-hidden rounded-xs px-5 py-5 sm:px-6 sm:py-6"
-            >
-              {/*
-                La tuile est SOUS le texte et ne prend aucun clic : un calque
-                posé par-dessus avalerait la sélection du texte.
-
-                ⚠ `-inset-px` ET PAS `inset-0`, et ce pixel n'est pas décoratif.
-
-                Au repos la tuile est décalée de sa propre hauteur vers le haut,
-                donc son bord bas tombe pile sur le bord haut du bloc. Les blocs
-                ne sont pas posés sur des pixels entiers — mesuré à 64,34 px —
-                et le rendu anticrénelle alors ce bord commun : un liseré clair
-                d'un pixel restait affiché en haut de chaque question, en
-                permanence, sans que rien ne soit survolé.
-
-                Déborder d'un pixel de tous les côtés sort ce bord de la boîte.
-                Le débordement au repos, lui, est rogné par `overflow-hidden`.
-              */}
-              <div
-                data-survol-tuile
-                class="survol-tuile pointer-events-none absolute -inset-px"
-                aria-hidden="true"
-              >
-              </div>
-
-              <div class:list={['relative', retraitsDroite[i]]}>
-                <h3 class="font-titre text-sm font-medium tracking-[0.08em] uppercase sm:text-base md:text-lg">
-                  {item.q}
-                </h3>
-                <p class="font-texte mt-3 text-xs leading-relaxed text-white/60 sm:text-xs md:text-sm">
-                  {item.r}
-                </p>
-              </div>
-            </article>
-          ))
-        }
-      </div>
-    </div>
-
-    {/*
-      Le raccord avec la section d'avant, et c'est le même que celui de l'offre
-      pris à l'envers.
-
-      « Comment ça se passe » est sur le noir de la page, la Q&R sur le brique :
-      la couture est là aussi une droite pleine largeur. `data-arc-mode="envers"`
-      colle l'arc en HAUT de la section, plein au départ, et le vide vers le
-      haut — c'est donc le noir d'avant qui s'attarde sur les questions avant de
-      se retirer, en creusant vers le bas là où l'autre bombait vers le haut.
-
-      Pas de `data-arc-fin` ici, volontairement : un arc à l'envers cache du
-      texte le temps de se retirer. Sur la course par défaut — une hauteur
-      d'écran — il a fini de dégager quand le haut de la section atteint le haut
-      de la fenêtre, soit avant la première question. Le pointer plus loin le
-      ferait traîner sur ce qu'on essaie de lire.
-
-      ⚠ LA COULEUR DÉPEND DE LA SECTION D'AVANT, ET ELLE A CHANGÉ. L'arc a été
-      dessiné quand la Q&R suivait « Comment ça se passe », sur le noir. La
-      section Suivi s'est glissée entre les deux, sur `surface` : un arc noir
-      arrivait alors sous un fond qui ne l'était pas, et se lisait comme une
-      bande de plus au lieu d'un raccord. Il prend donc la couleur de Suivi
-      quand elle est affichée, le noir par défaut sinon — elle disparaît avec
-      `offreMensuelle.actif`. Si l'ordre des sections change dans index.astro,
-      c'est ici qu'il faut suivre.
-    */}
-    <div
-      class:list={[
-        'arc-transition arc-transition--envers',
-        offreMensuelle.actif && '[--arc-couleur:var(--color-surface)]',
-      ]}
-      data-arc
-      data-arc-mode="envers"
-      aria-hidden="true"
-    >
-    </div>
-  </section>
-</div>
+  </div>
+</section>
