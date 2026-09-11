@@ -97,7 +97,7 @@ const voisines = communes.filter((c) => c.slug !== commune.slug).slice(0, 5);
       {metier.nom.toLowerCase()}, il tape le métier et le nom de sa commune, puis
       appelle un des trois premiers. Le reste de la liste n'existe pas.
     </p>
-    <a href="/contact" data-bouton-anime class="bouton-primaire reveal mt-10 [--retard:240ms]">
+    <a href="/contact" data-bouton-anime data-mesure="devis" class="bouton-primaire reveal mt-10 [--retard:240ms]">
       Demander un devis
     </a>
   </section>
