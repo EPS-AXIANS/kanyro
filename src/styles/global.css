@@ -202,13 +202,26 @@
      */
     display: inline-grid;
     justify-items: center;
+    /*
+     * Une hauteur minimale COMMUNE aux deux boutons, et le libellé centré dans
+     * cette hauteur. Mesuré avant : 64, 57 et 59 px pour le même bouton selon
+     * la section, et 1 px d'écart entre deux boutons posés côte à côte. Le
+     * padding seul dépendait de la hauteur de ligne de ce qu'il contenait (un
+     * libellé, une icône), la hauteur minimale ne dépend plus de rien.
+     *
+     * 3 rem = 48 px : au-dessus des 44 px recommandés pour une cible tactile.
+     */
+    align-content: center;
+    min-height: 3rem;
     border-radius: var(--radius-bouton);
     background: var(--color-texte);
     color: var(--color-fond);
-    padding: 1rem 2.5rem;
-    font-size: 0.625rem;
+    padding: 0.875rem 2.25rem;
+    /* 12 px et plus 10 : sur un téléphone, 10 px en capitales espacées ne se
+       lisaient qu'en plissant les yeux, sur le seul bouton qui compte. */
+    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     text-decoration: none;
     transition: all 0.5s var(--ease-rideau);
@@ -221,15 +234,23 @@
     transform: scale(0.98);
   }
 
+  /*
+   * Même boîte que le primaire : grille, hauteur minimale et libellé centré.
+   * Un bouton secondaire qui porte une icône (le téléphone) repasse en
+   * `inline-flex` par un utilitaire, qui l'emporte sur cette couche.
+   */
   .bouton-secondaire {
-    display: inline-block;
+    display: inline-grid;
+    justify-items: center;
+    align-content: center;
+    min-height: 3rem;
     border-radius: var(--radius-bouton);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     color: var(--color-texte);
-    padding: 1rem 2.5rem;
-    font-size: 0.625rem;
+    padding: 0.875rem 2.25rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     text-decoration: none;
     transition: all 0.5s var(--ease-rideau);
@@ -243,8 +264,8 @@
   @media (min-width: 640px) {
     .bouton-primaire,
     .bouton-secondaire {
-      padding: 1.15rem 3rem;
-      font-size: 0.75rem;
+      min-height: 3.25rem;
+      padding: 1rem 2.75rem;
     }
   }
 

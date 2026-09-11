@@ -1,6 +1,7 @@
 ---
 import { MEDIAS } from '../../config/medias.js';
 import { offre } from '../../data/offres.js';
+import LienTelephone from '../LienTelephone.astro';
 
 /*
  * Le premier écran répond à quatre questions, dans cet ordre : pour qui, quoi,
@@ -130,18 +131,39 @@ import { offre } from '../../data/offres.js';
       </span>
     </h1>
 
+    {/* En Archivo et plus en Cormorant : à 14 px sur un téléphone, les déliés
+        du Garamond disparaissaient dans la vidéo. C'est la phrase qui dit ce
+        que fait Kanyro, elle doit se lire du premier coup. */}
     <p
-      class="hero-fade-up font-titre mt-8 max-w-xl text-sm text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [--retard:600ms] sm:text-lg md:text-xl"
+      class="hero-fade-up font-texte mt-8 max-w-xl text-base leading-relaxed text-white [drop-shadow:0_2px_12px_rgba(0,0,0,0.8)] [--retard:600ms] sm:text-lg"
     >
       {offre.promesse}
     </p>
 
-    <a
-      href="/contact"
-      data-bouton-anime
-      class="liquid-glass font-texte hero-fade-up mt-10 inline-grid justify-items-center rounded-bouton px-10 py-5 text-[10px] font-medium tracking-[0.25em] text-white uppercase no-underline transition-all duration-500 [--retard:740ms] hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] sm:px-12 sm:py-6 sm:text-xs"
+    {/*
+      Deux chemins, côte à côte : le devis, et l'appel.
+
+      Le bouton du devis était en « verre » transparent, avec un libellé de
+      10 px : le CTA le moins visible de la page, alors que c'est le plus
+      important. Il reprend le blanc plein de `bouton-primaire`, comme tous les
+      autres « Demander un devis » du site.
+
+      Le téléphone vient de LienTelephone, qui lit `SITE.contact` : c'est le
+      canal naturel d'un artisan, et l'accueil n'en affichait aucun.
+    */}
+    <div
+      class="hero-fade-up mt-10 flex w-full max-w-md flex-col items-stretch gap-3 [--retard:740ms] sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center"
     >
-      Demander un devis
-    </a>
+      <a href="/contact" data-bouton-anime data-mesure="devis" class="bouton-primaire">
+        Demander un devis
+      </a>
+      <LienTelephone class="bouton-secondaire inline-flex items-center justify-center gap-2.5 bg-black/30 tracking-[0.12em] backdrop-blur-sm hover:bg-white/10" />
+    </div>
+
+    <p
+      class="hero-fade-up font-texte mt-5 text-sm text-white/85 [drop-shadow:0_1px_8px_rgba(0,0,0,0.9)] [--retard:820ms]"
+    >
+      À partir de {offre.prixDepart}, première année comprise · En ligne en {offre.delai}
+    </p>
   </div>
 </section>

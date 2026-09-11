@@ -1,0 +1,41 @@
+---
+import { Phone } from 'lucide-astro';
+import { SITE } from '../config/site.js';
+
+/*
+ * Le numéro, cliquable. Il n'est écrit qu'une fois, dans `SITE.contact` : ce
+ * composant est le seul endroit qui fabrique un `tel:`, pour qu'un changement
+ * de numéro ne laisse jamais une ancienne version traîner dans un coin.
+ *
+ * `telephone` est au format international (seul format que `tel:` compose sans
+ * ambiguïté), `telephoneAffiche` est la forme lisible.
+ *
+ * Rien n'est rendu si le numéro est vide : un bouton d'appel qui ne compose
+ * rien est pire que pas de bouton.
+ *
+ * `data-mesure="appel"` est la prise de la mesure d'audience, voir
+ * `initMesure` dans effets.js. Sans fournisseur configuré, elle ne fait rien.
+ *
+ * Props :
+ *   class    classes du lien (le composant n'impose aucun style)
+ *   libelle  texte affiché ; par défaut, le numéro lui-même
+ *   icone    affiche le combiné devant le texte (vrai par défaut)
+ */
+const { class: classe, libelle, icone = true } = Astro.props;
+const { telephone, telephoneAffiche } = SITE.contact;
+const texte = libelle ?? telephoneAffiche;
+---
+
+{
+  telephone && (
+    <a
+      href={`tel:${telephone}`}
+      class={classe}
+      data-mesure="appel"
+      aria-label={libelle ? `${libelle}, ${telephoneAffiche}` : `Appeler le ${telephoneAffiche}`}
+    >
+      {icone && <Phone class="h-4 w-4 shrink-0" stroke-width={1.5} aria-hidden="true" />}
+      <span>{texte}</span>
+    </a>
+  )
+}

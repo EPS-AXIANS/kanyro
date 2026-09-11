@@ -11,8 +11,21 @@
  */
 export const offre = {
   nom: 'Site orienté devis',
-  promesse: 'Être trouvé sur votre métier et votre commune, et recevoir des demandes de devis.',
+  /*
+   * « Pensé pour », et pas « vous trouverez » : la page refuse plus bas de
+   * garantir une position sur Google, la promesse du premier écran ne peut pas
+   * la garantir à sa place. C'est une intention de conception, pas un résultat.
+   */
+  promesse:
+    'Un site pensé pour qu’un client qui cherche votre métier dans sa commune vous trouve, voie vos chantiers et vous demande un devis.',
+  /* L'intro de la section Offre. Elle répétait mot pour mot la promesse du
+     hero, deux écrans plus bas ; elle dit maintenant ce qu'on achète. */
+  introduction:
+    'Cinq pages écrites avec vous, vos chantiers en photo, votre fiche Google créée ou reprise. Vous n’avez rien de technique à gérer.',
   prix: '1 900 à 3 900 €',
+  /* Le bas de la fourchette, pour les endroits où la fourchette entière ne
+     tient pas (le premier écran). Le même nombre que `prix`, jamais un autre. */
+  prixDepart: '1 900 €',
   mention: 'une seule fois, tout compris la première année',
   delai: '1 à 2 semaines',
 
