@@ -1,35 +1,76 @@
 ---
 import { MEDIAS } from '../../config/medias.js';
+import LienTelephone from '../LienTelephone.astro';
+
+/*
+ * La fin de l'accueil : la phrase qui résume tout, puis les deux chemins.
+ *
+ * ---- Ce qu'il y avait avant, et pourquoi ça ne tenait pas ----
+ *
+ * La citation était posée seule sur un ciel pastel, en blanc : 3,1:1 de
+ * contraste en médiane, 2,7:1 sur les zones les plus claires (mesuré), pour la
+ * meilleure phrase du site. Et après elle, rien : pas de bouton, pas de pied de
+ * page. Un visiteur qui avait tout lu arrivait dans un cul-de-sac.
+ *
+ * ---- Ce qui change ----
+ *
+ * Le fond est la brique de la Q&R, qui se prolonge : le blanc y fait plus de
+ * 15:1, et la phrase devient le titre de la section plutôt qu'une citation
+ * (ce n'en est pas une, c'est le propos du site). Suivent le devis et l'appel.
+ *
+ * Le voile de nuages reste, en bas, dans le flux et plus en position absolue :
+ * c'est la hauteur de l'image qui fait celle de la section, et plus un
+ * `min-h-screen` qui laissait un écran entier de ciel sous la phrase. Sa
+ * partie haute est transparente : la marge négative la glisse sous le texte
+ * sans jamais le recouvrir (le texte est au-dessus, en `z-20`).
+ */
 ---
 
-<section class="relative min-h-screen w-full overflow-hidden">
-  <img
-    src={MEDIAS.fondCitation}
-    alt=""
-    aria-hidden="true"
-    class="absolute inset-0 h-full w-full object-cover"
-  />
-  <div class="pointer-events-none absolute inset-0 bg-black/25" aria-hidden="true"></div>
-
-  <div
-    class="relative z-20 flex min-h-screen items-center justify-center px-5 lg:items-start lg:justify-start lg:px-20 lg:pt-[25vh]"
-  >
-    <blockquote
-      class="rideau font-titre max-w-xs text-xl leading-snug text-white drop-shadow-[0_2px_20px_rgba(0,0,0,0.35)] sm:max-w-md sm:text-2xl md:max-w-xl md:text-3xl lg:max-w-2xl lg:text-5xl lg:leading-tight"
+<section class="relative overflow-hidden bg-brique" aria-labelledby="titre-fin">
+  <div class="contenu relative z-20 flex flex-col items-center pt-20 text-center lg:pt-28">
+    <h2
+      id="titre-fin"
+      class="rideau font-titre max-w-3xl text-3xl leading-snug tracking-wide sm:text-4xl lg:text-5xl lg:leading-tight"
     >
       Vos clients vous cherchent déjà.{' '}
-      <span class="font-light italic">
-        La question est de savoir qui ils trouvent.
-      </span>
-    </blockquote>
+      <span class="font-light italic">La question est de savoir qui ils trouvent.</span>
+    </h2>
+
+    <p class="font-texte reveal mt-7 max-w-xl text-base leading-relaxed text-white/85 [--retard:120ms]">
+      Décrivez votre activité en deux lignes, ou appelez-moi. Je vous dis
+      franchement si un site peut vous rapporter quelque chose.
+    </p>
+
+    <div
+      class="reveal mt-10 flex w-full max-w-md flex-col items-stretch gap-3 [--retard:200ms] sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center"
+    >
+      <a href="/contact" data-bouton-anime data-mesure="devis" class="bouton-primaire">
+        Demander un devis
+      </a>
+      <LienTelephone class="bouton-secondaire inline-flex items-center justify-center gap-2.5 tracking-[0.12em]" />
+    </div>
+
+    <p class="font-texte reveal mt-5 text-sm text-white/75 [--retard:260ms]">
+      Réponse sous 48 heures, sans engagement.
+    </p>
   </div>
 
-  {/* Voile bas en parallaxe : remonte doucement pendant le défilement. */}
   <img
     src={MEDIAS.voileBas}
     alt=""
     aria-hidden="true"
-    data-parallaxe="80"
-    class="pointer-events-none absolute -bottom-16 left-0 z-10 w-full will-change-transform select-none"
+    width="2688"
+    height="1520"
+    loading="lazy"
+    decoding="async"
+    class="pointer-events-none relative z-10 -mt-[10vw] w-full select-none"
   />
+
+  {/* Le raccord avec le pied de page, qui est sur le noir de la page : sans
+      lui, les nuages s'arrêtaient sur une arête droite. */}
+  <div
+    class="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[12vw] bg-gradient-to-b from-transparent to-fond"
+    aria-hidden="true"
+  >
+  </div>
 </section>
