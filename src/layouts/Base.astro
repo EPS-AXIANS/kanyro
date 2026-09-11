@@ -6,10 +6,11 @@
  * client et le script d'effets.
  */
 import { ClientRouter } from 'astro:transitions';
-import { SITE, BETA, urlAbsolue } from '../config/site.js';
+import { SITE, BETA, cheminPropre, urlAbsolue } from '../config/site.js';
 import { HOTES_MEDIAS } from '../config/medias.js';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import BarreAction from '../components/BarreAction.astro';
 import '../styles/global.css';
 
 /*
@@ -61,16 +62,13 @@ const echapperJsonLd = (json) =>
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029');
 
-const {
-  titre,
-  description,
-  image,
-  jsonLd,
-  noindex = false,
-  /** 'cinema' : barre de pied fixe, sans bloc de liens (page d'accueil).
-   *  'standard' : pied de page complet en fin de flux (pages internes). */
-  variante = 'standard',
-} = Astro.props;
+const { titre, description, image, jsonLd, noindex = false } = Astro.props;
+
+/*
+ * Sur /contact, la barre d'action mobile ne propose que l'appel : son bouton de
+ * devis mènerait à la page où l'on se trouve déjà.
+ */
+const surContact = cheminPropre(Astro.url.pathname) === '/contact';
 
 /*
  * Tant que la bêta tourne sur le domaine personnel, AUCUNE page ne doit entrer
@@ -230,7 +228,9 @@ const csp = [
     }
   </head>
 
-  <body class:list={['bg-fond', variante === 'cinema' && 'pb-14']}>
+  {/* La réserve basse, sous 768 px, est la hauteur de la barre d'action : sans
+      elle, les derniers liens du pied de page passeraient dessous. */}
+  <body class="bg-fond pb-[calc(4.25rem+env(safe-area-inset-bottom))] md:pb-0">
     <a
       href="#contenu-principal"
       class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-texte focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-fond"
@@ -244,7 +244,8 @@ const csp = [
       <slot />
     </main>
 
-    <Footer variante={variante} />
+    <Footer />
+    <BarreAction avecDevis={!surContact} />
 
     {/*
       Servi depuis public/ et chargé par `src`, volontairement.

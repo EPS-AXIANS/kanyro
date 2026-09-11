@@ -1,0 +1,45 @@
+---
+import LienTelephone from './LienTelephone.astro';
+
+/*
+ * La barre d'action du téléphone : « Appeler » et « Demander un devis », en
+ * permanence sous le pouce. Elle remplace la barre fixe d'icônes de l'accueil
+ * (quatorze pixels de côté, sans téléphone, avec deux réseaux morts).
+ *
+ * Sous 768 px seulement. Au-delà, l'écran a la place de montrer le hero, la
+ * fin de page et le pied de page, qui portent tous les deux chemins.
+ *
+ * Deux cibles de 48 px de haut, sur toute la largeur : c'est la taille que
+ * réclame un pouce, pas celle que tolère une souris.
+ *
+ * ⚠ `z-[56]`, entre l'arc de raccord (54) et le lien d'évitement (60). L'arc
+ * passe au premier plan pendant qu'il monte (voir global.css) : sous lui, la
+ * barre disparaîtrait le temps de la montée, et les deux boutons avec.
+ *
+ * Sur /contact, le bouton du devis mènerait à la page où l'on est déjà : il
+ * laisse la place à l'appel seul.
+ */
+const { avecDevis = true } = Astro.props;
+---
+
+<div
+  class="barre-action fixed inset-x-0 bottom-0 z-[56] border-t border-trait bg-fond/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
+>
+  <div class="mx-auto flex max-w-md gap-2">
+    <LienTelephone
+      libelle="Appeler"
+      class="font-texte flex min-h-12 flex-1 items-center justify-center gap-2 rounded-bouton border border-white/60 text-sm font-semibold tracking-[0.08em] text-texte no-underline"
+    />
+    {
+      avecDevis && (
+        <a
+          href="/contact"
+          data-mesure="devis"
+          class="font-texte flex min-h-12 flex-[1.4] items-center justify-center rounded-bouton bg-texte text-sm font-semibold tracking-[0.08em] text-fond no-underline"
+        >
+          Demander un devis
+        </a>
+      )
+    }
+  </div>
+</div>

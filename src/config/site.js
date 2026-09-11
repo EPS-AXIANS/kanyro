@@ -71,6 +71,9 @@ export const SITE = {
    * alimentent `areaServed`.
    */
   zone: {
+    /* Ce qui s'affiche au visiteur. C'est une ZONE d'intervention, pas une
+       adresse : elle ne sert ni aux mentions légales ni au JSON-LD. */
+    libelle: 'Arrageois, bassin minier et métropole lilloise',
     ville: 'Arras et Lille',
     departement: 'Pas-de-Calais et Nord',
     region: 'Hauts-de-France',

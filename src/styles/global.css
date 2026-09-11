@@ -1186,12 +1186,13 @@
    * AU PREMIER PLAN, et pas seulement au-dessus du contenu de sa section.
    *
    * À 10, l'arc recouvrait bien les titres et le texte, mais il passait SOUS la
-   * barre de navigation (z-50) et sous le dégradé de pied de page (z-40) : la
-   * courbe montait, et ces deux-là restaient posés par-dessus, ce qui trahit le
-   * raccord au moment précis où il doit se lire comme un seul aplat.
+   * barre de navigation (z-50) : la courbe montait, et la barre restait posée
+   * par-dessus, ce qui trahit le raccord au moment précis où il doit se lire
+   * comme un seul aplat.
    *
-   * L'échelle du site, du fond vers le haut : le dégradé de pied à 40, la barre
-   * à 50, l'arc à 54, le lien d'évitement à 60.
+   * L'échelle du site, du fond vers le haut : la barre de navigation à 50,
+   * l'arc à 54, la barre d'action mobile à 56 (elle doit rester utilisable
+   * pendant la montée, voir BarreAction.astro), le lien d'évitement à 60.
    *
    * ⚠ SOUS 60, TOUJOURS. Le lien d'évitement ne s'affiche qu'au clavier et doit
    * rester visible quand il le fait. (Le plafond était 55 tant qu'une bille de
