@@ -142,9 +142,29 @@ const retraitsDroite = ['md:ml-[2.5%]', 'md:ml-[7.5%]', 'md:ml-[12.5%]'];
 ---
 
 <div class="relative">
+  {/*
+    ⚠ LE BAS DE LA SECTION EST LA PLACE DU NUAGE, ET IL SE MESURE EN LARGEUR.
+
+    Le nuage de transition, posé plus bas, s'étire sur toute la largeur : sa
+    hauteur suit donc celle de l'écran en LARGEUR, à 56,5 vw pour une PNG de
+    2 688 × 1 520. Sa silhouette remonte jusqu'à environ 37 vw au-dessus de la
+    couture. Un rembourrage de 50vh seul ne suivait que la hauteur : sur un
+    écran large et bas, le nuage montait dans les dernières questions (206 px
+    sur un 1911 × 944, 146 px sur un 1920 × 1080), passait sous leur texte, et
+    la tuile de survol le coupait d'un rectangle net.
+
+    D'où `max(50vh, 38vw + 3rem)` : la place du nuage, plus un peu d'air.
+    Mesuré en suivant la silhouette réelle de la PNG, parallaxe comprise, de
+    1 024 à 2 560 px de large : il reste au moins 59 px entre le nuage et la
+    dernière question. Sur tablette et téléphone, 50vh reste le plus grand, et
+    rien ne change.
+
+    Si le nuage change d'image ou de décalage (`translate-y-[36%]`), c'est ce
+    38vw qu'il faut revoir.
+  */}
   <section
     id="questions"
-    class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[50vh] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
+    class="relative overflow-hidden bg-[#410C01] px-4 pt-20 pb-[max(50vh,calc(38vw_+_3rem))] sm:px-8 md:px-16 lg:px-28 lg:pt-32"
   >
     <h2
       class="rideau font-titre flex items-baseline justify-center gap-1 text-4xl tracking-wide sm:text-5xl md:text-6xl lg:text-7xl"
