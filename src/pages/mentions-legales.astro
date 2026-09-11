@@ -1,21 +1,44 @@
 ---
 import Base from '../layouts/Base.astro';
-import { SITE } from '../config/site.js';
+import LienTelephone from '../components/LienTelephone.astro';
+import {
+  SITE,
+  adresseLegale,
+  champsLegauxManquants,
+  mentionTva,
+  sirenValide,
+} from '../config/site.js';
 
 /*
- * Les champs vides (SIREN notamment) se remplissent dans src/config/site.js
- * après immatriculation. Publier le site avec un SIREN manquant est une
- * infraction à l'article 19 de la LCEN — à traiter avant la mise en ligne.
+ * N'affiche que des informations réelles.
+ *
+ * La version précédente publiait « SIREN : Arrive prochainement » et une
+ * adresse « Arras et Lille (62000 et 59000) » : un texte d'attente présenté
+ * comme une information légale, et une zone d'intervention présentée comme une
+ * adresse. Désormais chaque ligne n'apparaît que si sa donnée existe ET a la
+ * bonne forme (voir `sirenValide` et `adresseLegale` dans site.js).
+ *
+ * Ce qui manque ne s'affiche pas au visiteur : c'est écrit dans les journaux du
+ * build, pour qu'on le voie au moment de mettre en ligne, et en développement
+ * dans un encart. Publier des mentions incomplètes reste une infraction à
+ * l'article 6 III de la LCEN : ce fichier ne peut pas la corriger à la place
+ * des données, il peut seulement refuser de la maquiller.
  */
-const champsManquants = [
-  !SITE.legal.siren && 'SIREN',
-  !SITE.contact.telephone && 'téléphone',
-].filter(Boolean);
+const siren = sirenValide();
+const adresse = adresseLegale();
+const tva = mentionTva();
+const manquants = champsLegauxManquants();
+
+if (manquants.length) {
+  console.warn(
+    `\n⚠ Mentions légales incomplètes : ${manquants.join(', ')}.\n  À renseigner dans src/config/site.js (SITE.legal), avec des données réelles.\n`
+  );
+}
 ---
 
 <Base
   titre="Mentions légales"
-  description="Mentions légales et informations sur le traitement des données."
+  description="Mentions légales du site Kanyro et informations sur le traitement des données personnelles."
   noindex={true}
 >
   <section class="contenu sous-navbar max-w-3xl pb-24">
@@ -23,67 +46,110 @@ const champsManquants = [
     <h1 class="titre-page mt-6">Mentions légales</h1>
 
     {
-      champsManquants.length > 0 && (
+      import.meta.env.DEV && manquants.length > 0 && (
         <p class="font-texte mt-10 rounded-2xl border border-signal bg-brique p-6 text-sm leading-relaxed">
-          <strong>À compléter avant la mise en ligne :</strong> {champsManquants.join(', ')}.
-          Ces informations sont obligatoires (article 19 de la LCEN). Renseignez-les
-          dans <code class="text-signal-vif">src/config/site.js</code>.
+          <strong>Visible en développement seulement.</strong> Manque : {manquants.join(', ')}.
+          À renseigner dans <code class="text-signal-vif">src/config/site.js</code>, avec des
+          données réelles.
         </p>
       )
     }
 
     <h2 class="font-titre mt-14 text-2xl tracking-wide">Éditeur du site</h2>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
-      {SITE.nom}<br />
-      {SITE.legal.formeJuridique}<br />
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      {SITE.nom}, {SITE.legal.formeJuridique.toLowerCase()}<br />
       Directeur de la publication : {SITE.legal.directeurPublication}<br />
-      {SITE.zone.ville} ({SITE.zone.codePostal}), {SITE.zone.region}<br />
-      {SITE.legal.siren && <>SIREN : {SITE.legal.siren}<br /></>}
-      Contact :{' '}
+      {adresse && <>{adresse.rue}, {adresse.codePostal} {adresse.ville}<br /></>}
+      {siren && <>SIREN : {siren}<br /></>}
+      Téléphone :{' '}
+      <LienTelephone icone={false} class="text-signal-vif" /><br />
+      Email :{' '}
       <a class="text-signal-vif" href={`mailto:${SITE.contact.email}`}>
         {SITE.contact.email}
       </a>
     </p>
 
     <h2 class="font-titre mt-12 text-2xl tracking-wide">Hébergement</h2>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
       {SITE.legal.hebergeur}
+      {SITE.legal.hebergeurTelephone && <><br />Téléphone : {SITE.legal.hebergeurTelephone}</>}
+      {
+        SITE.legal.hebergeurSite && (
+          <>
+            <br />
+            <a class="text-signal-vif" href={SITE.legal.hebergeurSite} rel="noopener">
+              {SITE.legal.hebergeurSite.replace(/^https:\/\//, '')}
+            </a>
+          </>
+        )
+      }
     </p>
 
+    {
+      tva && (
+        <>
+          <h2 class="font-titre mt-12 text-2xl tracking-wide">Prix</h2>
+          <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+            Les prix affichés sur ce site sont des prix indicatifs ; seul le devis signé
+            fait foi. {tva}.
+          </p>
+        </>
+      )
+    }
+
     <h2 class="font-titre mt-12 text-2xl tracking-wide">Données personnelles</h2>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
-      Les informations transmises via le formulaire de contact (nom, entreprise,
-      email, téléphone, message) servent uniquement à répondre à votre demande. Elles
-      ne sont ni revendues, ni transmises à des tiers à des fins commerciales, et sont
-      conservées trois ans à compter du dernier échange.
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      <strong class="text-texte">Responsable du traitement.</strong>{' '}
+      {SITE.legal.directeurPublication}, pour {SITE.nom}. Pour toute question :{' '}
+      <a class="text-signal-vif" href={`mailto:${SITE.contact.email}`}>{SITE.contact.email}</a>.
     </p>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
-      Vous disposez d'un droit d'accès, de rectification et de suppression de ces
-      données. Pour l'exercer, écrivez à{' '}
-      <a class="text-signal-vif" href={`mailto:${SITE.contact.email}`}>
-        {SITE.contact.email}
-      </a>.
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      <strong class="text-texte">Ce qui est collecté, et pourquoi.</strong> Les informations
+      transmises par le formulaire de contact (nom, entreprise, email, téléphone, métier,
+      disponibilités et message) servent uniquement à répondre à votre demande et, si vous le
+      souhaitez, à établir un devis. La base légale est l'exécution de mesures
+      précontractuelles prises à votre demande (article 6.1.b du RGPD).
+    </p>
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      <strong class="text-texte">Qui y a accès.</strong> Moi seul. Elles ne sont ni revendues, ni
+      transmises à des tiers, ni utilisées pour de la prospection. Le message arrive dans la
+      messagerie de {SITE.nom}, hébergée sur le même serveur que le site.
+    </p>
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      <strong class="text-texte">Combien de temps.</strong> Trois ans à compter de notre dernier
+      échange, puis elles sont supprimées.
+    </p>
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      <strong class="text-texte">Contre les abus.</strong> À l'envoi du formulaire, votre adresse IP
+      est enregistrée sous une forme non réversible, pour limiter le nombre d'envois par heure.
+      Elle ne sert à rien d'autre et n'est jamais associée à votre demande.
+    </p>
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      <strong class="text-texte">Vos droits.</strong> Vous pouvez demander l'accès à vos données,
+      leur rectification, leur effacement, la limitation de leur traitement, vous y opposer, ou
+      les recevoir dans un format réutilisable, en écrivant à{' '}
+      <a class="text-signal-vif" href={`mailto:${SITE.contact.email}`}>{SITE.contact.email}</a>.
+      Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation
+      à la CNIL (<a class="text-signal-vif" href="https://www.cnil.fr" rel="noopener">cnil.fr</a>).
     </p>
 
     <h2 class="font-titre mt-12 text-2xl tracking-wide">Cookies</h2>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
-      Ce site ne dépose aucun cookie et n'utilise aucun outil de mesure d'audience
-      tiers. C'est aussi pour ça qu'aucune bannière ne vous barre l'écran.
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      Ce site ne dépose aucun cookie et n'utilise aucun outil de mesure d'audience tiers. C'est
+      aussi pour ça qu'aucune bannière ne vous barre l'écran.
     </p>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
-      Une seule exception, et elle ne sort pas de votre navigateur : si l'envoi du
-      formulaire échoue, ce que vous aviez saisi est conservé le temps de vous le
-      réafficher, puis effacé. Rien n'est transmis, et tout disparaît à la
-      fermeture de l'onglet.
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      Une seule exception, et elle ne sort pas de votre navigateur : si l'envoi du formulaire
+      échoue, ce que vous aviez saisi est conservé le temps de vous le réafficher, puis effacé.
+      Rien n'est transmis, et tout disparaît à la fermeture de l'onglet.
     </p>
 
-    <h2 class="font-titre mt-12 text-2xl tracking-wide">
-      Propriété intellectuelle
-    </h2>
-    <p class="font-texte mt-4 text-sm leading-relaxed text-texte-doux">
-      Les textes et visuels présents sur ce site sont la propriété de {SITE.nom}, sauf
-      mention contraire. Les photographies de chantiers sont publiées avec l'accord des
-      clients concernés.
+    <h2 class="font-titre mt-12 text-2xl tracking-wide">Propriété intellectuelle</h2>
+    <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+      Les textes de ce site sont la propriété de {SITE.nom}. La vidéo et les illustrations de
+      ciel et de nuages sont utilisées sous licence commerciale et restent la propriété de leurs
+      auteurs. Les captures de réalisations montrent des sites conçus par {SITE.nom} ; les
+      textes et photographies qu'elles reproduisent appartiennent aux clients concernés.
     </p>
   </section>
 </Base>

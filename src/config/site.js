@@ -61,23 +61,18 @@ export const SITE = {
   /*
    * Zone d'intervention : Arrageois, bassin minier, métropole lilloise.
    *
-   * ⚠ `ville` et `codePostal` doivent porter l'ADRESSE RÉELLE de l'entreprise,
-   * pas le centre géographique de la zone couverte : ils alimentent les mentions
-   * légales et le JSON-LD `LocalBusiness`. Arras est un point de départ
-   * cohérent — 20 min du bassin minier, 45 min de Lille — mais à remplacer par
-   * l'adresse d'immatriculation avant la mise en ligne.
+   * C'est une ZONE, pas une adresse. Elle portait auparavant `ville: 'Arras et
+   * Lille'` et `codePostal: '62000 et 59000'`, recopiés tels quels dans les
+   * mentions légales et dans l'adresse du JSON-LD : deux villes et deux codes
+   * postaux dans des champs qui n'en attendent qu'un, soit une adresse fictive.
+   * L'adresse réelle vit désormais dans `legal.adresse`, et nulle part ailleurs.
    *
    * Les communes réellement couvertes sont dans src/data/communes.json et
    * alimentent `areaServed`.
    */
   zone: {
-    /* Ce qui s'affiche au visiteur. C'est une ZONE d'intervention, pas une
-       adresse : elle ne sert ni aux mentions légales ni au JSON-LD. */
     libelle: 'Arrageois, bassin minier et métropole lilloise',
-    ville: 'Arras et Lille',
-    departement: 'Pas-de-Calais et Nord',
     region: 'Hauts-de-France',
-    codePostal: '62000 et 59000',
     pays: 'FR',
   },
 
@@ -92,16 +87,86 @@ export const SITE = {
     facebook: '',
   },
 
-  /** Renseigner après immatriculation — sert aussi aux mentions légales. */
+  /*
+   * Mentions légales (LCEN, article 6 III) — ne renseigner QUE des données
+   * réelles. Un champ vide n'est pas affiché ; un texte d'attente, lui, le
+   * serait comme une information légale. C'est ce qui s'est passé : « SIREN :
+   * Arrive prochainement » a été publié en production, et le garde-fou des
+   * mentions légales, qui ne testait que le vide, ne s'est pas déclenché.
+   * `champsLegauxManquants()` plus bas vérifie maintenant la FORME des
+   * données, et le build signale ce qui manque.
+   */
   legal: {
-    siren: 'Arrive prochainement',
+    /* Neuf chiffres, espaces permis. Vide tant que l'immatriculation n'a pas
+       eu lieu. */
+    siren: '',
     formeJuridique: 'Entreprise individuelle',
     directeurPublication: 'Elio Pallois',
-    /* Identification de l'hébergeur — obligation de l'article 19 de la LCEN.
-       VPS Hostinger. À corriger si vous changez d'hébergement. */
+    /* Adresse de l'établissement ou de la domiciliation, telle qu'elle figure
+       à l'immatriculation. Vide tant qu'elle n'est pas fixée : ni la zone
+       d'intervention, ni une ville « de départ ». */
+    adresse: {
+      rue: '',
+      codePostal: '',
+      ville: '',
+    },
+    /*
+     * Régime de TVA, qui décide de la mention affichée à côté des prix.
+     *   'franchise' : TVA non applicable, article 293 B du CGI.
+     *   'assujetti' : les prix sont affichés HT.
+     *   ''          : aucune mention (et le build le signale).
+     *
+     * 'franchise' est le régime sur lequel le modèle de devis est construit
+     * (docs/devis-modele.md, « micro-entreprise en franchise de TVA »). À
+     * confirmer au moment de l'immatriculation, et à changer ici s'il diffère.
+     */
+    tva: 'franchise',
+    /* Identification de l'hébergeur — obligation de l'article 6 III de la
+       LCEN, qui demande aussi son numéro de téléphone : à ajouter dans
+       `hebergeurTelephone` une fois vérifié, jamais de mémoire. VPS
+       Hostinger. À corriger si vous changez d'hébergement. */
     hebergeur: 'Hostinger International, Ltd., 61 Lordou Vyronos Street, Lumiel Commercial Centre, 4th floor, 6023 Larnaca, Chypre',
+    hebergeurTelephone: '',
+    hebergeurSite: 'https://www.hostinger.fr',
   },
 };
+
+/** Le SIREN s'il a la forme d'un SIREN (neuf chiffres), sinon une chaîne vide. */
+export function sirenValide() {
+  const brut = (SITE.legal.siren ?? '').replace(/\s/g, '');
+  return /^\d{9}$/.test(brut) ? brut.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3') : '';
+}
+
+/** L'adresse légale si elle est complète, sinon `null`. */
+export function adresseLegale() {
+  const { rue, codePostal, ville } = SITE.legal.adresse ?? {};
+  return rue && /^\d{5}$/.test(codePostal ?? '') && ville ? { rue, codePostal, ville } : null;
+}
+
+/**
+ * La mention à poser à côté d'un prix, selon `legal.tva`. Une seule formulation
+ * pour tout le site : l'offre, le suivi et les mentions légales la lisent ici.
+ */
+export function mentionTva() {
+  if (SITE.legal.tva === 'franchise') return 'TVA non applicable, article 293 B du CGI';
+  if (SITE.legal.tva === 'assujetti') return 'Prix hors taxes';
+  return '';
+}
+
+/**
+ * Ce qui manque aux mentions légales. Lu par la page des mentions légales, qui
+ * l'écrit dans les journaux du build : c'est à la mise en ligne qu'il faut le
+ * voir, pas au visiteur qu'il faut le montrer.
+ */
+export function champsLegauxManquants() {
+  return [
+    !sirenValide() && 'SIREN (neuf chiffres)',
+    !adresseLegale() && 'adresse (rue, code postal, ville)',
+    !SITE.contact.telephone && 'téléphone',
+    !SITE.legal.hebergeurTelephone && "téléphone de l'hébergeur",
+    !SITE.legal.tva && 'régime de TVA',
+  ].filter(Boolean);
+}
 
 /**
  * Interrupteurs de périmètre.

@@ -1,4 +1,4 @@
-import { SITE, reseauxActifs, urlAbsolue } from './site.js';
+import { SITE, adresseLegale, reseauxActifs, urlAbsolue } from './site.js';
 
 /**
  * JSON-LD de l'agence.
@@ -18,18 +18,30 @@ export function agenceJsonLd(communes = []) {
     url: SITE.url,
     email: SITE.contact.email,
     priceRange: '€€',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: SITE.zone.ville,
-      postalCode: SITE.zone.codePostal,
-      addressRegion: SITE.zone.region,
-      addressCountry: SITE.zone.pays,
-    },
     areaServed: communes.map((c) => ({
       '@type': 'City',
       name: typeof c === 'string' ? c : c.nom,
     })),
   };
+
+  /*
+   * L'adresse n'est émise que si elle est réelle et complète. Elle valait
+   * « Arras et Lille » et « 62000 et 59000 » : deux villes et deux codes postaux
+   * dans des champs qui n'en attendent qu'un. Une adresse fausse dans les
+   * données structurées est pire qu'une adresse absente — `areaServed` dit déjà
+   * où l'agence intervient.
+   */
+  const adresse = adresseLegale();
+  if (adresse) {
+    noeud.address = {
+      '@type': 'PostalAddress',
+      streetAddress: adresse.rue,
+      postalCode: adresse.codePostal,
+      addressLocality: adresse.ville,
+      addressRegion: SITE.zone.region,
+      addressCountry: SITE.zone.pays,
+    };
+  }
 
   if (SITE.contact.telephone) noeud.telephone = SITE.contact.telephone;
 
