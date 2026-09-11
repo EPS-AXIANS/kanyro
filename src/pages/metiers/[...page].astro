@@ -25,7 +25,7 @@ const jsonLd = filAriane([
 ---
 
 <Base
-  titre="Les métiers du bâtiment que j'accompagne"
+  titre="Un site internet pour chaque métier du bâtiment"
   description="Sites internet et référencement local pour couvreurs, maçons, plombiers-chauffagistes, électriciens, menuisiers et plaquistes des Hauts-de-France."
   jsonLd={jsonLd}
 >
@@ -49,17 +49,17 @@ const jsonLd = filAriane([
         metiers.map((m) => (
           <li class="carte reveal p-8">
             <h2 class="font-titre text-3xl tracking-wide">{m.nom}</h2>
-            <p class="font-texte mt-3 text-sm text-signal-vif">{m.accroche}</p>
-            <p class="font-texte mt-5 text-sm leading-relaxed text-texte-doux">
+            <p class="font-texte mt-3 text-[0.9375rem] text-signal-vif">{m.accroche}</p>
+            <p class="font-texte mt-5 text-[0.9375rem] leading-relaxed text-texte-doux">
               {m.contexte}
             </p>
 
-            <p class="font-texte mt-6 text-xs text-texte-faible">
-              Chantier moyen : <span class="text-texte-doux">{m.panierMoyen}</span>
+            <p class="font-texte mt-6 text-sm text-texte-faible">
+              Ordre de grandeur d'un chantier : <span class="chiffres text-texte-doux">{m.panierMoyen}</span>
             </p>
 
             <a href={`/metiers/${m.slug}`} class="bouton-secondaire mt-7">
-              Voir la page
+              Voir la page<span class="sr-only"> {m.nom}</span>
             </a>
           </li>
         ))
@@ -72,9 +72,9 @@ const jsonLd = filAriane([
       Où j'interviens
     </h2>
     <p
-      class="font-texte reveal mx-auto mt-5 max-w-xl text-sm leading-relaxed text-texte-doux"
+      class="font-texte reveal mx-auto mt-5 max-w-xl text-base leading-relaxed text-texte-doux"
     >
-      Je me déplace sur vos chantiers. Au-delà de ce périmètre on peut travailler à
+      Je me déplace sur vos chantiers. Au-delà de ce périmètre, on peut travailler à
       distance, mais autant être honnête : je fais de meilleures photos quand je suis
       sur place.
     </p>

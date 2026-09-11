@@ -39,7 +39,7 @@ const jsonLd = filAriane([
   jsonLd={jsonLd}
 >
   <nav class="contenu sous-navbar font-texte pb-6 text-xs tracking-[0.2em] text-texte-faible uppercase" aria-label="Fil d'Ariane">
-    <a href="/metiers" class="hover:text-texte">Métiers</a>
+    <a href="/metiers" class="-my-3.5 inline-block py-3.5 hover:text-texte">Métiers</a>
     <span class="mx-2" aria-hidden="true">·</span>
     <span class="text-texte-doux">{metier.nom}</span>
   </nav>
@@ -54,7 +54,7 @@ const jsonLd = filAriane([
     <p class="font-texte reveal mt-6 max-w-2xl text-base leading-relaxed text-texte-doux [--retard:160ms]">
       {metier.contexte}
     </p>
-    <a href="/contact" data-bouton-anime class="bouton-primaire reveal mt-10 [--retard:240ms]">
+    <a href="/contact" data-bouton-anime data-mesure="devis" class="bouton-primaire reveal mt-10 [--retard:240ms]">
       Demander un devis
     </a>
   </section>
@@ -96,8 +96,8 @@ const jsonLd = filAriane([
         </ul>
 
         <p class="font-texte reveal mt-9 border-l border-signal pl-5 text-sm leading-relaxed text-white/60">
-          Chantier moyen dans votre métier : <strong class="text-white">{metier.panierMoyen}</strong>.
-          C'est l'ordre de grandeur à comparer au prix du site,{' '}
+          Ordre de grandeur d'un chantier dans votre métier : <strong class="chiffres text-white">{metier.panierMoyen}</strong>.
+          À comparer au prix du site,{' '}
           <span class="whitespace-nowrap">{offre.prix}</span>, payé une seule fois.
         </p>
       </div>
