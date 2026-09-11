@@ -215,7 +215,9 @@ import Visuel from '../Visuel.astro';
     <p
       class="hero-fade-up font-texte mt-5 text-sm text-white/85 [drop-shadow:0_1px_8px_rgba(0,0,0,0.9)] [--retard:820ms]"
     >
-      À partir de {offre.prixDepart}, première année comprise · En ligne en {offre.delai}
+      <span class="chiffres whitespace-nowrap">À partir de {offre.prixDepart}, première année comprise</span>
+      <span aria-hidden="true">·</span>
+      <span class="chiffres whitespace-nowrap">En ligne en {offre.delai}</span>
     </p>
   </div>
 </section>
