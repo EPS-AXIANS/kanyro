@@ -1,0 +1,35 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  kanyro.tech — VPS Hostinger (srv1917309.hstgr.cloud)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Version du dépôt de /etc/caddy/Caddyfile. Pour la mettre en place :
+#
+#   sudo cp deploy/caddy/Caddyfile deploy/caddy/kanyro.caddy /etc/caddy/
+#   sudo caddy validate --config /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+#
+# Puis vérifier : `curl -sI https://kanyro.tech/` et
+# `curl -sI https://kanyro.tech/nimporte` doivent montrer
+# strict-transport-security et content-security-policy, sans `server:`.
+
+import kanyro.caddy
+
+# www : une redirection permanente vers l'adresse canonique. Il servait le
+# site en 200, soit deux copies du même contenu.
+www.kanyro.tech {
+	import kanyro_entetes
+	redir https://kanyro.tech{uri} permanent
+}
+
+kanyro.tech {
+	import kanyro_site /var/www/kanyro
+}
+
+# ─── Serveur mail ───────────────────────────────────────────────────────────
+# Ce bloc n'existe que pour que Caddy obtienne et renouvelle le certificat
+# Let's Encrypt de mail.kanyro.tech, partagé avec Postfix/Dovecot via le
+# script de synchronisation /usr/local/bin/sync-mail-certs.sh.
+mail.kanyro.tech {
+	root * /var/www/mail
+	file_server
+}

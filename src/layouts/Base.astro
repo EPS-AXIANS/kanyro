@@ -135,16 +135,26 @@ const imageAbsolue = image ? urlAbsolue(image) : null;
  * Assemble une directive sans espace parasite quand la liste d'hôtes est vide —
  * ce qui est désormais le cas de `fontes` et `styles`, les fontes étant
  * auto-hébergées. Une valeur comme `font-src 'self' ` reste valide, mais elle se
- * retrouve telle quelle dans l'en-tête et rend la comparaison avec `.htaccess`
+ * retrouve telle quelle dans l'en-tête et rend la comparaison avec l’en-tête de Caddy
  * pénible à l'œil.
  */
 const directive = (nom, ...valeurs) => [nom, ...valeurs.flat()].join(' ');
 
+/*
+ * ⚠ Cette balise n'est plus la seule CSP. La production l'envoie aussi en
+ * en-tête HTTP (deploy/caddy/kanyro.caddy), avec deux directives qu'une balise
+ * <meta> ne peut pas porter : `frame-ancestors`, ignorée ici par
+ * spécification (elle y figurait, et chaque page levait une erreur dans la
+ * console), et `upgrade-insecure-requests` (voir plus bas). Le navigateur
+ * applique les deux politiques ensemble : elles doivent rester le miroir l'une
+ * de l'autre, sans quoi une ressource autorisée d'un côté serait bloquée de
+ * l'autre. La balise reste pour qu'un déploiement sans en-tête (un autre
+ * serveur, une préproduction) garde une politique.
+ */
 const csp = [
   "default-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
-  "frame-ancestors 'none'",
   "object-src 'none'",
   directive('img-src', "'self'", 'data:', HOTES_MEDIAS.images),
   directive('media-src', "'self'", HOTES_MEDIAS.video),
@@ -168,8 +178,8 @@ const csp = [
    * localhost, que la spec exempte les adresses de bouclage. Symptôme
    * déroutant, cause invisible.
    *
-   * Elle est donc portée par l'en-tête HTTP (public/.htaccess et netlify.toml),
-   * où elle n'est envoyée que par un serveur qui sert effectivement en HTTPS.
+   * Elle est donc portée par l'en-tête HTTP de Caddy (deploy/caddy/kanyro.caddy),
+   * qui n'est envoyé que par un serveur qui sert effectivement en HTTPS.
    */
 ].join('; ');
 ---
@@ -182,7 +192,7 @@ const csp = [
     {
       /* Émise en production seulement : le serveur de développement d'Astro
          injecte ses styles en inline, que style-src 'self' bloquerait. En ligne,
-         c'est l'en-tête HTTP de netlify.toml qui fait autorité. */
+         l'en-tête HTTP de Caddy (deploy/caddy/kanyro.caddy) s'y ajoute. */
     }
     {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={csp} />}
     <meta name="referrer" content="strict-origin-when-cross-origin" />

@@ -1,0 +1,119 @@
+# ═══════════════════════════════════════════════════════════════════════════
+#  Kanyro — blocs réutilisables de la configuration Caddy
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Importé par deploy/caddy/Caddyfile (production) et par
+# deploy/caddy/essai-local.Caddyfile (essai sur le poste). Les deux servent donc
+# exactement les mêmes en-têtes, les mêmes redirections et le même cache : ce
+# qui a été vérifié en local est ce qui partira en ligne.
+#
+# ⚠ La production lit /etc/caddy/Caddyfile, HORS du dépôt. Ce fichier-ci ne
+# change rien tant qu'il n'y a pas été copié (voir le README, « Déploiement »).
+
+# ─── En-têtes de sécurité, sur TOUTES les réponses ─────────────────────────
+#
+# Ils étaient absents des réponses d'erreur (404) : le bloc contenait `-Server`,
+# ce qui le rend « différé » (appliqué à l'écriture de la réponse du flux
+# principal), et une erreur passe par `handle_errors`, qui ne l'hérite pas.
+# D'où ce bloc nommé, importé dans le flux principal ET dans `handle_errors`.
+#
+# HSTS : un an, SANS includeSubDomains. Le certificat de kanyro.tech est valide
+# et le HTTP redirige déjà vers HTTPS ; mail.kanyro.tech a son propre
+# certificat, mais un futur sous-domaine servi en HTTP seul serait coupé par
+# includeSubDomains. Une fois l'en-tête envoyé, les navigateurs refusent le HTTP
+# pendant un an : ne pas l'ajouter à un domaine dont le HTTPS n'est pas vérifié.
+#
+# Pas de Cross-Origin-Opener-Policy : essayé le 11 septembre 2026, il faisait
+# changer de processus de rendu à chaque page, et le navigateur de test perdait
+# alors ses caractéristiques de pointeur (Lenis et les survols ne se chargeaient
+# plus). Sans fenêtre ouverte vers un tiers, il n'apportait presque rien.
+(kanyro_entetes) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+		-Server
+	}
+}
+
+# ─── La CSP, en en-tête HTTP ───────────────────────────────────────────────
+#
+# Elle n'existait que dans la balise <meta> de src/layouts/Base.astro, où deux
+# directives sont sans effet par spécification : `frame-ancestors` (ignorée en
+# <meta>, avec une erreur dans la console à chaque page) et
+# `upgrade-insecure-requests` (volontairement absente de la balise, voir
+# Base.astro). Ici, les deux s'appliquent.
+#
+# La politique doit rester le MIROIR de celle de Base.astro : les deux
+# s'appliquent ensemble (le navigateur respecte la plus stricte), et une
+# ressource ajoutée d'un côté seulement serait bloquée par l'autre.
+#
+# ⚠ Pas sur /demo/* : la démonstration du chantier de reliure est un autre site,
+# avec des attributs `style` dans son balisage et une carte servie par un tiers.
+# La politique de Kanyro la casserait. D'où l'argument : le matcher auquel
+# s'applique l'en-tête (`@kanyro_hors_demo` dans le flux principal, `*` dans
+# `handle_errors`, où la page servie est toujours la 404 de Kanyro). Un matcher
+# nommé ne peut être défini qu'une fois par site : il vit dans kanyro_site.
+(kanyro_csp) {
+	header {args[0]} Content-Security-Policy "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self'; upgrade-insecure-requests"
+}
+
+# ─── Le site ───────────────────────────────────────────────────────────────
+#
+# Argument : le dossier servi (/var/www/kanyro en production).
+(kanyro_site) {
+	root * {args[0]}
+	encode zstd gzip
+
+	import kanyro_entetes
+	@kanyro_hors_demo not path /demo/*
+	import kanyro_csp @kanyro_hors_demo
+
+	# Une seule adresse par page. /index.html, /contact/ et /404 répondaient en
+	# 200 à côté de /, /contact et d'une vraie erreur : le canonical limitait la
+	# casse, une redirection permanente la supprime. La démo garde ses propres
+	# conventions d'URL : elle n'est pas concernée.
+	@index_html path /index.html
+	redir @index_html / permanent
+
+	@slash_final {
+		path_regexp slash ^(/.+)/$
+		not path /demo/*
+	}
+	redir @slash_final {re.slash.1}{?query} permanent
+
+	@page_404 path /404 /404.html
+	error @page_404 404
+
+	# Cache. Les fichiers de /_astro/ ont un nom haché : ils ne changent jamais
+	# sous la même adresse, d'où un an et `immutable`. Lenis (/js/) et l'image de
+	# partage (/images/) ne sont pas hachés : un jour et une semaine, avec
+	# revalidation par ETag ensuite.
+	@astro path /_astro/*
+	header @astro Cache-Control "public, max-age=31536000, immutable"
+	@js path /js/*
+	header @js Cache-Control "public, max-age=86400"
+	@images path /images/*
+	header @images Cache-Control "public, max-age=604800"
+
+	try_files {path} {path}.html {path}/index.html
+
+	# Exécute les .php (formulaire de contact) via PHP-FPM, puis file_server.
+	php_fastcgi unix//run/php/php-fpm.sock
+
+	file_server
+
+	handle_errors {
+		import kanyro_entetes
+		import kanyro_csp *
+		# Une erreur ne se met pas en cache. Sans cette ligne, un fichier de
+		# /_astro/ introuvable repartait avec le `immutable` d'un an posé plus
+		# haut : un navigateur qui l'avait demandé pendant une mise en ligne
+		# gardait l'erreur un an.
+		header Cache-Control "no-store"
+		rewrite * /404.html
+		file_server
+	}
+}

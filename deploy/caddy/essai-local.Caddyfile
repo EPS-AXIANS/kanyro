@@ -1,0 +1,25 @@
+# Essai local de la configuration de production, sans TLS ni droits root :
+#
+#   npm run build
+#   KANYRO_DIST="$PWD/dist" caddy run --config deploy/caddy/essai-local.Caddyfile
+#
+# puis `curl -sI http://127.0.0.1:8088/…`. Les blocs sont ceux de kanyro.caddy,
+# importés tels quels. PHP-FPM n'est pas joignable d'ici : /contact.php ne
+# répondra pas, tout le reste si.
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+import kanyro.caddy
+
+http://127.0.0.1:8088 {
+	import kanyro_site {$KANYRO_DIST}
+}
+
+# Le « www » de l'essai : un second port.
+http://127.0.0.1:8089 {
+	import kanyro_entetes
+	redir http://127.0.0.1:8088{uri} permanent
+}
