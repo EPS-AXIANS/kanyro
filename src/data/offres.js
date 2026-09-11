@@ -252,7 +252,7 @@ export const offreMensuelle = {
   horsPerimetre: [
     'Les nouvelles pages et les refontes font l’objet d’un devis à part',
     'Je ne gère pas vos réseaux sociaux au quotidien',
-    'Je ne réécris pas vos textes — les corrections courtes, oui',
+    'Je ne réécris pas vos textes, mais les corrections courtes sont comprises',
   ],
 
   /* Sans porte de sortie explicite, un forfait se lit comme un piège, et c'est

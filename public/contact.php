@@ -338,13 +338,13 @@ $corpsAccuse = implode("\n", [
     'le samedi.',
     '',
     'Vous pouvez répondre directement à cet email si vous voulez ajouter quelque',
-    'chose — une photo de chantier, une précision, une question.',
+    'chose : une photo de chantier, une précision, une question.',
     '',
     '--- Ce que vous m\'avez écrit ---',
     $message,
     '',
     '---',
-    'Elio Pallois — Kanyro',
+    'Elio Pallois, Kanyro',
     'Sites et visibilité pour les artisans du bâtiment',
     $siteUrl,
 ]);
@@ -361,7 +361,7 @@ $entetesAccuse = implode("\r\n", [
 
 @mail(
     nettoyerEntete($email),
-    sujetEncode('Votre demande est bien arrivée — Kanyro'),
+    sujetEncode('Kanyro : votre demande est bien arrivée'),
     $corpsAccuse,
     $entetesAccuse,
     '-f' . $expediteur

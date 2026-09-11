@@ -61,8 +61,8 @@ brouillon: false
 > **Ce chantier n'est pas encore en ligne.** Le site est terminé et fonctionne ;
 > il attend le numéro SIRET de l'atelier, quelques tarifs à faire relire, et le
 > plan de redirections qui évitera de perdre dix ans de référencement. Cette
-> fiche décrit donc du travail livré, pas un site que vous pouvez visiter — et
-> aucun chiffre de résultat n'y figure, pour la même raison.
+> fiche décrit donc du travail livré, pas un site que vous pouvez visiter.
+> Aucun chiffre de résultat n'y figure, pour la même raison.
 
 ## Le point de départ
 
@@ -71,8 +71,8 @@ métier se voit : des registres cousus main, des dorures au fer, des livres
 anciens remontés, des enluminures peintes à la gouache. Cent quarante-quatre
 photographies de ce travail existaient déjà, sur un site construit avec Wix.
 
-Le problème n'était pas qu'il était laid. Il était lourd — sa seule page
-d'accueil pesait 386 Ko de HTML, avant la moindre image — et surtout il
+Le problème n'était pas qu'il était laid. Il était lourd (sa seule page
+d'accueil pesait 386 Ko de HTML, avant la moindre image), et surtout il
 s'arrêtait à la vitrine. Une demande arrivait par courriel, le devis se
 fabriquait à la main, la facture aussi. Le travail d'atelier finissait par se
 faire le soir, après le travail d'atelier.
@@ -87,8 +87,8 @@ qu'on ne perd rien en changeant d'outil.
 
 **Le site est redevenu du fichier.** Les pages sont pré-calculées : il n'y a plus
 de constructeur à charger avant de lire. La carte du contact vient
-d'OpenStreetMap, servie sans compte ni clé — donc rien n'est déposé chez le
-visiteur, donc aucun bandeau de consentement à afficher. Le site marche sans elle
+d'OpenStreetMap, servie sans compte ni clé : rien n'est donc déposé chez le
+visiteur, et il n'y a aucun bandeau de consentement à afficher. Le site marche sans elle
 si les tuiles ne viennent pas : l'adresse reste écrite en toutes lettres.
 
 **Et l'atelier a reçu un back-office.** C'est la moitié du chantier, et celle qui
@@ -99,7 +99,7 @@ le devis accepté se facture d'un clic, ses lignes recopiées.
 Cette partie-là n'est pas qu'un formulaire de plus. Une facture est une pièce
 comptable, et trois règles sont tenues par le code plutôt que par la vigilance
 d'un vendredi soir : une facture émise ne se modifie plus, elle ne se supprime
-pas — on l'annule par un avoir —, et son numéro est attribué à l'émission et non
+pas (on l'annule par un avoir), et son numéro est attribué à l'émission et non
 à la création, pour que la suite reste continue comme l'exige l'article 242
 nonies A de l'annexe II du Code général des impôts. Un brouillon abandonné ne
 creuse donc aucun trou dans la numérotation, et un trou dans une numérotation est
@@ -116,6 +116,6 @@ remplace pas sans redirections.
 
 Aucun chiffre de résultat n'est affiché ici, et c'est volontaire : le site n'a pas
 encore servi un seul visiteur. Ce qui sera compté le moment venu, ce sont les
-demandes arrivées par le formulaire — elles sont enregistrées en base, donc
-vérifiables — et le temps qu'un devis prend à sortir. En attendant, il n'y a rien
+demandes arrivées par le formulaire, enregistrées en base et donc vérifiables,
+et le temps qu'un devis prend à sortir. En attendant, il n'y a rien
 à afficher, et une estimation présentée comme un résultat ne vaut rien.

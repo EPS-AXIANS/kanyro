@@ -71,10 +71,10 @@ export const SITE = {
    * alimentent `areaServed`.
    */
   zone: {
-    ville: 'Arras - Lille',
-    departement: 'Pas-de-Calais - Nord',
+    ville: 'Arras et Lille',
+    departement: 'Pas-de-Calais et Nord',
     region: 'Hauts-de-France',
-    codePostal: '62000 - 59000',
+    codePostal: '62000 et 59000',
     pays: 'FR',
   },
 
@@ -91,7 +91,7 @@ export const SITE = {
     directeurPublication: 'Elio Pallois',
     /* Identification de l'hébergeur — obligation de l'article 19 de la LCEN.
        VPS Hostinger. À corriger si vous changez d'hébergement. */
-    hebergeur: 'Hostinger International, Ltd. — 61 Lordou Vyronos Street, Lumiel Commercial Centre, 4th floor, 6023 Larnaca, Chypre',
+    hebergeur: 'Hostinger International, Ltd., 61 Lordou Vyronos Street, Lumiel Commercial Centre, 4th floor, 6023 Larnaca, Chypre',
   },
 };
 
