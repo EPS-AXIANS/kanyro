@@ -118,14 +118,16 @@ const sansDevis = ['/contact', '/merci'].includes(cheminPropre(Astro.url.pathnam
 const horsIndex = noindex || BETA.actif;
 
 const canonical = urlAbsolue(Astro.url.pathname);
+/* La 404 est servie à la place de n'importe quelle adresse inconnue : un
+   canonical y désignerait /404 depuis toutes ces adresses. Elle n'en a pas. */
+const pageErreur = cheminPropre(Astro.url.pathname) === '/404';
 const titreComplet = `${titre} · ${SITE.nom}`;
 const imageAbsolue = image ? urlAbsolue(image) : null;
 
 /*
- * CSP. Elle est plus large qu'elle ne devrait l'être : les hôtes tiers listés
- * dans medias.js sont la contrepartie directe des médias provisoires du
- * template. Une fois les assets rapatriés, `HOTES_MEDIAS` se vide et la
- * politique se resserre d'elle-même, sans toucher à ce fichier.
+ * CSP. Tous les médias sont servis par le site : `HOTES_MEDIAS` (medias.js) est
+ * vide, et la politique n'autorise que `'self'`. Un hôte tiers ajouté là
+ * s'ajoute ici d'office, mais PAS dans l'en-tête de Caddy : voir plus bas.
  *
  * Aucun style inline n'est écrit dans le balisage (les délais d'animation passent
  * par la variable `--retard`, les fonds par des <img>), ce qui permet de garder
@@ -203,7 +205,7 @@ const csp = [
 
     <title>{titreComplet}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {!pageErreur && <link rel="canonical" href={canonical} />}
 
     {/*
       Navigation sans rechargement, avec fondu croisé entre les pages.
@@ -216,7 +218,7 @@ const csp = [
       et il est invisible à l'œil.
 
       ⚠ La contrepartie est réelle : le document n'est plus rechargé, donc
-      public/js/effets.js ne s'exécute plus qu'une fois. Tout ce qu'il fait est
+      src/scripts/effets.js ne s'exécute plus qu'une fois. Tout ce qu'il fait est
       rangé dans des fonctions rejouées sur `astro:page-load` — sans quoi la
       restauration de saisie et les bandeaux d'erreur de /contact cesseraient de
       fonctionner après la première navigation, silencieusement. Toute
@@ -244,7 +246,7 @@ const csp = [
     <meta property="og:site_name" content={SITE.nom} />
     <meta property="og:title" content={titreComplet} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!pageErreur && <meta property="og:url" content={canonical} />}
     <meta
       name="twitter:card"
       content={imageAbsolue ? 'summary_large_image' : 'summary'}
