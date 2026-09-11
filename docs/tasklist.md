@@ -18,6 +18,11 @@
 > 1.2 est préparé sans outil branché. Restent bloqués sur une donnée ou une
 > action externe : 0.1 (SIREN, adresse), 3.2, 4.6, 5.4 (vrai téléphone).
 >
+> **En ligne le 11/09/2026 à 13 h 25** (main `4103774`), avec la configuration
+> Caddy du dépôt (HSTS, CSP en en-tête, redirections 301) et `KANYRO_SEL_QUOTA`
+> posé dans le pool PHP-FPM. Un envoi de contrôle du formulaire est passé de
+> bout en bout. Mesuré en ligne, en 4G lente simulée : LCP 2,0 s, 161 Ko.
+>
 > *(Le total annoncé était « 42 » jusqu'au 19/08 : en énumérant les points
 > numérotés, de 0.1 à 7.6, il y en a 37.)*
 >
