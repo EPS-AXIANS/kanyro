@@ -24,9 +24,10 @@ est dans [`docs/environnement.md`](docs/environnement.md).
 ## Déploiement — VPS Hostinger, Caddy
 
 Le site tourne sur le VPS `srv1917309.hstgr.cloud` (Hostinger), servi par le
-**Caddy du système** depuis `/var/www/kanyro`. La configuration est dans
-`/etc/caddy/Caddyfile`, **hors du dépôt**, et `contact.php` est exécuté par
-PHP-FPM 8.3 via `unix/run/php/php-fpm.sock`.
+**Caddy du système** depuis `/var/www/kanyro`. La configuration active est
+`/etc/caddy/Caddyfile` ; sa version de référence est dans le dépôt, sous
+`deploy/caddy/` (voir « La configuration Caddy » plus bas). `contact.php` est
+exécuté par PHP-FPM 8.3 via `unix/run/php/php-fpm.sock`.
 
 Publier, c'est donc synchroniser le contenu de `dist/` vers `/var/www/kanyro/`.
 Le répertoire est accessible en écriture sans `sudo`.
@@ -52,9 +53,10 @@ propriétaire (`caddy:caddy`, avec le bit setgid) : sans eux, rsync lui
 appliquerait ceux de `dist/` et un déploiement suivant, fait par un autre
 utilisateur, pourrait ne plus passer.
 
-**`--exclude '.htaccess'` n'est pas un détail.** Caddy ne le lit pas, mais il le
-SERVIRAIT comme un fichier ordinaire : `https://kanyro.tech/.htaccess`
-publierait la politique de sécurité du site.
+**`--exclude '.htaccess'` reste une ceinture de sécurité.** Le fichier a été
+retiré du dépôt le 11 septembre 2026 (il datait d'Apache, que Caddy ne lit
+pas) ; s'il revenait un jour dans `public/`, Caddy le SERVIRAIT comme un fichier
+ordinaire, et `https://kanyro.tech/.htaccess` publierait sa configuration.
 
 ### La démonstration du chantier de reliure
 
@@ -94,58 +96,75 @@ sauvegarde aussi `/var/www/kanyro/demo/` avant d'écrire.
 > **`git push` ne déploie rien.** Aucun webhook, aucune CI — vérifié. GitHub ne
 > sert que de dépôt. La mise en ligne est l'étape ci-dessus, et elle seule.
 
-### Ce que Caddy prend en charge
+### La configuration Caddy
+
+`deploy/caddy/Caddyfile` est la version du dépôt de `/etc/caddy/Caddyfile` ;
+`deploy/caddy/kanyro.caddy` porte ce qui est propre au site, en trois extraits
+réutilisables (en-têtes, CSP, site). **Rien de ce dossier ne s'applique seul** :
+tant qu'il n'a pas été copié, le serveur garde l'ancienne configuration.
+
+```bash
+sudo cp deploy/caddy/Caddyfile deploy/caddy/kanyro.caddy /etc/caddy/
+sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl reload caddy
+
+curl -sI https://kanyro.tech/          # strict-transport-security, content-security-policy, pas de server:
+curl -sI https://kanyro.tech/nimporte  # 404, mêmes en-têtes, cache-control: no-store
+curl -sI https://www.kanyro.tech/      # 308 vers https://kanyro.tech/
+```
+
+Ce qu'elle fait :
 
 - **HTTPS et le certificat**, obtenus et renouvelés seuls auprès de
-  Let's Encrypt. Le HTTP répond `308` vers HTTPS ; `www.kanyro.tech` est servi
-  par le même bloc.
-- **Les URL sans slash final**, par `try_files {path} {path}.html {path}/index.html`.
-  Astro déclare le canonical `/contact` : le visiteur doit arriver sur cette
-  adresse, pas sur `/contact/`.
-- **Le cache des assets hashés** (`/_astro/*` en `immutable`, un an) et la
-  **compression** (zstd, gzip).
-- **La page 404**, par `handle_errors`.
-- **Quatre en-têtes de sécurité** : `X-Frame-Options: SAMEORIGIN`,
-  `X-Content-Type-Options`, `Referrer-Policy`, et une `Permissions-Policy`
-  courte (caméra, micro, géolocalisation). Plus `-Server`, qui retire la
-  signature du serveur.
+  Let's Encrypt. Le HTTP répond `308` vers HTTPS.
+- **`www.kanyro.tech` redirige** en 301 vers `kanyro.tech`, au lieu de servir
+  une seconde copie du site en 200.
+- **Les URL sans slash final**, par `try_files {path} {path}.html {path}/index.html`,
+  et une redirection permanente de `/contact/` vers `/contact` (requête
+  conservée), comme de `/index.html` vers `/`. Astro déclare le canonical
+  `/contact` : il ne doit exister qu'une adresse par page. `/demo/*` est exclu
+  de la règle, la démo ayant ses propres chemins.
+- **Le cache** : `/_astro/*` en `immutable` (un an, noms hashés), `/js/*` un
+  jour, `/images/*` une semaine. La 404 est en `no-store`, jamais en
+  `immutable`. Compression zstd et gzip.
+- **La 404**, par `handle_errors`, avec les mêmes en-têtes de sécurité que les
+  pages normales (ils ne s'y appliquaient pas).
+- **Les en-têtes de sécurité** : HSTS (un an, sans `preload` ni
+  `includeSubDomains`, voir plus bas), `X-Content-Type-Options`,
+  `X-Frame-Options: DENY`, `Referrer-Policy`, une `Permissions-Policy` qui
+  refuse huit API (caméra, micro, géolocalisation, paiement…), et `-Server`
+  qui retire la signature du serveur.
+- **La CSP en en-tête HTTP**, identique à la balise `<meta>` de
+  `src/layouts/Base.astro`, plus les deux directives que la balise ne peut pas
+  porter : `frame-ancestors 'none'` (ignoré en `<meta>`) et
+  `upgrade-insecure-requests` (voir plus bas). Elle n'est pas envoyée sous
+  `/demo/*`, dont le site a sa propre politique.
 
-### ⚠ Ce que Caddy N'ENVOIE PAS, et qui manque
+⚠ **Les deux CSP doivent rester identiques.** Un hôte ajouté dans `Base.astro`
+sans l'être dans `kanyro.caddy` (ou l'inverse) est bloqué en production, où les
+deux s'appliquent et où c'est la plus stricte qui gagne.
 
-**Aucun en-tête `Content-Security-Policy`.** En production, la CSP ne vient donc
-QUE de la balise `<meta http-equiv>` de `src/layouts/Base.astro`. Deux
-conséquences, à connaître avant de croire le site protégé :
+⚠ **HSTS ne se retire pas.** Une fois l'en-tête reçu, le navigateur refuse le
+HTTP pendant un an, même si vous faites machine arrière. Il n'est envoyé que
+parce que le certificat de `kanyro.tech` est vérifié. `includeSubDomains` n'est
+pas posé : un futur sous-domaine servi en HTTP seul serait coupé net.
 
-- **`frame-ancestors` est inopérant en `<meta>`**, la spécification l'ignore
-  dans cette forme. C'est le `X-Frame-Options: SAMEORIGIN` de Caddy qui tient ce
-  rôle — en plus permissif, puisqu'il autorise l'encadrement par le site
-  lui-même là où la directive disait `'none'`.
-- **`upgrade-insecure-requests` n'est émis nulle part** : la balise l'exclut
-  volontairement (voir plus bas), et il n'y a plus d'en-tête HTTP pour le
-  porter.
+`Cross-Origin-Opener-Policy` a été essayé puis retiré : il faisait changer de
+processus de rendu à chaque page, et le navigateur de test perdait alors ses
+caractéristiques de pointeur (Lenis et les survols ne se chargeaient plus).
+Sans fenêtre ouverte vers un tiers, il n'apportait presque rien.
 
-**Ni la `Permissions-Policy` longue** (quatorze API refusées) que décrivait
-l'ancienne configuration Apache. **Ni HSTS** — mais celui-là n'a jamais été
-envoyé : il était déjà commenté dans le `.htaccess`, volontairement.
+**Tester en local**, sans toucher au Caddy du système :
 
-> **Le bon endroit pour corriger tout cela est le `Caddyfile`**, dans le bloc
-> `header` du site. Y déplacer la CSP la rendrait complète, et rendrait la
-> balise `<meta>` superflue. Tant que ce n'est pas fait, ne pas se fier à ce que
-> raconte `public/.htaccess`.
->
-> **HSTS s'ajoute au même endroit, et seulement une fois** le certificat
-> vérifié : l'en-tête envoyé, le navigateur refuse le HTTP pendant un an, même
-> si vous faites machine arrière.
+```bash
+npm run build
+KANYRO_DIST=$PWD/dist caddy run --config deploy/caddy/essai-local.Caddyfile
+# http://127.0.0.1:8088 : le site ; http://127.0.0.1:8089 : le test de la redirection www
+```
 
-### ⚠ `public/.htaccess` n'est plus lu par personne
-
-Le fichier date de l'hébergement mutualisé OVH, où Apache l'exécutait. Il est
-conservé dans le dépôt, mais **Caddy l'ignore entièrement** et le déploiement
-l'exclut.
-
-C'est un leurre dangereux : à le lire, on croirait que la CSP, HSTS et la
-`Permissions-Policy` longue sont appliqués. Aucun ne l'est. Le supprimer, ou
-porter son contenu dans le `Caddyfile`, éviterait qu'on s'y fie.
+`essai-local.Caddyfile` importe le même `kanyro.caddy` que la production, sans
+HTTPS. Il sert l'essai des en-têtes, des redirections et du cache, pas celui
+du formulaire.
 
 ### Le formulaire
 
@@ -160,10 +179,6 @@ certificat Let's Encrypt est partagé avec Postfix et Dovecot par
 `contact.php` et doivent rester cohérentes avec `SITE.contact.email` dans
 `src/config/site.js` — les trois valent `contact@kanyro.tech`.
 
-> ⚠ L'en-tête de `contact.php` décrit encore les contraintes d'OVH et une
-> adresse d'expédition en `elio-pallois.fr`, héritées de la bêta. Le code, lui,
-> est à jour ; seuls les commentaires sont à reprendre.
-
 En cas d'échec, le visiteur est renvoyé sur `/contact?erreur=<motif>` — `saisie`,
 `limite` ou `envoi` — et `effets.js` dévoile le bandeau correspondant en
 restaurant ce qu'il avait tapé. Un échec silencieux sur l'unique chemin de
@@ -174,6 +189,31 @@ Le formulaire renvoie aussi un **accusé de réception** au visiteur, ce qui imp
 une **limite de 5 envois par heure et par IP** : sans elle, on soumet l'adresse
 d'un tiers en boucle et c'est le domaine expéditeur qui finit sur les listes
 noires.
+
+**L'accusé de réception est générique.** Il ne reprend ni le nom ni le message
+saisis : l'adresse du destinataire est tapée par le visiteur, sans aucune
+vérification, et un accusé qui recopiait le texte du formulaire permettait
+d'envoyer, depuis `contact@kanyro.tech`, un message de son choix à n'importe
+qui. Il dit seulement que la demande est arrivée, et quoi faire si l'on n'a
+rien demandé. Plus d'en-tête `X-Mailer` non plus : il annonçait la version de
+PHP.
+
+**Le sel du quota** rend imprévisible le nom des fichiers de comptage, posés
+dans le `/tmp` partagé de la machine (le détail est en tête de
+`contact.php`). Il se règle une fois, dans le pool PHP-FPM :
+
+```bash
+openssl rand -hex 32   # à coller ci-dessous
+sudoedit /etc/php/8.3/fpm/pool.d/www.conf
+#   env[KANYRO_SEL_QUOTA] = <les 64 caractères>
+sudo systemctl reload php8.3-fpm
+```
+
+Sans la variable, le script tire un secret au hasard à la première demande et
+le garde dans `/tmp/kanyro-sel-quota.secret`, lisible par le seul compte de
+PHP-FPM (`www-data`). ⚠ Si ce fichier appartient à un autre compte (créé par
+un test lancé à la main, par exemple), il est refusé et le quota ne tient plus
+d'une demande à l'autre : le supprimer, il sera recréé au bon propriétaire.
 
 **Validation vivante.** Chaque champ signale lui-même son état pendant la saisie
 — coche verte quand il est bon, pastille orange et une phrase quand il ne l'est
@@ -219,47 +259,29 @@ chez Hostinger sont détaillés dans [`docs/serveur-mail.md`](docs/serveur-mail.
 Sans ces enregistrements (`mail`, SPF, DKIM, DMARC, PTR), les messages partent
 en spam : la boîte est fonctionnelle mais pas encore crédible aux yeux de Gmail.
 
-### Bêta sur elio-pallois.fr
+### Le mode bêta (éteint)
 
-Le site tourne actuellement sur le domaine personnel. Tout est piloté par un seul
-objet, `BETA` dans `src/config/site.js` :
+Le site a d'abord tourné sur le domaine personnel. Le basculement est piloté par
+un seul objet, `BETA` dans `src/config/site.js`, qui vaut aujourd'hui
+`actif: false` : le site est servi et annoncé sur `https://kanyro.tech`.
 
-```js
-export const BETA = {
-  actif: true,
-  url: 'https://kanyro.elio-pallois.fr',
-};
-```
+S'il fallait rouvrir une préproduction, `actif: true` fait basculer ensemble :
 
-Tant que `actif` vaut `true` :
-
-- `SITE.url` prend l'adresse de bêta — canonical, `og:url` et sitemap annoncent
-  donc l'adresse réellement servie, et non un domaine qui ne répond pas encore ;
-- **toutes** les pages sortent en `noindex`, y compris l'accueil ;
-- `robots.txt` (désormais généré par `src/pages/robots.txt.js`, plus posé en dur
-  dans `public/`) passe en `Disallow: /` et n'annonce plus le sitemap.
-
-L'enjeu n'est pas cosmétique : si Google indexe la bêta, c'est elle qui sort dans
-les résultats, et le jour de l'ouverture `kanyro.fr` publie un contenu déjà connu
-ailleurs. Au mieux la notoriété acquise reste sur le mauvais domaine, au pire les
-deux se font concurrence.
+- `SITE.url` sur l'adresse de bêta (canonical, `og:url` et sitemap annoncent
+  l'adresse réellement servie) ;
+- **toutes** les pages en `noindex`, accueil compris ;
+- `robots.txt` (généré par `src/pages/robots.txt.js`) en `Disallow: /`, sans
+  sitemap annoncé.
 
 > **`robots.txt` ne ferme rien.** C'est une demande, que les robots sont libres
 > d'ignorer, et un simple lien partagé suffit à faire entrer l'URL dans l'index.
-> La vraie serrure est le mot de passe HTTP. Le bloc commenté en haut de
-> `public/.htaccess` ne sert plus à rien depuis le passage à Caddy : c'est
-> `basic_auth` qu'il faut poser dans le bloc du site, avec une empreinte
-> produite par `caddy hash-password`.
+> La vraie serrure est le mot de passe HTTP : `basic_auth` dans le bloc du site
+> de préproduction, avec une empreinte produite par `caddy hash-password`.
 
-**⚠ Servir la bêta depuis un sous-dossier ne marchera pas.** Le site génère des
+**⚠ Servir une bêta depuis un sous-dossier ne marchera pas.** Le site génère des
 chemins absolus (`/_astro/…`, `/contact.php`, `/merci`) et la configuration
 s'applique à la racine d'un domaine. Il faut un sous-domaine, donc un bloc de
 site à part dans le `Caddyfile`.
-
-**Le jour de l'ouverture :** passer `actif` à `false`. L'URL, les canonical, le
-sitemap, les `noindex` et le `robots.txt` rebasculent ensemble. Restent trois
-choses que ce fichier ne pilote pas — les adresses en haut de `contact.php`,
-`SITE.contact.email`, et le `basic_auth` du `Caddyfile` à retirer.
 
 ---
 
@@ -268,11 +290,11 @@ choses que ce fichier ne pilote pas — les adresses en haut de `contact.php`,
 Cloudflare Pages est une piste envisagée pour plus tard. Trois choses tombent
 le jour où vous basculez, et il vaut mieux le savoir avant :
 
-1. **La configuration du serveur est à réécrire.** Le `Caddyfile` ne part pas
-   avec le dépôt. Les en-têtes, le cache et la règle d'URL sans slash final se
-   redéclarent dans un fichier `public/_headers` (même syntaxe chez Netlify, si
-   la question se reposait). Occasion de porter enfin la CSP dans un en-tête
-   HTTP plutôt que dans la balise `<meta>`.
+1. **La configuration du serveur est à réécrire.** `deploy/caddy/kanyro.caddy`
+   ne s'y lit pas. Les en-têtes (CSP et HSTS compris), le cache et les
+   redirections se redéclarent dans `public/_headers` et `public/_redirects`
+   (même syntaxe chez Netlify, si la question se reposait), en recopiant ce que
+   fait `kanyro.caddy`, ligne à ligne.
 2. **`contact.php` ne s'exécute pas.** Cloudflare Pages ne sert pas de PHP. Le
    formulaire doit être recâblé sur une Pages Function, et l'envoi de mail passe
    par un service tiers (Resend, MailChannels) puisqu'il n'y a plus de Postfix
@@ -299,15 +321,14 @@ serveur qui ne parle pas HTTPS, et la page s'afficherait en HTML brut.
 Le piège est que tout fonctionne sur `localhost`, que la spécification exempte
 des adresses de bouclage : le symptôme n'apparaît qu'une fois déployé.
 
-**⚠ Elle n'est donc émise nulle part aujourd'hui.** L'en-tête qui la portait
-était celui du `.htaccess`, que Caddy ne lit pas. La conséquence est faible —
-tout le site est en même origine et servi en HTTPS — mais c'est une raison de
-plus de déplacer la CSP dans le `Caddyfile`, où cette directive retrouverait sa
-place.
+**Elle est donc portée par l'en-tête CSP de `deploy/caddy/kanyro.caddy`**, et
+seulement là. L'en-tête ne part qu'une fois cette configuration copiée sur le
+serveur ; d'ici là, elle n'est émise nulle part, comme avant (l'ancien
+`.htaccess` qui la portait n'était pas lu par Caddy).
 
 ---
 
-## Périmètre actuel : vitrine courte, 5 pages
+## Périmètre actuel : une vitrine, ses pages métier et une réalisation
 
 Une offre, un prix, un délai, une preuve honnête, un appel à l'action. Rien
 d'autre, et c'est délibéré : construire davantage avant d'avoir vendu repousse le
@@ -315,24 +336,26 @@ moment de vendre.
 
 | Page | Rôle |
 |---|---|
-| `/` | Porte tout : offre, prix, délai, déroulement, forfait Suivi, questions, preuve, appel à l'action |
-| `/contact` | Formulaire de demande de devis |
-| `/mentions-legales` | Obligations légales |
+| `/` | Porte tout : offre et prix, réalisation, qui suis-je, déroulement, forfait Suivi, questions, appel à l'action |
+| `/contact` | Téléphone et email d'abord, puis le formulaire de demande de devis |
+| `/realisations`, `/realisations/atelier-reliure-deranty` | La réalisation livrée, avec ses captures |
+| `/metiers` et six pages métier | Une page par métier du bâtiment couvert |
+| `/mentions-legales` | Obligations légales et données personnelles |
 | `/merci`, `/404` | Techniques, `noindex` |
 
-**Ce qui est écrit mais désactivé** — les 6 pages métier, les 36 pages
-« métier × commune » et la galerie de réalisations. Le code est intact ; seuls
-deux booléens de `FONCTIONS` dans `src/config/site.js` les éteignent, et
-`getStaticPaths` renvoie une liste vide. Les rallumer après le premier ou le
-deuxième vrai client est une ligne à changer, pas un chantier à refaire.
+Le sitemap compte onze adresses. **Ce qui est écrit mais éteint** : les
+36 pages « métier × commune » (`FONCTIONS.pagesCommunes` dans
+`src/config/site.js`, voir plus bas pourquoi). Les rallumer est une ligne à
+changer, pas un chantier à refaire.
 
 **Le forfait Suivi a sa propre section en vitrine.** C'est l'abonnement
-d'hébergement et de maintenance proposé après la création : 25 €/mois ou
-250 €/an, à partir de la fin de la première année. Décidé le 30 août 2026 sur la
+d'hébergement et de maintenance proposé après la création, en deux formules :
+Maintenance à 29 €/mois ou 290 €/an, Accompagnement à 59 €/mois ou 590 €/an, à
+partir de la fin de la première année et sans engagement de durée. Décidé le 30 août 2026 sur la
 branche `feat/forfait-suivi-mensuel`, jamais fusionnée, il a été repris et mis
-en vitrine le 11 septembre. `Suivi.astro` le présente en entier — les deux
-montants, les cinq prestations, les deux délais d'engagement, les conditions de
-sortie et l'alternative à ~30 €/an.
+en vitrine le 11 septembre. `Suivi.astro` le présente en deux cartes-résumés,
+puis un tableau comparatif à déplier (les prestations de chaque formule), les
+délais d'engagement, les conditions de sortie et l'alternative à ~30 €/an.
 
 Un second prix sur la même page est le risque décrit au point 2.2 de la
 tasklist : deux tarifs sans règle qui les relie, et le prospect n'en retient
@@ -397,55 +420,72 @@ d'elle-même sur le champ « quand vous joindre » du formulaire.
 
 ### 1. Les médias
 
-Vidéo d'accueil, nuages, colombe, fonds de section : rapatriés du template de
-référence dans `public/medias/`, sous licence commerciale acquise — le site ne
-dépend plus du CDN du vendeur, qui pouvait disparaître sans préavis. Restent
-des visuels de template, pas une urgence légale ou technique. À remplacer par
-vos propres visuels quand l'occasion se présente — idéalement des photos de
-chantiers réels, qui serviront de toute façon mieux le propos. Tout est
-centralisé dans `src/config/medias.js`, pour qu'un remplacement soit un seul
-fichier à éditer.
+Vidéo d'accueil, fonds de section : visuels du template de référence, sous
+licence commerciale acquise. Ils vivent dans `src/assets/medias/` et passent
+par le build (`src/config/medias.js`) : les images sortent en AVIF et WebP à
+plusieurs largeurs par le composant `Visuel.astro`, et la vidéo a été
+réencodée (6 Mo → 588 Ko, 1 280 × 720, lecture progressive), servie aux seuls
+écrans d'au moins 768 px et jamais en économie de données ni en mouvement
+réduit. Le nuage peint (1,8 Mo), la colombe et le fond de citation ont été
+retirés le 11 septembre 2026.
+
+Ils restent des visuels de template : ciel, nuages et colombes dans la vidéo
+d'accueil n'ont rien à voir avec le bâtiment. À remplacer par de vraies photos
+dès qu'elles existent : un portrait (emplacement `photoFondateur` dans
+`medias.js`, affiché par la section « Qui suis-je » dès qu'il est renseigné),
+puis des chantiers réels. **Jamais de photo de banque présentée comme un
+chantier ou un client.**
 
 ### 2. Le reste
 
-- [ ] SIREN dans `src/config/site.js` (`SITE.legal.siren`) — sans lui, les
-      mentions légales sont en infraction (article 19 de la LCEN). La page
-      affiche un encart d'avertissement tant que le champ est vide.
-- [ ] Image de partage (`og:image`), à passer via la prop `image` du layout.
-      Aucune balise n'est émise tant qu'elle n'existe pas, ce qui vaut mieux
-      qu'une balise pointant vers un fichier absent.
+- [ ] **SIREN** dans `src/config/site.js` (`SITE.legal.siren`), et l'**adresse**
+      (`SITE.legal.adresse`) : sans eux, les mentions légales sont incomplètes
+      (article 19 de la LCEN). La page n'affiche que ce qui est renseigné et
+      valide, le build liste les champs manquants dans la console, et un encart
+      les rappelle en développement seulement.
+- [ ] **Régime de TVA** à confirmer (`SITE.legal.tva`) : `'franchise'` affiche
+      « TVA non applicable, article 293 B du CGI » sous les prix. Repris du
+      modèle de devis ; si ce n'est pas le bon régime, passer la valeur à
+      `'assujetti'` (« Prix hors taxes ») ou `''`.
+- [ ] **Téléphone de l'hébergeur** (`SITE.legal.hebergeurTelephone`), demandé par
+      la LCEN à côté de son nom et de son adresse.
 - [ ] Redirection `kaniro.fr` à ajouter dans le `Caddyfile` si le domaine
-      défensif est réservé — le nom sera mal orthographié à l'oral (« Kaniro »).
+      défensif est réservé : le nom sera mal orthographié à l'oral (« Kaniro »).
       Mieux vaut une redirection 301 qu'un second site à maintenir.
-- [x] Chantier de référence — l'atelier de reliure Frédérique Deranty, publié
-      dans `/realisations`. ⚠ La fiche dit qu'il s'agit d'une **maquette livrée
-      et pas encore en ligne**, et la section « Preuve » de l'accueil le répète :
-      c'est ce qui la distingue d'une fausse référence, et ça ne tient que tant
-      que les deux textes disent la même chose. Le jour de la mise en ligne,
-      renseigner `enLigne` et la date dans
-      `src/content/realisations/atelier-reliure-deranty.md` — la mention
-      « maquette livrée en <mois> » bascule alors d'elle-même en
-      « mis en ligne en <mois> », et le lien « voir le site » apparaît.
-- [ ] Accord de l'artisane pour publier son nom sur le site de l'agence.
+- [x] Image de partage : `public/images/partage-kanyro.jpg` (1 200 × 630), tirée
+      de `scripts/image-partage.html`. Une page peut en passer une autre par la
+      prop `image` du layout.
+- [x] Chantier de référence : l'atelier de reliure Frédérique Deranty, publié
+      dans `/realisations` avec deux captures de la maquette. ⚠ La fiche et la
+      section « Réalisation » de l'accueil disent qu'il s'agit d'une **maquette
+      livrée et pas encore en ligne** : c'est ce qui la distingue d'une fausse
+      référence, et ça ne tient que tant que les deux textes disent la même
+      chose. Le jour de la mise en ligne, renseigner `enLigne` et la date dans
+      `src/content/realisations/atelier-reliure-deranty.md`.
+- [ ] **Accord écrit de l'artisane** pour publier son nom et les captures. En
+      cas de refus, retirer ensemble les captures ET le lien vers la maquette
+      (la note est en tête de la fiche).
 
 ---
 
 ## Décisions structurantes
 
-**Sortie statique, deux scripts, 20,5 Ko gzip en tout.** Le site vend du
+**Sortie statique, deux scripts, 9,6 Ko gzip en tout.** Le site vend du
 référencement local : il ne peut pas dépendre du client pour afficher son
-contenu. `public/js/effets.js` (14,9 Ko gzip — il n'est pas minifié, voir
-plus bas, et c'est surtout du commentaire) porte les révélations, la frise du
-déroulement, la parallaxe, la barre de navigation et la validation du
-formulaire ; `<ClientRouter />` d'Astro (5,6 Ko) enchaîne les
-pages en fondu. Tout est décoratif, à une exception près : la
+contenu. `src/scripts/effets.js` (4 Ko gzip une fois minifié par le build)
+porte les révélations, la frise du déroulement, la vidéo d'accueil, la barre de
+navigation, la validation du formulaire et les points de mesure ;
+`<ClientRouter />` d'Astro (5,5 Ko) enchaîne les pages en fondu. Tout est décoratif, à une exception près : la
 densité de la barre de navigation, qui relève de la lisibilité — d'où un CSS qui
 part de l'état lisible et un script qui ne fait que l'éclaircir.
 
-Aucune dépendance d'animation. GSAP, ScrollTrigger, Lenis et Barba ont été
-regardés puis écartés : ~40 Ko pour la première paire, un `<head>` à recoller à
-la main pour la seconde, et un scroll à inertie qui se paie cher sur les
-téléphones de la cible.
+Une seule dépendance d'animation, et pas pour tout le monde. GSAP,
+ScrollTrigger et Barba ont été regardés puis écartés : ~40 Ko pour la première
+paire, un `<head>` à recoller à la main pour la seconde. Lenis (le défilement
+amorti, 5,3 Ko gzip, `public/js/lenis.min.js`) n'est chargé qu'avec une souris
+(`(hover: hover) and (pointer: fine)`) et sans préférence de mouvement réduit :
+un défilement à inertie se paie cher sur les téléphones de la cible, qui ne le
+téléchargent donc pas. La parallaxe a été retirée le 11 septembre 2026.
 
 Plusieurs ressources Osmo ont été reprises, et celles qui dépendaient d'un CDN
 ont dû être remotorisées, puisque `script-src 'self'` le refuse. Le libellé des
@@ -496,7 +536,9 @@ changé deux fois sans toucher à un seul composant.
 variable `--retard`, les fonds par des `<img>` positionnées. Ça permet de garder
 `style-src` sans `'unsafe-inline'` malgré la richesse visuelle — `style-src`
 régit les attributs `style` écrits dans le HTML, pas les écritures par le CSSOM,
-dont vivent la parallaxe, les cascades et la frise.
+dont vivent les cascades, les arcs et la frise. Les images passent par
+`Visuel.astro` (un `<picture>` sans style), pas par `<Picture>` d'Astro, dont
+la sortie peut poser des attributs `style` que la CSP bloquerait sans bruit.
 
 ⚠ Un délai ne s'écrit JAMAIS en `animation-delay`. Les règles d'animation vivent
 hors `@layer`, leur raccourci `animation:` remet le délai à zéro, et le hors
@@ -504,11 +546,21 @@ couche l'emporte sur `@layer utilities` : les 46 `[animation-delay:…]` du site
 étaient silencieusement écrasés, et aucune des cascades n'a jamais existé. Le
 détail est en tête du bloc « Animations » de `global.css`.
 
-**Le script d'effets est servi depuis `public/`, pas bundlé.** Astro inline les
-petits scripts, et un script inline est bloqué par `script-src 'self'` : en
-production le script ne s'exécutait pas et les pages s'affichaient vides. Le
-développement ne le montrait pas, puisque la CSP n'y est pas émise. Le coût est
-l'absence de minification sur 2,8 Ko.
+**Le script d'effets est bundlé, mais jamais inliné.** Astro inline les scripts
+plus petits que `vite.build.assetsInlineLimit`, et un script inline est bloqué
+par `script-src 'self'` : en production il ne s'exécutait pas, et les pages
+s'affichaient vides (le développement ne le montrait pas, la CSP n'y étant pas
+émise). Le script avait donc été servi tel quel depuis `public/`, non minifié,
+17,5 Ko gzip dont l'essentiel en commentaires. Il est maintenant importé depuis
+`src/scripts/effets.js`, et `assetsInlineLimit: 0` (`astro.config.mjs`)
+garantit qu'il sort toujours en fichier. ⚠ Ne pas remonter cette limite.
+
+**La typographie française est posée au rendu.** `src/middleware.js` passe sur
+le HTML de chaque page générée : espaces fines insécables avant ? ! ;,
+insécables avant : et dans les guillemets, entre un nombre et son unité, entre
+les milliers, apostrophes typographiques. Il ne touche ni aux balises, ni aux
+attributs, ni au contenu des `<script>` (le JSON-LD garde ses espaces). Les
+textes s'écrivent donc normalement, sans insécables à la main.
 
 **Palette nommée par rôle** (`fond`, `surface`, `texte`) et non par teinte. Le
 thème est passé du clair au sombre en cours de route ; des noms comme « craie »
@@ -521,16 +573,20 @@ donne un bouton invisible. Le rôle survit au changement de thème.
 
 | Besoin | Fichier |
 |---|---|
-| Nom, coordonnées, SIREN, réseaux | `src/config/site.js` |
-| **Rallumer pages locales / réalisations** | `FONCTIONS` dans `src/config/site.js` |
-| **Médias provisoires + hôtes CSP** | `src/config/medias.js` |
+| Nom, coordonnées, zone, réseaux | `src/config/site.js` |
+| **SIREN, adresse, TVA, hébergeur** | `SITE.legal` dans `src/config/site.js` |
+| **Rallumer pages communes / métiers / réalisations** | `FONCTIONS` dans `src/config/site.js` |
+| Médias (vidéo, fonds, portrait) | `src/assets/medias/` et `src/config/medias.js` |
 | Palette, typo, boutons, animations | `src/styles/global.css` |
-| L'offre, le prix, le tarif de lancement | `src/data/offres.js` |
+| L'offre, le prix, le tarif de lancement, le Suivi | `src/data/offres.js` |
+| Les questions fréquentes (page et JSON-LD) | `src/data/questions.js` |
 | Métiers couverts | `src/data/metiers.json` |
 | Communes couvertes | `src/data/communes.json` |
 | JSON-LD | `src/config/schema.js` |
 | Sections de l'accueil | `src/components/sections/` |
-| En-têtes HTTP, redirections | `/etc/caddy/Caddyfile` — **hors du dépôt** |
+| Tous les liens d'appel | `src/components/LienTelephone.astro` |
+| Typographie française automatique | `src/middleware.js` |
+| En-têtes HTTP, CSP, redirections, cache | `deploy/caddy/kanyro.caddy`, copié dans `/etc/caddy/` |
 
 ---
 
@@ -543,9 +599,17 @@ aussi la partie la plus risquée du site.**
 Générer N × M pages qui ne diffèrent que par un toponyme substitué correspond à la
 définition Google de la *doorway page*. La sanction frappe le domaine entier.
 
-Ce qui protège aujourd'hui : chaque commune porte un `contexte` écrit à la main
-(nature du bâti, contraintes locales réelles) et chaque métier le sien. Le
-générateur saute toute commune dépourvue de `contexte`.
+Ce qui protège : chaque commune porte un `contexte` écrit à la main (nature du
+bâti, contraintes locales réelles) et chaque métier le sien. Le générateur saute
+toute commune dépourvue de `contexte`.
+
+**État au 11 septembre 2026 :** les six pages métier sont en ligne
+(`FONCTIONS.pagesMetiers`), les 36 pages par commune restent éteintes
+(`FONCTIONS.pagesCommunes`). Six contextes de commune ne suffisent pas à
+distinguer 36 pages, et un domaine neuf sans aucune référence dans le bâtiment
+est exactement celui que Google soupçonne. Les communes s'affichent en simple
+liste sur les pages métier, sans lien. À rallumer quand chaque page aura
+quelque chose de propre à dire (un chantier réel dans la commune, par exemple).
 
 > **Règle à tenir :** ne jamais ajouter une commune sans lui écrire un contexte
 > propre et véridique. Six bonnes pages valent mieux que soixante vides.
@@ -555,31 +619,63 @@ générateur saute toute commune dépourvue de `contexte`.
 ## Réalisations
 
 `src/content/realisations/*.md`, avec `brouillon: true` par défaut pour qu'un
-exemple ne parte jamais en production. `_gabarit.md` montre la structure.
+exemple ne parte jamais en production. `_gabarit.md` montre la structure. Les
+captures vivent dans `src/assets/realisations/` et se déclarent dans le champ
+`captures` (image, texte alternatif de dix caractères au moins, appareil).
 
-Aucune fiche réelle pour l'instant : la page affiche un état vide assumé plutôt
-que de fausses références. Dans un tissu artisanal local, les artisans se
-connaissent — une référence inventée se découvre et coûte plus cher qu'elle ne
+Une seule fiche publiée : l'atelier de reliure, une maquette livrée, présentée
+comme telle. Aucune autre référence, aucun avis, aucun chiffre de résultat tant
+qu'ils n'existent pas. Dans un tissu artisanal local, les artisans se
+connaissent : une référence inventée se découvre et coûte plus cher qu'elle ne
 rapporte.
+
+---
+
+## Mesure d'audience
+
+Aucun outil n'est branché, et les mentions légales le disent (« ce site ne
+dépose aucun cookie et n'utilise aucun outil de mesure d'audience tiers »). Les points de mesure sont prêts dans
+`src/scripts/effets.js` (`initMesure`) et ne font rien tant qu'aucun outil
+n'est chargé :
+
+| Événement | Déclencheur |
+|---|---|
+| `clic-appel` | un lien d'appel (`data-mesure="appel"`, posé par `LienTelephone`) |
+| `clic-devis` | un bouton « Demander un devis » (`data-mesure="devis"`) |
+| `formulaire-envoye` | le formulaire part, validation passée |
+| `demande-recue` | arrivée sur `/merci`, une fois par visite de la page |
+
+Pour en brancher un (Plausible ou Umami, détectés tels quels) :
+
+1. charger son script **depuis un fichier servi par le site** ou depuis un hôte
+   ajouté à `script-src` et `connect-src`, dans la balise de
+   `src/layouts/Base.astro` ET dans `deploy/caddy/kanyro.caddy` ;
+2. réécrire la section « Cookies » de `src/pages/mentions-legales.astro`, qui
+   affirme aujourd'hui qu'il n'y a aucune mesure ;
+3. un outil sans cookie (Plausible, Umami) évite le bandeau de consentement ;
+   un outil à cookies l'impose.
 
 ---
 
 ## Vérifications passées
 
-Sur le build de production, CSP active :
+Sur le build de production, le 11 septembre 2026, servi par
+`deploy/caddy/essai-local.Caddyfile` (CSP en en-tête ET en balise) :
 
-- 5 pages, une seule balise `h1` par page, aucun script ni style inline
-- Le script d'effets se charge et déclenche les 51 révélations de l'accueil,
-  à 1 440 px comme à 390 px de large (remesuré le 11/09/2026, après l'ajout de
-  la section Suivi et le retrait de trois questions)
-- Aucun lien mort, toutes les ancres de la navbar résolvent
-- Prix, tarif de lancement et délai présents dans le HTML statique
-- Forfait Suivi : section `#suivi` rendue, « 25 €/mois » trois fois (section
-  Offre, section Suivi, Q&R) et « 250 €/an » deux fois. Tous lus depuis
-  `offres.js` — si un seul de ces nombres diverge, c'est qu'un texte a été
-  écrit en dur quelque part
+- 14 pages générées, onze dans le sitemap, une seule balise `h1` par page,
+  aucun script ni style inline (hors données JSON-LD)
+- Aucun lien interne mort sur les quatorze pages, aucune ancre orpheline,
+  aucun `href="#"`
+- Accueil en 4G lente simulée (1,6 Mb/s, 150 ms, processeur ×4) : LCP 2,2 s
+  (22,6 s avant), 175 Ko transférés au chargement (10 Mo avant), CLS 0
+- Contrastes AA sur tout le texte de l'accueil, de 360 à 2 560 px ; cibles
+  tactiles d'au moins 44 px ; aucun débordement horizontal
+- Prix, tarif de lancement, délai et forfaits présents dans le HTML statique,
+  tous lus depuis `offres.js`
+- JSON-LD valide : `ProfessionalService` (fondateur, logo, offre et
+  fourchette de prix), `FAQPage`, fil d'Ariane ; aucune adresse ni réseau
+  fictif
 - Contenu intégralement lisible sans exécuter de JavaScript
 - `canonical` et `og:url` sur l'URL propre, alignés sur le sitemap
-- Sitemap réduit à `/` et `/contact` ; pages `noindex` exclues
-- Aucun débordement horizontal
-- Vidéo, fontes et images externes chargées sans violation de CSP
+- Aucune erreur dans la console, révélations et frise déclenchées, Lenis chargé
+  à la souris seulement, vidéo jamais téléchargée sur mobile
