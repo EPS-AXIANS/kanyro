@@ -80,7 +80,7 @@ const classesBandeau = 'bandeau-alerte mb-8';
         Ou décrivez votre activité ci-dessous, je vous réponds par écrit.
       </p>
 
-      <!--
+      {/*
         POST natif vers public/contact.php — aucun JavaScript nécessaire pour
         envoyer. Le script n'ajoute que le confort : restaurer la saisie après une
         erreur, afficher le bon bandeau, et signaler un champ fautif avant
@@ -89,7 +89,11 @@ const classesBandeau = 'bandeau-alerte mb-8';
 
         `bot-field` est le pot de miel : masqué en CSS, un humain ne le voit pas,
         un robot le remplit et l'envoi est ignoré côté serveur.
-      -->
+
+        ⚠ Commentaire Astro, et pas commentaire HTML : écrit en <!-- -->, il
+        partait tel quel dans la page, et expliquait le piège aux robots qu'il
+        doit attraper.
+      */}
       <form
         name="devis"
         method="POST"

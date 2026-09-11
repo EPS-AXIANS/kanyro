@@ -73,13 +73,64 @@ $fenetreLimite = 3600; // secondes
  * processus local non privilégié pour en profiter. Elle ne coûte rien et couvre
  * ce cas-là, on la garde.
  *
- * À personnaliser au déploiement — la valeur ci-dessous est publique puisque le
- * dépôt l'est. `KANYRO_SEL_QUOTA` dans l'environnement PHP la remplace si vous
- * préférez la garder hors du dépôt. En changer invalide les fichiers existants,
- * c'est aussi le geste de rotation si vous soupçonnez une fuite.
+ * D'où vient le sel, dans l'ordre :
+ *
+ *   1. `KANYRO_SEL_QUOTA` dans l'environnement de PHP-FPM, s'il fait au moins
+ *      32 caractères. C'est la voie recommandée (voir le README).
+ *   2. Sinon, un secret tiré au hasard à la première demande et gardé dans un
+ *      fichier du répertoire temporaire, lisible par ce seul compte (0600).
+ *
+ * Il valait auparavant une chaîne écrite en clair dans ce fichier, donc
+ * publique dès que le dépôt l'est : le chemin des fichiers de quota redevenait
+ * devinable, exactement ce que le sel devait empêcher. En changer (variable ou
+ * fichier supprimé) invalide les fichiers existants : c'est aussi le geste de
+ * rotation si vous soupçonnez une fuite.
  */
-$selQuota = getenv('KANYRO_SEL_QUOTA') ?: 'kanyro-quota-a-personnaliser';
+$selQuota = selQuota();
 // ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Le sel du quota : la variable d'environnement si elle est posée, sinon un
+ * secret aléatoire conservé dans le répertoire temporaire.
+ *
+ * Le fichier n'est lu que s'il appartient à ce compte et n'est lisible par
+ * personne d'autre : un fichier déposé d'avance par un tiers, dans un /tmp
+ * partagé, n'est pas un secret. Dans ce cas, ou si rien ne peut être écrit, le
+ * sel est tiré pour la seule requête : le quota ne tient plus d'une demande à
+ * l'autre, ce qui laisse passer un abus plutôt que de bloquer une vraie demande
+ * de devis. Même principe que partout ailleurs dans ce fichier.
+ */
+function selQuota(): string
+{
+    $environnement = getenv('KANYRO_SEL_QUOTA');
+    if (is_string($environnement) && strlen($environnement) >= 32) {
+        return $environnement;
+    }
+
+    $fichier = sys_get_temp_dir() . '/kanyro-sel-quota.secret';
+    $nous = function_exists('posix_geteuid') ? posix_geteuid() : getmyuid();
+
+    if (is_file($fichier)) {
+        $etat = @stat($fichier);
+        if (is_array($etat) && $etat['uid'] === $nous && ($etat['mode'] & 0077) === 0) {
+            $sel = @file_get_contents($fichier);
+            if (is_string($sel) && strlen($sel) >= 32) {
+                return $sel;
+            }
+        }
+        return bin2hex(random_bytes(32));
+    }
+
+    $sel = bin2hex(random_bytes(32));
+    $masque = umask(0077);
+    $flux = @fopen($fichier, 'x');
+    umask($masque);
+    if ($flux !== false) {
+        fwrite($flux, $sel);
+        fclose($flux);
+    }
+    return $sel;
+}
 
 /** Redirige et coupe l'exécution. Aucun message d'erreur technique n'est exposé. */
 function terminer(string $url): never
@@ -304,7 +355,6 @@ $entetes = implode("\r\n", [
     'From: Kanyro <' . $expediteur . '>',
     'Reply-To: ' . nettoyerEntete($email),
     'Content-Type: text/plain; charset=UTF-8',
-    'X-Mailer: PHP/' . phpversion(),
 ]);
 
 $sujet = sprintf(
@@ -327,23 +377,30 @@ if (!$envoye) {
  * aussi de preuve que l'adresse saisie fonctionne, et ouvre le fil de discussion
  * — répondre à un mail existant demande moins d'effort qu'en écrire un.
  *
+ * ⚠ IL EST GÉNÉRIQUE, ET C'EST UNE PROTECTION. Il reprenait le nom et le
+ * message saisis : n'importe qui pouvait donc faire envoyer par ce serveur, à
+ * l'adresse de son choix, un texte de son choix, signé DKIM au nom de Kanyro.
+ * Le contrôle d'origine se contourne hors navigateur, le quota par IP avec
+ * plusieurs adresses : c'était un relais de spam crédible, et c'est la
+ * réputation du domaine d'expédition qui aurait payé. Désormais le visiteur ne
+ * reçoit que ce texte fixe, et rien de ce qu'un tiers pourrait y glisser.
+ *
  * Envoi au mieux : son échec ne doit pas faire croire au visiteur que sa demande
  * n'est pas partie, puisqu'elle l'est. Le gérant a le message, c'est ce qui
  * compte.
  */
 $corpsAccuse = implode("\n", [
-    'Bonjour ' . $nom . ',',
+    'Bonjour,',
     '',
-    "J'ai bien reçu votre demande. Je vous réponds sous 48 heures, en soirée ou",
+    "Votre demande est bien arrivée. Je vous réponds sous 48 heures, en soirée ou",
     'le samedi.',
     '',
-    'Vous pouvez répondre directement à cet email si vous voulez ajouter quelque',
-    'chose : une photo de chantier, une précision, une question.',
+    'Vous pouvez répondre directement à cet email pour ajouter quelque chose :',
+    'une photo de chantier, une précision, une question.',
     '',
-    '--- Ce que vous m\'avez écrit ---',
-    $message,
+    "Si vous n'avez rien demandé, ignorez simplement ce message : aucune suite",
+    "n'y sera donnée.",
     '',
-    '---',
     'Elio Pallois, Kanyro',
     'Sites et visibilité pour les artisans du bâtiment',
     $siteUrl,
@@ -353,7 +410,6 @@ $entetesAccuse = implode("\r\n", [
     'From: Kanyro <' . $expediteur . '>',
     'Reply-To: ' . $expediteur,
     'Content-Type: text/plain; charset=UTF-8',
-    'X-Mailer: PHP/' . phpversion(),
     // Un accusé de réception ne doit jamais déclencher le répondeur automatique
     // d'en face : deux robots qui se répondent, c'est une boucle.
     'Auto-Submitted: auto-replied',
