@@ -436,8 +436,8 @@ fichier à éditer.
 référencement local : il ne peut pas dépendre du client pour afficher son
 contenu. `public/js/effets.js` (14,9 Ko gzip — il n'est pas minifié, voir
 plus bas, et c'est surtout du commentaire) porte les révélations, la frise du
-déroulement, la parallaxe, la barre de navigation, le curseur magnétique et la
-validation du formulaire ; `<ClientRouter />` d'Astro (5,6 Ko) enchaîne les
+déroulement, la parallaxe, la barre de navigation et la validation du
+formulaire ; `<ClientRouter />` d'Astro (5,6 Ko) enchaîne les
 pages en fondu. Tout est décoratif, à une exception près : la
 densité de la barre de navigation, qui relève de la lisibilité — d'où un CSS qui
 part de l'état lisible et un script qui ne fait que l'éclaircir.
@@ -447,22 +447,22 @@ regardés puis écartés : ~40 Ko pour la première paire, un `<head>` à recoll
 la main pour la seconde, et un scroll à inertie qui se paie cher sur les
 téléphones de la cible.
 
-Trois ressources Osmo ont été reprises, et les trois ont dû être remotorisées
-pour la même raison — leurs dépendances sont servies par un CDN, que
-`script-src 'self'` refuse. Le libellé des boutons (« Button 004 ») se passe de
-SplitText, la validation du formulaire n'a jamais eu besoin de JavaScript tiers,
-et le curseur magnétique remplace GSAP et son greffon Flip par une boucle
-amortie et un FLIP écrit à la main : mesurer avant, déplacer, mesurer après,
-animer l'écart. Dans les trois cas, la ressource servait de plan, pas de
+Plusieurs ressources Osmo ont été reprises, et celles qui dépendaient d'un CDN
+ont dû être remotorisées, puisque `script-src 'self'` le refuse. Le libellé des
+boutons (« Button 004 ») se passe de SplitText, l'arc de raccord de GSAP et
+ScrollTrigger, et la validation du formulaire n'a jamais eu besoin de
+JavaScript tiers. Dans chaque cas, la ressource servait de plan, pas de
 bibliothèque.
 
-**Deux effets de survol, et un partage clair.** L'aimantation du curseur est
-automatique sur tous les boutons — `.bouton-primaire`, `.bouton-secondaire`, et
-tout ce qui porte `data-curseur-cible`. L'échange de lettres, lui, se demande
-explicitement par `data-bouton-anime` et n'est posé que sur les
-« Demander un devis » : c'est le geste de l'unique chemin de conversion, et il
-perdait tout son poids à se jouer aussi sur « Retour à l'accueil » ou
-« Revoir l'offre ». L'effet suit le libellé, pas la classe.
+Le curseur magnétique, remotorisé de la même façon, a été retiré le
+11 septembre 2026 : le site garde le curseur du navigateur. Son code reste dans
+l'historique et sur la branche `feat/curseur-magnetique`.
+
+**L'échange de lettres se demande, il ne s'hérite pas.** Il est posé par
+`data-bouton-anime`, et seulement sur les « Demander un devis » : c'est le geste
+de l'unique chemin de conversion, et il perdait tout son poids à se jouer aussi
+sur « Retour à l'accueil » ou « Revoir l'offre ». L'effet suit le libellé, pas
+la classe.
 
 **Le contenu ne dépend jamais du script.** `.reveal { opacity: 0 }` n'est appliqué
 que sous `@media (scripting: enabled)`. Sans JavaScript, sans
