@@ -416,7 +416,7 @@ d'elle-même sur le champ « quand vous joindre » du formulaire.
 
 ---
 
-## ⚠ À REMPLACER AVANT TOUTE MISE EN LIGNE
+## ⚠ Ce qui reste à fournir
 
 ### 1. Les médias
 
@@ -429,12 +429,13 @@ réencodée (6 Mo → 588 Ko, 1 280 × 720, lecture progressive), servie aux seu
 réduit. Le nuage peint (1,8 Mo), la colombe et le fond de citation ont été
 retirés le 11 septembre 2026.
 
-Ils restent des visuels de template : ciel, nuages et colombes dans la vidéo
-d'accueil n'ont rien à voir avec le bâtiment. À remplacer par de vraies photos
-dès qu'elles existent : un portrait (emplacement `photoFondateur` dans
-`medias.js`, affiché par la section « Qui suis-je » dès qu'il est renseigné),
-puis des chantiers réels. **Jamais de photo de banque présentée comme un
-chantier ou un client.**
+**Le ciel, les nuages et les colombes sont la direction artistique du site**,
+choisie par le propriétaire et confirmée le 11 septembre 2026 : ils ne sont pas
+« à remplacer », même si un audit les juge éloignés du bâtiment. Les vraies
+photos ont leur place à côté, pas à leur place : un portrait (emplacement
+`photoFondateur` dans `medias.js`, affiché par la section « Qui suis-je » dès
+qu'il est renseigné), puis les chantiers réels, dans les réalisations. **Jamais
+de photo de banque présentée comme un chantier ou un client.**
 
 ### 2. Le reste
 

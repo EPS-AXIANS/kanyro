@@ -23,6 +23,10 @@
 > posé dans le pool PHP-FPM. Un envoi de contrôle du formulaire est passé de
 > bout en bout. Mesuré en ligne, en 4G lente simulée : LCP 2,0 s, 161 Ko.
 >
+> **Direction artistique : le ciel, les nuages et les colombes restent.** C'est
+> le choix du propriétaire (11/09/2026), pas un défaut : les remarques de
+> l'audit qui les jugent hors cible ne sont pas des points à corriger.
+>
 > *(Le total annoncé était « 42 » jusqu'au 19/08 : en énumérant les points
 > numérotés, de 0.1 à 7.6, il y en a 37.)*
 >
