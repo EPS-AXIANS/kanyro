@@ -14,7 +14,7 @@ export const offre = {
   promesse: 'Être trouvé sur votre métier et votre commune, et recevoir des demandes de devis.',
   prix: '1 900 – 2 900 €',
   mention: 'une seule fois, tout compris la première année',
-  delai: '4 à 6 semaines',
+  delai: '1 à 2 semaines',
 
   pour: [
     'Vous n’avez pas de site, ou un site que vous n’osez pas montrer',

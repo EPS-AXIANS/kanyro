@@ -18,6 +18,9 @@ import { offre } from '../../data/offres.js';
  * Le délai affiché vient de offres.js pour qu'il ne puisse pas contredire celui
  * annoncé deux sections plus haut.
  *
+ * ⚠ Les durées des étapes, elles, sont écrites à la main : leur somme doit
+ * tenir dans ce délai. S'il change, les reprendre en même temps.
+ *
  * ---- Mise en forme ----
  *
  * Première version : six cartes empilées pleine largeur dans un cadre arrondi,
@@ -103,13 +106,13 @@ const etapes = [
   },
   {
     titre: 'Je construis le site',
-    duree: 'deux à trois semaines',
+    duree: 'quelques jours',
     detail: 'Les pages, le formulaire, la fiche Google.',
     champClient: false,
   },
   {
     titre: 'On corrige ensemble',
-    duree: 'une semaine',
+    duree: 'deux ou trois jours',
     detail: 'Vous dites ce qui ne va pas, je reprends. Le moment de tout dire.',
     champClient: true,
   },
