@@ -49,7 +49,13 @@ const jeu = async (format, qualite) => {
   return images.map((im, i) => `${im.src} ${utiles[i]}w`).join(', ');
 };
 
-const avif = await jeu('avif', 55);
+/*
+ * Qualités mesurées sur les images du site à 1 440 px : AVIF 50 pèse à peu
+ * près le WebP 72 (34 contre 33 Ko pour l'affiche du hero, 29 contre 55 Ko
+ * pour le voile de nuages) avec moins d'artefacts. À 55, l'AVIF de l'affiche
+ * dépassait le WebP alors que le navigateur le choisit en premier.
+ */
+const avif = await jeu('avif', 50);
 const webp = await jeu('webp', 72);
 const repli = await getImage({ src, width: utiles[Math.min(1, utiles.length - 1)], format: 'webp', quality: 72 });
 ---

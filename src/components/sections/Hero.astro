@@ -1,7 +1,9 @@
 ---
+import { Pause, Play } from 'lucide-astro';
 import { MEDIAS } from '../../config/medias.js';
 import { offre } from '../../data/offres.js';
 import LienTelephone from '../LienTelephone.astro';
+import Visuel from '../Visuel.astro';
 
 /*
  * Le premier écran répond à quatre questions, dans cet ordre : pour qui, quoi,
@@ -21,30 +23,80 @@ import LienTelephone from '../LienTelephone.astro';
  */
 ---
 
-<section class="relative h-screen w-full overflow-hidden">
-  {/* `hero-poussee` : 4 % d'échelle sur 22 s. Voir global.css — c'est sous le
-      seuil où l'œil identifie un mouvement, mais le plan cesse d'être fixe. */}
-  <video
-    id="video-hero"
-    class="hero-poussee absolute inset-0 h-full w-full object-cover"
-    src={MEDIAS.heroVideo}
-    autoplay
-    muted
-    loop
-    playsinline
-    aria-hidden="true"
-    tabindex="-1"></video>
+{/*
+  `h-svh` et plus `h-screen` : sur iOS, 100vh compte la barre d'adresse, et le
+  bas du premier écran (le bouton d'appel) passait dessous au chargement.
+*/}
+<section class="relative h-svh min-h-[40rem] w-full overflow-hidden">
+  {/*
+    ---- L'affiche et la vidéo ----
+
+    La vidéo pesait 6 Mo, se chargeait sur tous les écrans, n'avait pas
+    d'affiche (écran noir tant qu'elle n'arrivait pas) et bouclait même en
+    mouvement réduit, sans moyen de l'arrêter.
+
+    Désormais l'AFFICHE est l'image du premier écran : la première image de la
+    vidéo, en AVIF ou WebP à la largeur de l'écran, chargée en priorité. C'est
+    tout ce que voit un téléphone. Sur un écran d'au moins 768 px, sans
+    mouvement réduit ni économiseur de données, effets.js pose la source de la
+    vidéo (588 Ko) et la fait apparaître par-dessus dès qu'elle joue : elle
+    commence sur la même image, donc sans saut. Voir `initVideoHero`.
+
+    `hero-poussee` (4 % d'échelle sur 22 s, voir global.css) est sur le
+    conteneur, pour que l'affiche et la vidéo bougent comme une seule image.
+  */}
+  <div class="hero-poussee absolute inset-0" aria-hidden="true">
+    <Visuel
+      src={MEDIAS.heroAffiche}
+      alt=""
+      decoratif
+      loading="eager"
+      priorite
+      sizes="100vw"
+      largeurs={[640, 960, 1280, 1920]}
+      class="absolute inset-0 h-full w-full object-cover"
+    />
+    <video
+      data-video-hero
+      data-src={MEDIAS.heroVideo}
+      class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 data-[lecture]:opacity-100"
+      muted
+      loop
+      playsinline
+      preload="none"
+      tabindex="-1"></video>
+  </div>
 
   {/*
     Voile ajouté par rapport au template : sans lui, le texte blanc passe sur les
     plans clairs de la vidéo et devient illisible. Le contraste ne peut pas
     dépendre de l'image du moment.
+
+    Il finit sur le noir de la page : c'est ce qui raccorde le premier écran à
+    la section suivante, maintenant que le nuage qui masquait la couture a
+    disparu (il remontait sous le titre et le bouton, et pesait 1,8 Mo).
   */}
   <div
-    class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/65"
+    class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-fond"
     aria-hidden="true"
   >
   </div>
+
+  {/*
+    Le bouton de pause, obligatoire dès qu'une vidéo joue plus de cinq
+    secondes à côté du contenu (WCAG 2.2.2). Masqué tant que la vidéo ne joue
+    pas : sur un téléphone, ou sans script, il n'y a rien à arrêter.
+  */}
+  <button
+    type="button"
+    data-video-bascule
+    hidden
+    class="absolute right-4 bottom-4 z-20 grid h-11 w-11 place-items-center rounded-full border border-white/40 bg-black/40 text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-black/60 sm:right-6 sm:bottom-6"
+    aria-label="Mettre la vidéo en pause"
+  >
+    <Pause class="bascule-pause h-4 w-4" stroke-width={1.75} aria-hidden="true" />
+    <Play class="bascule-lecture h-4 w-4" stroke-width={1.75} aria-hidden="true" />
+  </button>
 
   {/* `hero-sortie` efface le bloc pendant qu'on quitte le premier écran. C'est
       une timeline de défilement CSS, donc hors du fil principal — le seul

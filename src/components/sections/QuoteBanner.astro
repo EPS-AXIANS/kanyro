@@ -1,6 +1,7 @@
 ---
 import { MEDIAS } from '../../config/medias.js';
 import LienTelephone from '../LienTelephone.astro';
+import Visuel from '../Visuel.astro';
 
 /*
  * La fin de l'accueil : la phrase qui résume tout, puis les deux chemins.
@@ -55,16 +56,18 @@ import LienTelephone from '../LienTelephone.astro';
     </p>
   </div>
 
-  <img
-    src={MEDIAS.voileBas}
-    alt=""
-    aria-hidden="true"
-    width="2688"
-    height="1520"
-    loading="lazy"
-    decoding="async"
-    class="pointer-events-none relative z-10 -mt-[10vw] w-full select-none"
-  />
+  {/* Le PNG source pèse 1,8 Mo ; Visuel en tire de l'AVIF et du WebP à la
+      largeur de l'écran, chargés seulement à l'approche du bas de page. */}
+  <div class="pointer-events-none relative z-10 -mt-[10vw] select-none">
+    <Visuel
+      src={MEDIAS.voileBas}
+      alt=""
+      decoratif
+      sizes="100vw"
+      largeurs={[640, 1280, 1920]}
+      class="block w-full"
+    />
+  </div>
 
   {/* Le raccord avec le pied de page, qui est sur le noir de la page : sans
       lui, les nuages s'arrêtaient sur une arête droite. */}

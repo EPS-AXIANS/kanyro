@@ -37,6 +37,23 @@ import '@fontsource-variable/cormorant';
  */
 import '@fontsource-variable/cormorant/wght-italic.css';
 
+/*
+ * Les deux fichiers du titre du premier écran, préchargés.
+ *
+ * Le h1 de l'accueil est l'élément le plus grand de l'écran (son LCP) et il
+ * est en Cormorant, romain puis italique. Sans préchargement, le navigateur ne
+ * découvre ces fichiers qu'après avoir lu la feuille de style : mesuré en 4G
+ * lente, le titre attendait sa fonte près d'une seconde après le premier
+ * affichage. Seul le sous-ensemble latin est préchargé, celui qu'un texte
+ * français déclenche toujours.
+ *
+ * Vite émet ces imports `?url` sous le même nom haché que les `url()` de la
+ * feuille : le préchargement et la feuille désignent le même fichier, qui n'est
+ * téléchargé qu'une fois.
+ */
+import cormorantRomain from '@fontsource-variable/cormorant/files/cormorant-latin-wght-normal.woff2?url';
+import cormorantItalique from '@fontsource-variable/cormorant/files/cormorant-latin-wght-italic.woff2?url';
+
 /**
  * Échappe une chaîne JSON avant injection dans un
  * <script type="application/ld+json">.
@@ -179,6 +196,9 @@ const csp = [
       Le fondu croisé entre deux barres identiques ne se voit pas de toute façon.
     */}
     <ClientRouter />
+
+    <link rel="preload" href={cormorantRomain} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={cormorantItalique} as="font" type="font/woff2" crossorigin />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

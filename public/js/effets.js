@@ -892,46 +892,89 @@ function initParallaxe() {
 }
 
 /* ------------------------------------------------------------------------- */
-/* Vidéo du hero : reprise au premier geste                                   */
+/* Vidéo du hero : seulement là où elle a sa place                            */
 /* ------------------------------------------------------------------------- */
 
 /*
- * La vidéo de fond est `autoplay muted loop playsinline`, ce qui suffit dans le
- * cas général. Certains contextes mobiles la bloquent malgré tout — mode
- * économie d'énergie sur iOS, économiseur de données sur Android. Le navigateur
- * affiche alors son propre bouton de lecture, centré sur la vidéo donc sous le
- * bloc de texte et le bouton du hero : impossible à taper. La vidéo reste figée
- * sur sa première image.
+ * Le balisage ne porte que l'AFFICHE, en image responsive : c'est tout ce que
+ * voit un téléphone, un visiteur en mouvement réduit, ou sans script. La vidéo
+ * n'a pas de `src` dans le HTML (`data-src`), donc rien ne se télécharge tant
+ * que ce bloc ne l'a pas décidé.
  *
- * Le premier geste du visiteur, n'importe où sur la page, vaut interaction
- * utilisateur : c'est le moment où `play()` est autorisé. On ne le tente qu'une
- * fois (`once`), et `touchstart` est passif pour ne pas retarder le défilement.
- * Rappeler `play()` sur une vidéo déjà en lecture est sans effet — inutile de
- * vérifier au préalable qu'elle est en pause.
+ * Trois conditions pour la lancer, et chacune a sa raison :
  *
- * Volontairement hors du garde `MOUVEMENT_DOUX` : `prefers-reduced-motion`
- * couvre le mouvement décoratif ajouté par le site, pas cette vidéo. Le
- * propriétaire assume qu'elle joue dans tous les cas.
+ *   — un écran d'au moins 768 px : sur un téléphone, 600 Ko de ciel animé
+ *     derrière un titre ne valent pas le forfait de données du visiteur ;
+ *   — pas de mouvement réduit : une vidéo en boucle est exactement ce que
+ *     cette préférence demande d'éviter (elle bouclait jusqu'ici quoi qu'il
+ *     arrive, sans aucun moyen de l'arrêter) ;
+ *   — pas d'économiseur de données (`navigator.connection.saveData`).
+ *
+ * Elle apparaît en fondu au premier `playing`, par-dessus l'affiche qui est sa
+ * première image : aucun saut. Le bouton de pause (WCAG 2.2.2) n'apparaît qu'à
+ * ce moment-là. Hors du champ, elle se met en pause d'elle-même, et reprend en
+ * revenant, sauf si le visiteur l'a arrêtée.
  */
 function initVideoHero() {
-  const video = document.getElementById('video-hero');
+  const video = document.querySelector('[data-video-hero]');
   if (!video) return null;
 
-  const relancerLecture = () => {
+  const grandEcran = window.matchMedia('(min-width: 768px)').matches;
+  const economie = navigator.connection?.saveData === true;
+  if (!grandEcran || economie || MOUVEMENT_DOUX.matches) return null;
+
+  const bouton = document.querySelector('[data-video-bascule]');
+  let arreteeParLeVisiteur = false;
+
+  const lire = () => {
     video.play().catch(() => {
-      /* Refus persistant du navigateur : on n'insiste pas. */
+      /* Lecture refusée (économie d'énergie, onglet en arrière-plan) : l'affiche
+         reste, c'est déjà une image complète. */
     });
   };
 
-  document.addEventListener('touchstart', relancerLecture, {
-    once: true,
-    passive: true,
-  });
-  document.addEventListener('click', relancerLecture, { once: true });
+  const mettreAJourBouton = () => {
+    if (!bouton) return;
+    const enPause = video.paused;
+    bouton.dataset.etat = enPause ? 'pause' : 'lecture';
+    bouton.setAttribute('aria-label', enPause ? 'Relancer la vidéo' : 'Mettre la vidéo en pause');
+  };
+
+  const surLecture = () => {
+    video.dataset.lecture = '';
+    if (bouton) bouton.hidden = false;
+    mettreAJourBouton();
+  };
+
+  const basculer = () => {
+    arreteeParLeVisiteur = !video.paused;
+    if (video.paused) lire();
+    else video.pause();
+  };
+
+  video.addEventListener('playing', surLecture);
+  video.addEventListener('pause', mettreAJourBouton);
+  bouton?.addEventListener('click', basculer);
+
+  if (!video.getAttribute('src')) video.src = video.dataset.src;
+  lire();
+
+  const observateur =
+    'IntersectionObserver' in window
+      ? new IntersectionObserver(([entree]) => {
+          if (!entree) return;
+          if (!entree.isIntersecting) video.pause();
+          else if (!arreteeParLeVisiteur) lire();
+        })
+      : null;
+  observateur?.observe(video);
 
   return () => {
-    document.removeEventListener('touchstart', relancerLecture);
-    document.removeEventListener('click', relancerLecture);
+    observateur?.disconnect();
+    video.removeEventListener('playing', surLecture);
+    video.removeEventListener('pause', mettreAJourBouton);
+    bouton?.removeEventListener('click', basculer);
+    video.pause();
   };
 }
 

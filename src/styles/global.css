@@ -677,6 +677,15 @@
   transform-origin: center;
 }
 
+/* Le bouton de pause de la vidéo : l'icône suit l'état posé par effets.js. */
+[data-video-bascule] .bascule-lecture,
+[data-video-bascule][data-etat='pause'] .bascule-pause {
+  display: none;
+}
+[data-video-bascule][data-etat='pause'] .bascule-lecture {
+  display: block;
+}
+
 /*
  * Le bloc de texte s'efface pendant qu'on quitte le premier écran.
  *
