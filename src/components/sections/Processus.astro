@@ -101,7 +101,7 @@ const etapes = [
   },
   {
     titre: 'Vous validez les textes',
-    duree: 'avant tout dessin',
+    duree: 'le temps d’une relecture',
     detail: 'Les mots d’abord : devant une maquette, on ne lit plus rien.',
     champClient: true,
   },
@@ -120,7 +120,7 @@ const etapes = [
   {
     titre: 'Mise en ligne',
     duree: 'le jour J',
-    detail: 'Les accès sont à vous. À un mois, les premiers chiffres.',
+    detail: 'Les accès sont à vous. Un mois après, je vous envoie les premiers chiffres.',
     champClient: false,
   },
 ];
@@ -132,16 +132,16 @@ const etapes = [
  */
 ---
 
-<section id="deroulement" class="bg-fond px-4 py-24 sm:px-8 md:px-16 lg:px-12 lg:py-32">
+<section id="deroulement" class="bg-fond px-4 py-16 sm:px-8 sm:py-24 md:px-16 lg:px-12 lg:py-32">
   <div class="mx-auto max-w-6xl">
     <p class="surtitre reveal text-center">Le déroulement</p>
     <h2
-      class="font-titre rideau mx-auto mt-6 max-w-3xl text-center text-4xl tracking-wide sm:text-5xl md:text-6xl"
+      class="titre-section rideau mx-auto mt-6 max-w-3xl text-center"
     >
       Comment ça se passe
     </h2>
     <p
-      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [--retard:120ms]"
+      class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-base leading-relaxed text-texte-doux [--retard:120ms]"
     >
       {offre.delai} entre le premier rendez-vous et la mise en ligne. Vous
       n’intervenez qu’à quatre moments, en orange ci-dessous : deux ou trois
@@ -171,7 +171,7 @@ const etapes = [
       se voit comme un bloc décalé vers la gauche sous un titre centré. C'était
       le cas à `max-w-3xl`, où le texte s'arrêtait 240 px avant le bord.
     */}
-    <ol data-frise class="relative mx-auto mt-16 max-w-xl sm:mt-20">
+    <ol data-frise class="relative mx-auto mt-12 max-w-xl sm:mt-20">
       {/*
         L'axe s'arrête au centre du premier et du dernier nœud, au lieu de
         déborder dans le vide : une frise chronologique a un début et une fin,
@@ -204,7 +204,7 @@ const etapes = [
           <li
             data-frise-etape
             data-client={etape.champClient ? '' : undefined}
-            class="etape-frise relative pb-14 pl-16 last:pb-0 sm:pb-20 sm:pl-20"
+            class="etape-frise relative pb-10 pl-16 last:pb-0 sm:pb-20 sm:pl-20"
           >
             {/*
               Le nœud est opaque et au-dessus de l'axe : c'est lui qui coupe le
@@ -242,7 +242,7 @@ const etapes = [
               <p class="font-texte mt-2 text-xs tracking-[0.2em] text-texte-faible uppercase">
                 {etape.duree}
               </p>
-              <p class="font-texte mt-3 text-xs leading-relaxed text-texte-doux sm:text-sm">
+              <p class="font-texte mt-3 text-[0.9375rem] leading-relaxed text-texte-doux sm:text-base">
                 {etape.detail}
               </p>
             </div>

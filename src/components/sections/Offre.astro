@@ -26,7 +26,7 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
 */}
 <section
   id="offre"
-  class="bg-brique relative overflow-hidden px-4 py-24 sm:px-8 md:px-16 lg:px-28 lg:py-32"
+  class="bg-brique relative overflow-hidden px-4 py-16 sm:px-8 sm:py-24 md:px-16 lg:px-28 lg:py-32"
 >
   <div class="mx-auto max-w-5xl">
     <p class="surtitre reveal text-center text-white/70">L'offre</p>
@@ -152,11 +152,11 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
     */}
     <ul
       data-cascade
-      class="mt-16 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2"
+      class="mt-12 grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:mt-16 sm:grid-cols-2"
     >
       {
         offre.contenu.map((bloc) => (
-          <li class="reveal bg-brique p-8">
+          <li class="reveal bg-brique p-6 sm:p-8">
             <h3 class="font-titre text-[1.75rem] leading-snug tracking-wide">{bloc.titre}</h3>
             <p class="font-texte mt-3 text-[0.9375rem] leading-relaxed text-white/80">
               {bloc.detail}
@@ -166,7 +166,7 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
       }
     </ul>
 
-    <div class="mt-16 grid gap-12 md:grid-cols-2">
+    <div class="mt-12 grid gap-10 sm:mt-16 sm:gap-12 md:grid-cols-2">
       <div>
         <h3 class="font-titre reveal text-[1.75rem] tracking-wide">C'est pour vous si</h3>
         <ul data-cascade="70" class="mt-5 space-y-3">
@@ -203,7 +203,7 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
       liste souple : jointes par « · », elles laissaient un « · Béthune » seul
       en début de ligne.
     */}
-    <div class="mt-16 text-center">
+    <div class="mt-12 text-center sm:mt-16">
       <p class="reveal font-texte mx-auto max-w-2xl text-sm leading-relaxed text-white/80">
         Pensé pour les{' '}
         {

@@ -46,7 +46,7 @@ export const offre = {
     {
       titre: 'Les demandes arrivent chez vous',
       detail:
-        'Cinq pages, écrites avec vous. Le bouton « demander un devis » est visible partout, le formulaire arrive directement dans votre boîte mail, et votre numéro est cliquable sur téléphone.',
+        'Le bouton « demander un devis » est visible sur chaque page, le formulaire arrive directement dans votre boîte mail, et votre numéro est cliquable sur téléphone.',
     },
     {
       titre: 'Vos chantiers en photo',

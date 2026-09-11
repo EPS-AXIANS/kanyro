@@ -31,7 +31,7 @@ const classeLien =
 ---
 
 <footer class="border-t border-trait bg-fond">
-  <div class="contenu grid gap-10 py-16 md:grid-cols-[1.4fr_1fr_1fr] md:gap-12">
+  <div class="contenu grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr] md:gap-12 md:py-16">
     <div>
       <p class="font-titre text-3xl tracking-wide">{SITE.nom}</p>
       <p class="font-texte mt-3 max-w-xs text-[0.9375rem] leading-relaxed text-texte-doux">
@@ -44,7 +44,7 @@ const classeLien =
 
     <nav aria-label="Pied de page">
       <p class="surtitre">Le site</p>
-      <ul class="font-texte mt-3">
+      <ul class="font-texte mt-3 grid grid-cols-2 gap-x-6 md:grid-cols-1">
         <li><a class={classeLien} href="/#offre">L'offre et les prix</a></li>
         {FONCTIONS.realisations && (
           <li><a class={classeLien} href="/realisations">Réalisation</a></li>
