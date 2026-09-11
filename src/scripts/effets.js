@@ -859,6 +859,77 @@ function initSurvolDirectionnel() {
 }
 
 /* ------------------------------------------------------------------------- */
+/* Mesure d'audience : les points de mesure, sans fournisseur                */
+/* ------------------------------------------------------------------------- */
+
+/*
+ * Quatre événements, ceux qui disent si le site fait son travail :
+ *
+ *   clic-appel          un lien d'appel (`data-mesure="appel"`, LienTelephone)
+ *   clic-devis          un bouton « Demander un devis » (`data-mesure="devis"`)
+ *   formulaire-envoye   le formulaire de devis part, validation passée
+ *   demande-recue       arrivée sur /merci, donc demande réellement reçue
+ *
+ * ⚠ AUCUN FOURNISSEUR N'EST BRANCHÉ, et c'est volontaire : le choisir
+ * (Plausible, Umami, Matomo, hébergé ou non) est une décision à prendre, pas
+ * un détail technique. Tant qu'aucun n'est chargé, `signaler` ne fait rien :
+ * pas de requête, pas de cookie, et les mentions légales restent vraies. La
+ * marche à suivre pour en brancher un est dans le README (« Mesure
+ * d'audience ») : le script, deux hôtes dans la CSP (Base.astro et
+ * deploy/caddy/kanyro.caddy), la section Cookies des mentions légales.
+ */
+function signaler(evenement) {
+  try {
+    if (typeof window.plausible === 'function') window.plausible(evenement);
+    else if (typeof window.umami?.track === 'function') window.umami.track(evenement);
+  } catch {
+    /* La mesure ne doit jamais casser la page. */
+  }
+}
+
+/*
+ * `initialiser()` est rejouée à dessein au premier chargement (appel direct,
+ * puis `astro:page-load`) : sans ce registre, l'arrivée sur /merci comptait
+ * deux fois. Chaque navigation installe un nouveau <body>, d'où la clé.
+ */
+const pagesMesurees = new WeakSet();
+
+function initMesure() {
+  const surClic = (evenement) => {
+    const cible =
+      evenement.target instanceof Element ? evenement.target.closest('[data-mesure]') : null;
+    if (cible) signaler(`clic-${cible.dataset.mesure}`);
+  };
+
+  /*
+   * Écouté sur le document, donc APRÈS l'écouteur de validation posé sur le
+   * formulaire : un envoi bloqué par un champ fautif arrive ici avec
+   * `defaultPrevented`, et ne compte pas.
+   */
+  const surEnvoi = (evenement) => {
+    const formulaire = evenement.target;
+    if (formulaire instanceof HTMLFormElement && formulaire.name === 'devis' && !evenement.defaultPrevented) {
+      signaler('formulaire-envoye');
+    }
+  };
+
+  document.addEventListener('click', surClic);
+  document.addEventListener('submit', surEnvoi);
+  if (
+    window.location.pathname.replace(/\/$/, '') === '/merci' &&
+    !pagesMesurees.has(document.body)
+  ) {
+    pagesMesurees.add(document.body);
+    signaler('demande-recue');
+  }
+
+  return () => {
+    document.removeEventListener('click', surClic);
+    document.removeEventListener('submit', surEnvoi);
+  };
+}
+
+/* ------------------------------------------------------------------------- */
 /* Vidéo du hero : seulement là où elle a sa place                            */
 /* ------------------------------------------------------------------------- */
 
@@ -1270,6 +1341,7 @@ function initialiser() {
     initSurvolDirectionnel(),
     initBoutonsAnimes(),
     initVideoHero(),
+    initMesure(),
   ].filter(Boolean);
 }
 
