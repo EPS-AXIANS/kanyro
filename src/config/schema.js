@@ -1,4 +1,4 @@
-import { SITE, urlAbsolue } from './site.js';
+import { SITE, reseauxActifs, urlAbsolue } from './site.js';
 
 /**
  * JSON-LD de l'agence.
@@ -33,7 +33,7 @@ export function agenceJsonLd(communes = []) {
 
   if (SITE.contact.telephone) noeud.telephone = SITE.contact.telephone;
 
-  const reseaux = Object.values(SITE.reseaux).filter(Boolean);
+  const reseaux = reseauxActifs().map((r) => r.url);
   if (reseaux.length) noeud.sameAs = reseaux;
 
   return noeud;

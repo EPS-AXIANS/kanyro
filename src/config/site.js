@@ -78,10 +78,15 @@ export const SITE = {
     pays: 'FR',
   },
 
+  /*
+   * Une chaîne vide tant que le compte n'existe pas. Ni `'#'`, ni une page
+   * d'accueil de réseau : c'est `reseauxActifs()` plus bas qui décide de ce
+   * qui s'affiche, et il ne laisse passer qu'une vraie adresse https.
+   */
   reseaux: {
     linkedin: 'https://www.linkedin.com/in/elio-pallois/',
-    instagram: '#',
-    facebook: '#',
+    instagram: '',
+    facebook: '',
   },
 
   /** Renseigner après immatriculation — sert aussi aux mentions légales. */
@@ -137,6 +142,20 @@ export function cheminPropre(chemin = '/') {
   // Pas de slash final, conformément à `trailingSlash: 'never'`.
   if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
   return p;
+}
+
+/**
+ * Les réseaux réellement ouverts, dans l'ordre de `SITE.reseaux`.
+ *
+ * Le pied de page et le `sameAs` du JSON-LD lisaient chacun `SITE.reseaux` avec
+ * leur propre filtre, `filter(Boolean)`, qui laissait passer `'#'` : deux icônes
+ * mortes sur chaque page et deux URL invalides dans les données structurées.
+ * Un seul filtre, une seule règle : une adresse https, ou rien.
+ */
+export function reseauxActifs() {
+  return Object.entries(SITE.reseaux)
+    .filter(([, url]) => typeof url === 'string' && /^https:\/\/[^/\s]+\.[^/\s]+/.test(url))
+    .map(([nom, url]) => ({ nom, url }));
 }
 
 /** Construit une URL absolue — exigée par OpenGraph et les canonical. */

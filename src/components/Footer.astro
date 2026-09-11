@@ -1,19 +1,23 @@
 ---
 import { Facebook, Instagram, Linkedin, Mail, Aperture } from 'lucide-astro';
-import { FONCTIONS, SITE } from '../config/site.js';
+import { FONCTIONS, SITE, reseauxActifs } from '../config/site.js';
 
 const { variante = 'standard' } = Astro.props;
 
 /*
- * Les icônes de réseaux ne sont rendues que si l'URL est renseignée dans
- * site.js. Un lien social mort sur le site d'une agence, c'est un mauvais signal
- * envoyé au premier prospect qui clique — mieux vaut l'absence que le vide.
+ * Les icônes de réseaux ne sont rendues que pour une vraie adresse : le filtre
+ * est `reseauxActifs()`, partagé avec le JSON-LD. Un lien social mort sur le
+ * site d'une agence, c'est un mauvais signal envoyé au premier prospect qui
+ * clique — mieux vaut l'absence que le vide.
  */
-const reseaux = [
-  { url: SITE.reseaux.linkedin, Icone: Linkedin, nom: 'LinkedIn' },
-  { url: SITE.reseaux.instagram, Icone: Instagram, nom: 'Instagram' },
-  { url: SITE.reseaux.facebook, Icone: Facebook, nom: 'Facebook' },
-].filter((r) => r.url);
+const ICONES = {
+  linkedin: { Icone: Linkedin, nom: 'LinkedIn' },
+  instagram: { Icone: Instagram, nom: 'Instagram' },
+  facebook: { Icone: Facebook, nom: 'Facebook' },
+};
+const reseaux = reseauxActifs()
+  .filter((r) => ICONES[r.nom])
+  .map((r) => ({ url: r.url, ...ICONES[r.nom] }));
 
 const classeTexte =
   'text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.15em] sm:tracking-[0.25em] text-white/90 transition-colors hover:text-white no-underline';
