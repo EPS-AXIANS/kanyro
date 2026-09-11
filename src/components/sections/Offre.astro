@@ -72,12 +72,16 @@ const secteurs = [
 
              En blanc discret et non en orange : le tarif de lancement juste
              au-dessus est ce qui doit déclencher l'appel, et deux accents de la
-             même couleur se neutralisent. */
+             même couleur se neutralisent.
+
+             « Dès » et le prix de la première formule seulement : les deux
+             montants ici ajouteraient une grille au milieu de l'offre, et le
+             tableau est deux sections plus bas. */
           offreMensuelle.actif && (
             <p class="font-texte mt-3 text-xs text-white/45">
               <a href="#suivi" class="underline underline-offset-4">
-                Puis {offreMensuelle.prix} à partir de la deuxième année pour
-                l’hébergement et la maintenance — facultatif
+                Puis dès {offreMensuelle.formules[0].prix} à partir de la deuxième
+                année pour l’hébergement et la maintenance — facultatif
               </a>
             </p>
           )

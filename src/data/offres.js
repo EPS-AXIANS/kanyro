@@ -89,19 +89,29 @@ export const tarifReference = {
 };
 
 /**
- * Forfait Suivi — hébergement et entretien du site, après la première année.
+ * Suivi — hébergement et entretien du site, après la première année. Deux
+ * formules : Kanyro Maintenance et Kanyro Accompagnement.
  *
  * ⚠ OUVERT AVANT LA MESURE PRÉVUE. Décidé le 30 août 2026 sur la branche
  * feat/forfait-suivi-mensuel, jamais fusionnée ; repris ici et mis en vitrine
- * le 11 septembre, à la demande du propriétaire.
+ * le 11 septembre, à la demande du propriétaire. Scindé en deux formules le
+ * même jour, toujours à sa demande : l'unique forfait Suivi à 25 €/mois est
+ * devenu Maintenance à 29 € et Accompagnement à 59 €.
  *
  * Ce bloc portait auparavant `actif: false` et une consigne : ne pas vendre
  * d'abonnement tant que le rythme réel n'a pas été mesuré sur un vrai client.
  * La décision de l'ouvrir quand même a été prise sciemment. Ce qui limite le
  * risque, ce n'est donc pas la mesure — elle reste à faire — c'est la façon
- * dont `inclus` est dimensionné : voir le calcul de marge plus bas.
+ * dont `comparatif` est dimensionné : voir le calcul de marge plus bas.
  *
- * ── Pourquoi 25 €/mois ────────────────────────────────────────────────
+ * ── Deux formules, alors que l'offre de tête dit « une, pas trois » ─────
+ *
+ * Le bloc `offre` en haut de ce fichier refuse le catalogue parce qu'un
+ * artisan qui hésite ne signe pas. Ici, le choix ne pèse pas sur la signature :
+ * il ne se pose qu'au onzième mois, sur un site qui tourne déjà. D'ici là, la
+ * seule question reste « oui ou non » pour le site.
+ *
+ * ── Pourquoi ces prix ──────────────────────────────────────────────────
  *
  * Le coût d'infrastructure réel est d'environ 2 à 3 € par mois et par site :
  * une part du VPS Hostinger déjà en service, le renouvellement du nom de
@@ -109,7 +119,7 @@ export const tarifReference = {
  *
  * Le prix ne paie donc pas l'infrastructure, il paie le fait que personne
  * n'ait à y penser — d'où l'obligation d'écrire `engagement` : sans délai
- * annoncé, 300 € par an face aux ~30 € que coûte un hébergement repris en
+ * annoncé, 290 € par an face aux ~30 € que coûte un hébergement repris en
  * main ne se défend pas en rendez-vous. C'est ce qui sépare un forfait d'une
  * revente d'hébergement avec marge, et un artisan fait très bien la
  * différence.
@@ -121,16 +131,27 @@ export const tarifReference = {
  * s'attaque trop facilement, puisque l'hébergement statique nu, lui, est
  * gratuit chez le même fournisseur.
  *
- * ── Le calcul qui contraint `inclus` ──────────────────────────────────
+ * ── Le calcul qui contraint `comparatif` ──────────────────────────────
  *
- * 300 € par an, moins ~36 € d'infrastructure, laissent 264 € — soit environ
- * quatre heures de travail par an au taux visé, pas davantage. Le relevé
- * mensuel en consomme déjà la moitié à lui seul (12 × ~15 min).
+ * Compté sur le prix annuel, le plus bas des deux, et moins ~36 €
+ * d'infrastructure, au même taux horaire visé qu'avant :
  *
- * C'est la raison pour laquelle les ajouts de chantiers sont plafonnés au
- * trimestre et non « à la demande ». Toute ligne ajoutée ici doit être
- * retranchée de ces quatre heures, sinon le forfait se vend à perte sans que
- * rien ne le signale avant la fin de l'année.
+ *   Maintenance     290 € → 254 €, soit à peine quatre heures par an.
+ *                   Les deux modifications par mois, si elles sont toutes
+ *                   prises, les consomment à elles seules (24 × ~10 min).
+ *                   C'est pourquoi le relevé mensuel n'y est plus.
+ *
+ *   Accompagnement  590 € → 554 €, soit un peu plus de huit heures par an.
+ *                   Le relevé mensuel en prend trois (12 × ~15 min). Il en
+ *                   reste cinq pour des modifications « illimitées », les
+ *                   petites évolutions et la visibilité locale.
+ *
+ * ⚠ C'EST LA LIGNE « ILLIMITÉES » QUI PORTE LE RISQUE, pas le prix. Sa seule
+ * borne est `note` : une demande à la fois, sur les pages existantes. Si cette
+ * phrase disparaît du site, ou du devis, la formule se vend à perte dès le
+ * premier client bavard, sans que rien ne le signale avant la fin de l'année.
+ *
+ * Toute ligne ajoutée au comparatif doit être retranchée de ces heures.
  *
  * ── À vérifier après le premier client ────────────────────────────────
  *
@@ -140,15 +161,18 @@ export const tarifReference = {
  */
 export const offreMensuelle = {
   actif: true,
-  nom: 'Suivi',
   /* Le mot « abonnement » et les deux services qu'il paie sont écrits en toutes
      lettres, dès la première phrase : un nom de forfait seul ne dit pas ce
      qu'on achète, et c'est ce qu'on doit comprendre sans rien lire d'autre. */
   promesse:
-    'Un abonnement pour l’hébergement et la maintenance de votre site, une fois créé. Il reste en ligne, à jour et surveillé, sans que vous ayez à y penser.',
+    'Un abonnement pour l’hébergement et la maintenance de votre site, une fois créé, en deux formules. Il reste en ligne, à jour et surveillé, sans que vous ayez à y penser.',
 
-  prix: '25 €/mois',
-  prixAnnuel: '250 €/an',
+  /* La première formule est aussi le prix d'appel : Offre.astro et la Q&R
+     l'annoncent en « à partir de ». Garder la moins chère en tête. */
+  formules: [
+    { nom: 'Maintenance', prix: '29 €/mois', prixAnnuel: '290 €/an' },
+    { nom: 'Accompagnement', prix: '59 €/mois', prixAnnuel: '590 €/an' },
+  ],
   mentionAnnuel: 'deux mois offerts',
 
   /* Le forfait ne démarre qu'à la fin de la première année, déjà comprise dans
@@ -156,37 +180,70 @@ export const offreMensuelle = {
      immédiat, ce qui ferait monter le prix d'entrée dans l'esprit du prospect. */
   demarrage: 'à la fin de la première année, qui est comprise dans le prix du site',
 
-  inclus: [
+  /*
+   * Une ligne par prestation, une valeur par formule, dans l'ordre de
+   * `formules` : `true` coché, `false` absent, une chaîne s'affiche telle
+   * quelle. La forme `{ texte, note: true }` accroche en plus l'astérisque qui
+   * renvoie à `note`.
+   *
+   * `detail` est facultatif, et il ne s'invente pas : chaque phrase reprend un
+   * engagement déjà écrit ailleurs. Une ligne qu'on ne sait pas encore décrire
+   * — « petites évolutions » — reste nue plutôt que de promettre au hasard.
+   */
+  comparatif: [
     {
-      titre: 'L’hébergement, le domaine et le certificat',
-      detail:
-        'Renouvelés à échéance, à ma charge. Aucune facture à suivre chez un hébergeur, aucun nom de domaine qui expire parce que le rappel est parti sur une ancienne adresse mail — c’est la panne la plus fréquente, et la plus bête.',
+      titre: 'Hébergement',
+      detail: 'Sur un serveur tenu à jour, à ma charge.',
+      valeurs: [true, true],
     },
     {
-      titre: 'Sauvegarde quotidienne, conservée un mois',
-      detail:
-        'Le site est sauvegardé chaque nuit et la restauration est à ma charge. Trente jours d’historique : de quoi revenir en arrière même si le problème n’a été remarqué qu’au bout de deux semaines.',
+      titre: 'Nom de domaine',
+      detail: 'Renouvelé à échéance, toujours à votre nom.',
+      valeurs: [true, true],
     },
     {
-      titre: 'Mises à jour de sécurité et surveillance',
-      detail:
-        'Le serveur est tenu à jour et sa disponibilité est vérifiée automatiquement. Si le site tombe, je suis prévenu avant vous.',
+      titre: 'Certificat SSL',
+      detail: 'Le cadenas dans la barre d’adresse.',
+      valeurs: [true, true],
     },
     {
-      titre: 'Un relevé chaque mois',
-      detail:
-        'Où vous sortez sur les recherches visées, combien de personnes sont venues, combien vous ont écrit. Envoyé même quand les chiffres sont mauvais : c’est le mois où ils baissent qu’il faut le savoir.',
+      titre: 'Sauvegardes',
+      detail: 'Chaque nuit, trente jours d’historique.',
+      valeurs: [true, true],
     },
     {
-      titre: 'Vos nouveaux chantiers ajoutés',
-      detail:
-        'Vous m’envoyez les photos, je m’occupe du reste — cadrage, poids des images, mise en page. Deux chantiers par trimestre.',
+      titre: 'Surveillance',
+      detail: 'Si le site tombe, je suis prévenu avant vous.',
+      valeurs: [true, true],
+    },
+    { titre: 'Corrections techniques', valeurs: [true, true] },
+    {
+      titre: 'Modifications de textes et de photos',
+      detail: 'Vous m’envoyez le texte ou les photos, je m’occupe du reste.',
+      valeurs: ['2 par mois', { texte: 'Illimitées', note: true }],
+    },
+    { titre: 'Petites évolutions', valeurs: [false, true] },
+    {
+      titre: 'Suivi des performances',
+      detail: 'Un relevé chaque mois : où vous sortez, combien vous ont écrit.',
+      valeurs: [false, true],
+    },
+    { titre: 'Visibilité locale et référencement', valeurs: [false, true] },
+    {
+      titre: 'Support prioritaire',
+      detail: 'Vos demandes passent avant les autres.',
+      valeurs: [false, true],
     },
   ],
 
+  /* La borne de « Illimitées » — voir le calcul de marge plus haut. */
+  note: 'Sur les pages existantes, une demande à la fois : la suivante part dès que la précédente est en ligne. Les nouvelles pages et les refontes restent sur devis.',
+
   /* Le palier tarifaire retenu n'est défendable qu'écrit. Un délai annoncé
      qu'on ne tient pas vaut moins que pas de délai du tout : ces deux chiffres
-     doivent rester tenables un soir de semaine, en alternance. */
+     doivent rester tenables un soir de semaine, en alternance. Ils valent pour
+     les deux formules — la priorité d'Accompagnement passe devant, elle ne
+     rallonge pas le délai de l'autre. */
   engagement: [
     'Je réponds à vos demandes sous 24 heures ouvrées',
     'Site inaccessible : remise en ligne sous 24 heures ouvrées, depuis la sauvegarde de la veille',
@@ -195,7 +252,7 @@ export const offreMensuelle = {
   horsPerimetre: [
     'Les nouvelles pages et les refontes font l’objet d’un devis à part',
     'Je ne gère pas vos réseaux sociaux au quotidien',
-    'Je ne réécris pas vos textes dans le forfait — les corrections courtes, oui',
+    'Je ne réécris pas vos textes — les corrections courtes, oui',
   ],
 
   /* Sans porte de sortie explicite, un forfait se lit comme un piège, et c'est

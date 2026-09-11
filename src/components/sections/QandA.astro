@@ -55,10 +55,11 @@ const colonneDroite = [
    * et répondait « Non ». Elle nommait donc un produit dont la page ne donnait ni
    * le prix ni le contenu — le prospect repartait avec une question de plus.
    *
-   * Le forfait Suivi a désormais sa propre section (Suivi.astro), et cette
-   * réponse ne la répète pas : elle donne les deux chemins, les deux montants,
-   * et renvoie plus haut pour le détail. Une Q&R qui redit une section entière
-   * fatigue au lieu de rassurer, et les deux textes finissent par diverger.
+   * Le suivi a désormais sa propre section (Suivi.astro), et cette réponse ne
+   * la répète pas : elle donne les deux chemins, le prix d'entrée, et renvoie
+   * plus haut pour le tableau des deux formules. Une Q&R qui redit une section
+   * entière fatigue au lieu de rassurer, et les deux textes finissent par
+   * diverger.
    *
    * Ce qu'elle redit quand même : qu'on ne signe rien aujourd'hui. C'est la
    * seule chose que le prospect a besoin d'entendre au moment où il lit un prix
@@ -74,7 +75,7 @@ const colonneDroite = [
    */
   {
     q: 'Et après la mise en ligne, il se passe quoi ?',
-    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Au bout d'un an, deux chemins. Vous reprenez la main : le site est à vous, il tourne, comptez ${offreMensuelle.alternative}. Ou je continue à m'en occuper — c'est le forfait ${offreMensuelle.nom}, ${offreMensuelle.prix} ou ${offreMensuelle.prixAnnuel}, détaillé plus haut sur cette page. Dans les deux cas, rien ne se signe aujourd'hui : la question ne se pose qu'au bout d'un an.`,
+    r: `La première année, l'hébergement, le nom de domaine et le certificat sont compris dans le prix. Au bout d'un an, deux chemins. Vous reprenez la main : le site est à vous, il tourne, comptez ${offreMensuelle.alternative}. Ou je continue à m'en occuper — deux formules, dès ${offreMensuelle.formules[0].prix}, comparées plus haut sur cette page. Dans les deux cas, rien ne se signe aujourd'hui : la question ne se pose qu'au bout d'un an.`,
   },
 ];
 
