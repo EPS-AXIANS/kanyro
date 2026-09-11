@@ -31,7 +31,7 @@ export const offre = {
     {
       titre: 'Vos chantiers en photo',
       detail:
-        'Je me déplace une demi-journée pour photographier deux ou trois chantiers finis. Dans le bâtiment, c’est la photo qui signe le devis, pas le texte.',
+        'Vous m’envoyez celles de vos chantiers finis, je fais le tri. Pas de photos ? Je me déplace pour en faire, en supplément. Dans le bâtiment, c’est la photo qui signe le devis, pas le texte.',
     },
     {
       titre: 'Visibilité locale',

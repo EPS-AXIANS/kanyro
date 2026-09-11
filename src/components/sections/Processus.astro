@@ -68,10 +68,11 @@ import { offre } from '../../data/offres.js';
  *
  * ---- `champClient`, et ce qu'il reste de l'alternance ----
  *
- * L'intro promet « vous n'intervenez qu'à trois moments » : ce sont les étapes
- * 1, 3 et 5, marquées `champClient`. Leur nœud est orange, les trois autres
- * gris — on voit d'un coup d'œil que les deux tiers du travail se font sans
- * vous.
+ * L'intro promet « vous n'intervenez qu'à quatre moments » : ce sont les étapes
+ * 1, 2, 3 et 5, marquées `champClient`. Leur nœud est orange, les deux autres
+ * gris. L'étape 2 est passée côté client quand le reportage photo est devenu
+ * un supplément : c'est lui qui envoie ses photos, et le compte de l'intro a
+ * suivi — un nœud orange de plus que de moments annoncés, et la phrase ment.
  *
  * Cette information était portée deux fois, avant : par la couleur ET par la
  * position, les étapes du client passant au-dessus de l'axe horizontal et les
@@ -93,10 +94,10 @@ const etapes = [
     champClient: true,
   },
   {
-    titre: 'Je viens photographier',
-    duree: 'une demi-journée',
-    detail: 'Deux ou trois chantiers finis. Vous n’avez rien à préparer.',
-    champClient: false,
+    titre: 'Vous m’envoyez vos photos',
+    duree: 'quelques minutes',
+    detail: 'Celles de vos chantiers finis, même prises au téléphone. Vous n’en avez pas ? Je viens en faire, en supplément.',
+    champClient: true,
   },
   {
     titre: 'Vous validez les textes',
@@ -143,7 +144,7 @@ const etapes = [
       class="font-texte reveal mx-auto mt-7 max-w-xl text-center text-sm leading-relaxed text-texte-doux [--retard:120ms]"
     >
       {offre.delai} entre le premier rendez-vous et la mise en ligne. Vous
-      n’intervenez qu’à trois moments, en orange ci-dessous. Le reste, c’est mon
+      n’intervenez qu’à quatre moments, en orange ci-dessous. Le reste, c’est mon
       travail.
     </p>
 
