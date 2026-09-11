@@ -275,7 +275,7 @@ moment de vendre.
 
 | Page | Rôle |
 |---|---|
-| `/` | Porte tout : offre, prix, délai, questions, preuve, appel à l'action |
+| `/` | Porte tout : offre, prix, délai, déroulement, forfait Suivi, questions, preuve, appel à l'action |
 | `/contact` | Formulaire de demande de devis |
 | `/mentions-legales` | Obligations légales |
 | `/merci`, `/404` | Techniques, `noindex` |
@@ -286,11 +286,44 @@ deux booléens de `FONCTIONS` dans `src/config/site.js` les éteignent, et
 `getStaticPaths` renvoie une liste vide. Les rallumer après le premier ou le
 deuxième vrai client est une ligne à changer, pas un chantier à refaire.
 
-**L'offre mensuelle est volontairement absente de la vitrine.** Vendre un
-abonnement suppose des livrables récurrents concrets et tenables chaque mois.
-Tant que ce rythme n'a pas été mesuré sur un vrai client, l'annoncer serait
-promettre un engagement dont on ignore le coût. Le squelette attend dans
-`src/data/offres.js`, avec `actif: false`.
+**Le forfait Suivi a sa propre section en vitrine.** C'est l'abonnement
+d'hébergement et de maintenance proposé après la création : 25 €/mois ou
+250 €/an, à partir de la fin de la première année. Décidé le 30 août 2026 sur la
+branche `feat/forfait-suivi-mensuel`, jamais fusionnée, il a été repris et mis
+en vitrine le 11 septembre. `Suivi.astro` le présente en entier — les deux
+montants, les cinq prestations, les deux délais d'engagement, les conditions de
+sortie et l'alternative à ~30 €/an.
+
+Un second prix sur la même page est le risque décrit au point 2.2 de la
+tasklist : deux tarifs sans règle qui les relie, et le prospect n'en retient
+qu'une chose — que le prix se négocie. **La règle est donc écrite à deux
+endroits, et retirer l'un des deux rouvre le problème :**
+
+1. `Offre.astro`, sous le prix du site, annonce le forfait et pointe vers
+   `#suivi` — comme il annonce déjà le tarif de lancement. Un prix récurrent
+   découvert trois sections plus bas se lit sinon comme un supplément caché.
+2. `Suivi.astro` rappelle que la première année est comprise dans le prix du
+   site. Les deux montants ne portant pas sur la même période, ils ne sont
+   jamais en concurrence.
+
+Les montants ne sont écrits qu'une fois, dans `src/data/offres.js`, et lus par
+les trois endroits qui les affichent — section Suivi, section Offre et Q&R. Un
+prix qui vit à trois endroits finit par diverger, et c'est le devis qui fait foi.
+
+Le forfait a été ouvert **avant** la mesure du rythme mensuel réel sur un premier
+client, contrairement à ce qui était prévu. Ce qui borne le risque n'est donc pas
+la mesure mais le dimensionnement de `inclus` : le fichier porte le calcul de
+marge — environ quatre heures de travail par an, dont la moitié consommée par le
+relevé mensuel. **Toute prestation ajoutée à cette liste doit être retranchée de
+ces quatre heures**, sinon le forfait se vend à perte sans que rien ne le signale
+avant la fin de l'année.
+
+Le palier retenu impose un engagement de délai écrit — réponse et remise en ligne
+sous 24 heures ouvrées, dans l'annexe de `docs/devis-modele.md`. C'est lui qui
+sépare le forfait d'une revente d'hébergement avec marge, face aux ~30 €/an que
+coûte un hébergement repris en main. Si le nombre de clients rend ces délais
+douteux, c'est le nombre de forfaits qu'il faut plafonner, pas le délai qu'il faut
+allonger.
 
 ## Documents de travail
 
@@ -487,10 +520,15 @@ rapporte.
 Sur le build de production, CSP active :
 
 - 5 pages, une seule balise `h1` par page, aucun script ni style inline
-- Le script d'effets se charge et déclenche les 49 révélations de l'accueil
+- Le script d'effets se charge et déclenche les 51 révélations de l'accueil,
+  à 1 440 px comme à 390 px de large (remesuré le 11/09/2026, après l'ajout de
+  la section Suivi et le retrait de trois questions)
 - Aucun lien mort, toutes les ancres de la navbar résolvent
-- Prix, tarif de lancement et délai présents dans le HTML statique ; offre
-  mensuelle absente
+- Prix, tarif de lancement et délai présents dans le HTML statique
+- Forfait Suivi : section `#suivi` rendue, « 25 €/mois » trois fois (section
+  Offre, section Suivi, Q&R) et « 250 €/an » deux fois. Tous lus depuis
+  `offres.js` — si un seul de ces nombres diverge, c'est qu'un texte a été
+  écrit en dur quelque part
 - Contenu intégralement lisible sans exécuter de JavaScript
 - `canonical` et `og:url` sur l'URL propre, alignés sur le sitemap
 - Sitemap réduit à `/` et `/contact` ; pages `noindex` exclues
