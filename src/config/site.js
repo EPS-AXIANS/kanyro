@@ -122,11 +122,17 @@ export const SITE = {
      */
     tva: 'franchise',
     /* Identification de l'hébergeur — obligation de l'article 6 III de la
-       LCEN, qui demande aussi son numéro de téléphone : à ajouter dans
-       `hebergeurTelephone` une fois vérifié, jamais de mémoire. VPS
-       Hostinger. À corriger si vous changez d'hébergement. */
+       LCEN, qui demande aussi son numéro de téléphone. VPS Hostinger. À
+       corriger si vous changez d'hébergement.
+
+       Le téléphone n'est pas écrit de mémoire : il vient de la fiche
+       organisation de Hostinger au RIPE (ORG-ARta1-RIPE, tenue par Hostinger
+       lui-même, modifiée le 15 mai 2026), lue le 11 septembre 2026 avec la
+       même adresse que ci-dessous. `curl -s
+       https://rest.db.ripe.net/ripe/organisation/ORG-ARta1-RIPE.json` pour
+       la revérifier. */
     hebergeur: 'Hostinger International, Ltd., 61 Lordou Vyronos Street, Lumiel Commercial Centre, 4th floor, 6023 Larnaca, Chypre',
-    hebergeurTelephone: '',
+    hebergeurTelephone: '+370 645 03378',
     hebergeurSite: 'https://www.hostinger.fr',
   },
 };

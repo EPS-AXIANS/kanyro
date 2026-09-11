@@ -447,8 +447,8 @@ chantier ou un client.**
       « TVA non applicable, article 293 B du CGI » sous les prix. Repris du
       modèle de devis ; si ce n'est pas le bon régime, passer la valeur à
       `'assujetti'` (« Prix hors taxes ») ou `''`.
-- [ ] **Téléphone de l'hébergeur** (`SITE.legal.hebergeurTelephone`), demandé par
-      la LCEN à côté de son nom et de son adresse.
+- [x] **Téléphone de l'hébergeur** (`SITE.legal.hebergeurTelephone`), demandé par
+      la LCEN : repris de la fiche RIPE de Hostinger (source dans `site.js`).
 - [ ] Redirection `kaniro.fr` à ajouter dans le `Caddyfile` si le domaine
       défensif est réservé : le nom sera mal orthographié à l'oral (« Kaniro »).
       Mieux vaut une redirection 301 qu'un second site à maintenir.

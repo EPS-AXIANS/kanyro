@@ -50,8 +50,8 @@
   mentions légales n'affichent plus que les données réelles (l'adresse fictive
   « Arras, 62000 » de la zone et du JSON-LD a été retirée) ; l'encart ne
   s'affiche plus qu'en développement, et le build liste les champs manquants.
-  **Manquent toujours : SIREN, adresse, téléphone de l'hébergeur**, et le
-  régime de TVA est à confirmer.
+  **Manquent toujours : SIREN et adresse**, et le régime de TVA est à
+  confirmer. Le téléphone de l'hébergeur est repris de sa fiche RIPE.
 
 - [x] **0.2 — Fonte « Arsenica Trial » non licenciée** 🔍 *Trouvé en plus.*
 
