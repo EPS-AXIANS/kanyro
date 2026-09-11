@@ -69,8 +69,10 @@ serviront à écrire le site.
 
 ## 5. La matière première
 
-- Avez-vous des photos de chantiers ? Sur quel support ?
-- Peut-on aller en photographier deux ou trois, finis et présentables ?
+- Avez-vous des photos de chantiers ? Sur quel support ? Pouvez-vous me les
+  envoyer, même prises au téléphone ?
+- S'il n'y a rien d'exploitable : peut-on aller en photographier deux ou trois,
+  finis et présentables ? (Reportage en supplément : le dire tout de suite.)
 - Avez-vous des clients qui accepteraient de laisser un avis ?
 - Avez-vous un logo ? Sous quel format ?
 

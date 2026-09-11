@@ -15,7 +15,8 @@ dire au client dès le devis évite le reproche d'un retard qui vient de son cô
 - [ ] Acompte de 30 % encaissé
 - [ ] Accès obtenus : nom de domaine existant, fiche Google, ancien site
 - [ ] Logo reçu, dans le meilleur format disponible
-- [ ] Créneau de reportage photo calé
+- [ ] Photos de chantiers reçues du client — ou, s'il n'en a pas, reportage
+      calé et porté au devis en supplément
 
 > **Le point qui fait dérailler les chantiers, c'est l'accès au nom de domaine.**
 > Il a souvent été acheté par un tiers injoignable. Le vérifier à l'étape 0, pas
@@ -32,14 +33,20 @@ dire au client dès le devis évite le reproche d'un retard qui vient de son cô
 > Faire valider les textes seuls, sans design. Un client à qui on montre une
 > maquette ne lit plus les textes : il regarde les couleurs.
 
-## Étape 2 — Reportage photo (semaine 1)
+## Étape 2 — Photos (semaine 1)
 
-- [ ] Une demi-journée, 2 à 3 chantiers finis
-- [ ] Lumière : tôt le matin ou fin d'après-midi, jamais en plein midi
-- [ ] Prévoir des plans larges et des détails d'exécution
-- [ ] Photographier aussi l'artisan au travail, avec son accord
-- [ ] Autorisation du propriétaire si le chantier est chez un particulier
+Par défaut, c'est le client qui envoie les photos de ses chantiers finis, même
+prises au téléphone. Le reportage n'a lieu que s'il n'y a rien d'exploitable, et
+il est facturé en supplément.
+
+- [ ] Photos reçues du client
 - [ ] Tri, recadrage, export en WebP
+- [ ] Rien d'exploitable ? Reportage en supplément :
+  - [ ] Une demi-journée, 2 à 3 chantiers finis
+  - [ ] Lumière : tôt le matin ou fin d'après-midi, jamais en plein midi
+  - [ ] Prévoir des plans larges et des détails d'exécution
+  - [ ] Photographier aussi l'artisan au travail, avec son accord
+  - [ ] Autorisation du propriétaire si le chantier est chez un particulier
 
 ## Étape 3 — Réalisation (semaines 1 et 2)
 

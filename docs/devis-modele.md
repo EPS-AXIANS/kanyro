@@ -45,7 +45,7 @@ place de la visibilité locale associée.
 |---|---|---|---|
 | 1 | Conception et rédaction | Cadrage, arborescence, rédaction des textes à partir de l'entretien | [ ] € |
 | 2 | Réalisation du site | 5 pages, affichage mobile, formulaire de devis, numéro cliquable | [ ] € |
-| 3 | Reportage photo | Une demi-journée sur 2 à 3 chantiers, retouche et optimisation | [ ] € |
+| 3 | Reportage photo — *supplément, seulement si le client n'a pas de photos exploitables ; retirer la ligne sinon* | Une demi-journée sur 2 à 3 chantiers, retouche et optimisation | [ ] € |
 | 4 | Visibilité locale | Fiche Google Business créée ou reprise, pages orientées recherches locales | [ ] € |
 | 5 | Mise en ligne | Nom de domaine, hébergement et certificat — **première année incluse** | [ ] € |
 | 6 | Prise en main | Guide d'une page et point de 30 minutes | [ ] € |

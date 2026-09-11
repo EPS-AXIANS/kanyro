@@ -99,4 +99,4 @@ prospect. Le formulaire de contact reste l'entrée principale, avec son champ
 
 Enchaîner sur `questionnaire-client.md`. Les vingt minutes servent à qualifier,
 pas à vendre : si ça accroche, on cale un vrai rendez-vous de cadrage sur le
-chantier, où l'on remplit le questionnaire et où l'on prend les premières photos.
+chantier, où l'on remplit le questionnaire et où l'on regarde ses photos.
