@@ -1324,6 +1324,84 @@
   }
 }
 
+/* ---- L'arc de raccord entre deux sections ---- */
+
+/*
+ * Une bande collée au bas de la section, dans laquelle le script dessine un
+ * chemin SVG qui se remplit par le bas en bombant au milieu. Voir
+ * `initArcTransition` dans effets.js pour le tracé et pour la course.
+ *
+ * `color` porte la couleur du raccord, et c'est celle de la section SUIVANTE :
+ * l'arc est ce qui vient la recouvrir, pas une bande posée entre les deux. Le
+ * tracé se peint en `currentcolor`, donc changer la couleur d'à côté se règle
+ * ici et nulle part dans le script.
+ *
+ * ⚠ La section hôte doit porter `relative` ET `overflow-hidden` : le premier
+ * ancre la bande, le second la coupe quand la section est plus courte qu'un
+ * écran — sans quoi elle déborderait par le HAUT, sur la section d'avant.
+ */
+
+.arc-transition {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  /*
+   * AU PREMIER PLAN, et pas seulement au-dessus du contenu de sa section.
+   *
+   * À 10, l'arc recouvrait bien les titres et le texte, mais il passait SOUS la
+   * barre de navigation (z-50) et sous le dégradé de pied de page (z-40) : la
+   * courbe montait, et ces deux-là restaient posés par-dessus, ce qui trahit le
+   * raccord au moment précis où il doit se lire comme un seul aplat.
+   *
+   * L'échelle du site, du fond vers le haut : le dégradé de pied à 40, la barre
+   * à 50, l'arc à 54, la bille du curseur à 55, le lien d'évitement à 60.
+   *
+   * ⚠ 54, ET PAS PLUS HAUT. Au-dessus de 55, l'arc recouvrirait la bille — or
+   * elle ne double pas la flèche, elle la REMPLACE (`cursor: none`, voir plus
+   * bas). Le visiteur se retrouverait sans aucun pointeur le temps du raccord,
+   * c'est-à-dire pendant qu'il défile. Le lien d'évitement, lui, ne s'affiche
+   * qu'au clavier et doit rester visible quand il le fait.
+   *
+   * L'arc reste découpé par sa section (`overflow-hidden`) : monter ce chiffre
+   * ne l'en fait pas sortir, ça ne change que l'ordre de peinture.
+   */
+  z-index: 54;
+
+  /*
+   * Une hauteur d'écran, et surtout PAS la hauteur de la section : c'est ce qui
+   * règle la vitesse de la montée. L'arête remonte à la fois parce qu'elle se
+   * remplit et parce que sa boîte défile — une boîte de trois écrans de haut
+   * ferait donc un balayage trois fois plus rapide que la page, qui se lirait
+   * comme un volet qui claque et non comme un raccord.
+   */
+  height: 100svh;
+
+  color: var(--color-fond);
+  pointer-events: none;
+}
+
+/*
+ * L'arc à l'envers se colle au HAUT de sa section : il n'annonce plus la
+ * suivante, il retient la précédente. Le reste — hauteur, couleur, tracé — ne
+ * change pas ; c'est le script qui retourne la courbure.
+ */
+.arc-transition--envers {
+  top: 0;
+  bottom: auto;
+}
+
+.arc-transition svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.arc-transition path {
+  fill: currentcolor;
+}
+
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
 @media (prefers-reduced-motion: reduce) {
   html {

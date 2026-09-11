@@ -189,6 +189,21 @@ const csp = [
     {/* Les fontes sont importées en haut de ce fichier : plus aucun <link> vers
         un hôte tiers, donc plus de preconnect à maintenir. */}
 
+    {/*
+      La feuille de Lenis, servie depuis le domaine.
+
+      La ressource la charge depuis jsDelivr ; `style-src 'self'` la refuserait,
+      exactement comme `script-src 'self'` refuse le script. Les deux fichiers
+      sont donc rapatriés dans public/js — c'est le même parti que pour les
+      fontes, et la version est celle du fichier, pas celle d'un CDN qui peut
+      bouger sous nos pieds.
+
+      Elle ne porte rien de visible : une hauteur `auto` sur <html> et <body>,
+      et de quoi contenir le défilement des éléments marqués
+      `data-lenis-prevent`. Pas de risque de flash si elle arrive tard.
+    */}
+    <link rel="stylesheet" href="/js/lenis.css" />
+
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:site_name" content={SITE.nom} />
@@ -281,6 +296,21 @@ const csp = [
       l'absence de minification sur ~2 Ko ; le bénéfice est un comportement qui
       ne dépend pas d'une heuristique de taille.
     */}
+    {/*
+      Lenis AVANT effets.js, et ce n'est pas un détail d'ordre.
+
+      C'est un script classique : il s'exécute à la ligne où il est écrit. Le
+      module qui suit est différé par nature, donc joué plus tard quoi qu'il
+      arrive — `globalThis.Lenis` est déjà là quand effets.js l'appelle. Les
+      inverser ne casserait rien pour autant : `initDefilementAmorti` vérifie sa
+      présence et rend la main au défilement natif si le fichier manque.
+
+      Comme effets.js, il est servi depuis public/ et chargé par `src` : le
+      routeur d'Astro ne rejoue pas un script dont le `src` a déjà été exécuté,
+      donc l'instance Lenis est créée une fois pour la vie du document, pas à
+      chaque navigation.
+    */}
+    <script src="/js/lenis.min.js" is:inline></script>
     <script type="module" src="/js/effets.js" is:inline></script>
   </body>
 </html>

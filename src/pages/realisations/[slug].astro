@@ -29,6 +29,19 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
   year: 'numeric',
   month: 'long',
 });
+
+/*
+ * Une fiche sans `enLigne` décrit un chantier livré mais pas encore publié —
+ * une maquette validée, un site en attente de bascule de domaine.
+ *
+ * Écrire « mis en ligne en septembre » sous une fiche dont aucun lien ne mène
+ * nulle part serait faux, et c'est le genre de faux qu'un prospect vérifie en
+ * cliquant. Le libellé suit donc la donnée : c'est la présence de l'adresse qui
+ * décide, pas un champ de plus à tenir à jour.
+ */
+const livraison = fiche.data.enLigne
+  ? `mis en ligne en ${dateLisible}`
+  : `maquette livrée en ${dateLisible}`;
 ---
 
 <Base titre={fiche.data.titre} description={fiche.data.resume} jsonLd={jsonLd}>
@@ -51,13 +64,30 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
     </p>
 
     <p class="font-texte reveal mt-5 text-xs text-texte-faible">
-      {fiche.data.client} — mis en ligne en {dateLisible}
+      {fiche.data.client} — {livraison}
       {
         fiche.data.enLigne && (
           <>
             {' · '}
             <a class="text-signal-vif" href={fiche.data.enLigne} rel="noopener">
               voir le site
+            </a>
+          </>
+        )
+      }
+      {
+        /* Le lien de maquette s'efface dès que le site est en ligne : à ce
+           moment-là, c'est le site qu'on veut montrer, pas son chantier. */
+        !fiche.data.enLigne && fiche.data.maquette && (
+          <>
+            {' · '}
+            <a
+              class="text-signal-vif"
+              href={fiche.data.maquette}
+              target="_blank"
+              rel="noopener"
+            >
+              voir la maquette
             </a>
           </>
         )

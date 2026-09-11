@@ -1,6 +1,6 @@
 ---
 import { Facebook, Instagram, Linkedin, Mail, Aperture } from 'lucide-astro';
-import { SITE } from '../config/site.js';
+import { FONCTIONS, SITE } from '../config/site.js';
 
 const { variante = 'standard' } = Astro.props;
 
@@ -42,6 +42,10 @@ const annee = new Date().getFullYear();
           <ul class="mt-4 space-y-2.5 text-sm text-white/70">
             <li><a class="hover:text-white" href="/#offre">L'offre</a></li>
             <li><a class="hover:text-white" href="/#questions">Questions</a></li>
+            {/* Le lien n'existe que si la section est générée. */}
+            {FONCTIONS.realisations && (
+              <li><a class="hover:text-white" href="/realisations">Réalisations</a></li>
+            )}
             <li><a class="hover:text-white" href="/contact">Contact</a></li>
             <li>
               <a class="hover:text-white" href="/mentions-legales">
