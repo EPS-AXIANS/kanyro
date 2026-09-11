@@ -205,22 +205,8 @@ const csp = [
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     {/* Les fontes sont importées en haut de ce fichier : plus aucun <link> vers
-        un hôte tiers, donc plus de preconnect à maintenir. */}
-
-    {/*
-      La feuille de Lenis, servie depuis le domaine.
-
-      La ressource la charge depuis jsDelivr ; `style-src 'self'` la refuserait,
-      exactement comme `script-src 'self'` refuse le script. Les deux fichiers
-      sont donc rapatriés dans public/js — c'est le même parti que pour les
-      fontes, et la version est celle du fichier, pas celle d'un CDN qui peut
-      bouger sous nos pieds.
-
-      Elle ne porte rien de visible : une hauteur `auto` sur <html> et <body>,
-      et de quoi contenir le défilement des éléments marqués
-      `data-lenis-prevent`. Pas de risque de flash si elle arrive tard.
-    */}
-    <link rel="stylesheet" href="/js/lenis.css" />
+        un hôte tiers, donc plus de preconnect à maintenir. Les règles de Lenis
+        sont dans global.css : une feuille de moins à attendre. */}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fr_FR" />
@@ -268,33 +254,21 @@ const csp = [
     <BarreAction avecDevis={!surContact} />
 
     {/*
-      Servi depuis public/ et chargé par `src`, volontairement.
+      Empaqueté par le build : minifié, haché, publié dans /_astro/.
 
-      Astro inline les petits scripts dans le HTML, et un script inline est
-      bloqué par `script-src 'self'` : en production le script ne s'exécuterait
-      pas, les éléments `.reveal` resteraient à opacity 0, et les pages
-      s'afficheraient vides. Le mode développement ne le montre pas, puisque la
-      CSP n'y est pas émise.
+      Il était servi brut depuis public/ (64 % de commentaires, 17,5 Ko gzip au
+      lieu d'environ 5), pour une raison qui tient toujours : un script inliné
+      dans le HTML serait bloqué par `script-src 'self'`, et la page resterait
+      vide en production. `assetsInlineLimit: 0` (astro.config.mjs) garantit
+      maintenant qu'Astro ne l'inline jamais, quelle que soit sa taille.
 
-      `is:inline` empêche Astro de reprendre le fichier à son compte. Le coût est
-      l'absence de minification sur ~2 Ko ; le bénéfice est un comportement qui
-      ne dépend pas d'une heuristique de taille.
+      Un module ne s'exécute qu'une fois pour la vie du document, même quand le
+      routeur change de page : tout ce qu'il fait est rejoué sur
+      `astro:page-load`, voir l'en-tête du fichier. Lenis n'est plus chargé
+      ici : effets.js le demande lui-même, et seulement à la souris.
     */}
-    {/*
-      Lenis AVANT effets.js, et ce n'est pas un détail d'ordre.
-
-      C'est un script classique : il s'exécute à la ligne où il est écrit. Le
-      module qui suit est différé par nature, donc joué plus tard quoi qu'il
-      arrive — `globalThis.Lenis` est déjà là quand effets.js l'appelle. Les
-      inverser ne casserait rien pour autant : `initDefilementAmorti` vérifie sa
-      présence et rend la main au défilement natif si le fichier manque.
-
-      Comme effets.js, il est servi depuis public/ et chargé par `src` : le
-      routeur d'Astro ne rejoue pas un script dont le `src` a déjà été exécuté,
-      donc l'instance Lenis est créée une fois pour la vie du document, pas à
-      chaque navigation.
-    */}
-    <script src="/js/lenis.min.js" is:inline></script>
-    <script type="module" src="/js/effets.js" is:inline></script>
+    <script>
+      import '../scripts/effets.js';
+    </script>
   </body>
 </html>

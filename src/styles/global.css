@@ -1293,6 +1293,37 @@
   fill: currentcolor;
 }
 
+/* ---- Lenis ---- */
+
+/*
+ * La feuille fournie avec Lenis, reprise ici plutôt que chargée à part : c'était
+ * une requête bloquante de plus sur chaque page, pour des règles qui ne
+ * s'appliquent qu'une fois la classe `lenis` posée sur <html> — c'est-à-dire
+ * seulement à la souris, voir `chargerLenis` dans src/scripts/effets.js.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
+
 /* Le mouvement est un agrément, jamais une condition d'accès au contenu. */
 @media (prefers-reduced-motion: reduce) {
   html {

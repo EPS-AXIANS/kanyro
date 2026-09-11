@@ -60,6 +60,15 @@ export default defineConfig({
     }),
   ],
   vite: {
+    build: {
+      /*
+       * Zéro : aucun fichier n'est inliné dans le HTML ou le CSS, quelle que soit
+       * sa taille. Un script inliné serait bloqué par `script-src 'self'` (la
+       * page resterait vide en production, voir src/scripts/effets.js), et une
+       * fonte inlinée en `data:` par `font-src 'self'`. Tout part en fichier.
+       */
+      assetsInlineLimit: 0,
+    },
     /*
      * `phpEnDeveloppement` ne s'active qu'avec `astro dev` : il exécute
      * public/contact.php au lieu de le servir en clair, pour que l'envoi du

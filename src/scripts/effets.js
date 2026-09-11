@@ -1,22 +1,26 @@
 /**
- * Révélations, frise du déroulement, parallaxe, barre de navigation, et confort
- * du formulaire de devis.
+ * Révélations, frise du déroulement, vidéo du hero, barre de navigation, mesure
+ * d'audience, et confort du formulaire de devis.
  *
- * ── Pourquoi ce code vit dans un fichier séparé et pas dans une balise
- *    <script> du layout ──
+ * ── Comment ce fichier arrive dans la page ──
  *
- * Astro inline les petits scripts directement dans le HTML. Un script inline est
- * bloqué par `script-src 'self'`, qui n'autorise que les fichiers servis depuis
- * le domaine. Résultat en production : le script ne s'exécute jamais, les
- * éléments `.reveal` restent à `opacity: 0`, et la page s'affiche vide — alors
- * que tout fonctionne en développement, où la CSP n'est pas émise.
+ * Il est importé par une balise <script> de Base.astro, donc empaqueté par le
+ * build : minifié (ces commentaires ne partent plus chez le visiteur, ils
+ * faisaient 64 % du fichier), et publié sous un nom haché dans /_astro/, que le
+ * serveur sert en `immutable`.
  *
- * Le layout le charge par `src`, ce qui donne un vrai fichier .js conforme.
+ * ⚠ Il ne doit JAMAIS être inliné dans le HTML. Un script inline est bloqué par
+ * `script-src 'self'`, qui n'autorise que les fichiers servis depuis le
+ * domaine : en production le script ne s'exécuterait pas, les éléments
+ * `.reveal` resteraient à `opacity: 0`, et la page s'afficherait vide — alors
+ * que tout fonctionne en développement, où la CSP n'est pas émise. C'est
+ * pourquoi il vivait dans public/ jusqu'au 11 septembre 2026, et c'est ce que
+ * garantit maintenant `assetsInlineLimit: 0` dans astro.config.mjs.
  *
  * ⚠ EN REVANCHE, ÉCRIRE UN STYLE DEPUIS JAVASCRIPT EST AUTORISÉ. `style-src`
  * régit les balises <style> et les attributs `style` PRÉSENTS DANS LE BALISAGE,
  * pas les écritures via le CSSOM. `element.style.setProperty(…)` passe donc la
- * CSP — c'est ce dont vivent la parallaxe, les cascades et la frise ci-dessous.
+ * CSP — c'est ce dont vivent les cascades et la frise ci-dessous.
  *
  * ── Pourquoi tout est rangé dans des fonctions ──
  *
@@ -855,43 +859,6 @@ function initSurvolDirectionnel() {
 }
 
 /* ------------------------------------------------------------------------- */
-/* Parallaxe                                                                  */
-/* ------------------------------------------------------------------------- */
-
-/*
- * `data-parallaxe` = amplitude ; `data-parallaxe-depart` décale la position
- * initiale en pourcentage de la hauteur de l'élément.
- */
-function initParallaxe() {
-  if (MOUVEMENT_DOUX.matches) return null;
-
-  const calques = [...document.querySelectorAll('[data-parallaxe]')];
-  if (!calques.length) return null;
-
-  const placer = () => {
-    const vh = window.innerHeight;
-
-    for (const calque of calques) {
-      const r = calque.getBoundingClientRect();
-      if (r.bottom < -200 || r.top > vh + 200) continue;
-
-      const amplitude = Number(calque.dataset.parallaxe) || 0;
-      const depart = Number(calque.dataset.parallaxeDepart) || 0;
-      const progres = Math.min(Math.max(1 - r.bottom / (vh + r.height), 0), 1);
-
-      calque.style.transform = depart
-        ? `translateY(${depart - progres * amplitude}%)`
-        : `translateY(${-(progres * amplitude)}px)`;
-    }
-  };
-
-  placer();
-  auDefilement.push(placer);
-
-  return null;
-}
-
-/* ------------------------------------------------------------------------- */
 /* Vidéo du hero : seulement là où elle a sa place                            */
 /* ------------------------------------------------------------------------- */
 
@@ -1165,40 +1132,53 @@ function initArcTransition() {
  * cible à chaque cadre.
  *
  * C'est la seule ressource du lot qui arrive ENTIÈRE, sans réécriture — elle ne
- * dépend de rien d'autre qu'elle-même, et son fichier tient dans public/js
- * comme effets.js. Seuls le chargement et les trois points ci-dessous sont de
- * notre fait.
+ * dépend de rien d'autre qu'elle-même, et son fichier vit dans public/js. Seuls
+ * le chargement et les trois points ci-dessous sont de notre fait.
+ *
+ * ---- Seulement à la souris ----
+ *
+ * Lenis n'amortit que la molette : au doigt, le défilement reste celui du
+ * téléphone (`syncTouch` est laissé à faux). Le charger sur un écran tactile ne
+ * lui faisait donc rien faire d'utile, pour 18 Ko de script et une boucle
+ * d'animation qui tournait à chaque image, défilement ou non — soit
+ * exactement le coût que le README reprochait aux défilements amortis « sur les
+ * téléphones de la cible ». Le fichier n'est plus demandé qu'avec un pointeur
+ * fin et un vrai survol, hors mouvement réduit : c'est `chargerLenis` qui pose
+ * la balise, une fois pour la vie du document.
  *
  * ---- Pourquoi la position réelle ne change pas ----
  *
  * Lenis écrit `window.scrollY`, il ne transforme pas la page. Les événements
  * `scroll` continuent donc d'être émis, et TOUT ce qui vit dans ce fichier — la
- * frise, la parallaxe, la barre, les arcs — continue de fonctionner sans une
- * ligne de changement. C'est ce qui distingue cette bibliothèque des défilements
- * dits « virtuels », qui déplacent un conteneur et cassent au passage toute
- * mesure faite sur la fenêtre.
+ * frise, la barre, les arcs — continue de fonctionner sans une ligne de
+ * changement. C'est ce qui distingue cette bibliothèque des défilements dits
+ * « virtuels », qui déplacent un conteneur et cassent au passage toute mesure
+ * faite sur la fenêtre.
  *
  * ---- L'instance vit hors du cycle des pages ----
  *
- * Elle est créée une fois, au chargement du module, et jamais démontée :
- * `<ClientRouter />` remplace le <body>, pas la fenêtre. La reconstruire à
- * chaque navigation empilerait des boucles d'animation concurrentes, toutes
- * occupées à écrire la même position.
+ * Elle est créée une fois, et jamais démontée : `<ClientRouter />` remplace le
+ * <body>, pas la fenêtre. La reconstruire à chaque navigation empilerait des
+ * boucles d'animation concurrentes, toutes occupées à écrire la même position.
  */
 let defilement = null;
 
-function initDefilementAmorti() {
-  /*
-   * Mouvement réduit : rien du tout. Amortir le défilement, c'est ajouter du
-   * mouvement là où le visiteur en demande le moins — et contrairement au reste
-   * du fichier, la dégradation est ici parfaite, le navigateur reprenant
-   * exactement la main.
-   */
-  if (MOUVEMENT_DOUX.matches) return;
+const AVEC_SOURIS = window.matchMedia('(hover: hover) and (pointer: fine)');
 
+function chargerLenis() {
+  if (MOUVEMENT_DOUX.matches || !AVEC_SOURIS.matches) return;
+
+  const script = document.createElement('script');
+  script.src = '/js/lenis.min.js';
+  script.async = true;
   // Le fichier peut manquer (mis en cache de travers, bloqué, renommé). La page
   // défile alors normalement ; c'est un agrément en moins, pas une panne.
-  if (typeof globalThis.Lenis !== 'function') return;
+  script.addEventListener('load', initDefilementAmorti, { once: true });
+  document.head.append(script);
+}
+
+function initDefilementAmorti() {
+  if (defilement || typeof globalThis.Lenis !== 'function') return;
 
   defilement = new globalThis.Lenis({ autoRaf: true });
 
@@ -1207,7 +1187,7 @@ function initDefilementAmorti() {
    *
    * `scroll-behavior: smooth` (global.css) et Lenis écrivent la même position à
    * chaque cadre : laissés ensemble, ils se la disputent et le saut devient
-   * saccadé. Lenis neutralise donc la propriété — et un clic sur `#preuve`
+   * saccadé. Lenis neutralise donc la propriété — et un clic sur `#lancement`
    * arriverait d'un coup, sans transition, ce qui serait une régression.
    *
    * Le clic est donc rendu à `scrollTo`, qui suit l'amortissement de l'instance.
@@ -1289,7 +1269,6 @@ function initialiser() {
     initBarre(),
     initSurvolDirectionnel(),
     initBoutonsAnimes(),
-    initParallaxe(),
     initVideoHero(),
   ].filter(Boolean);
 }
@@ -1298,7 +1277,7 @@ function initialiser() {
  * Le défilement amorti, hors du cycle des pages : une fois, et pour de bon.
  * Voir l'en-tête de `initDefilementAmorti`.
  */
-initDefilementAmorti();
+chargerLenis();
 
 /*
  * L'appel direct couvre le premier chargement quoi qu'il arrive. `astro:page-load`
