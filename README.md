@@ -666,10 +666,15 @@ Sur le build de production, le 11 septembre 2026, servi par
   aucun script ni style inline (hors données JSON-LD)
 - Aucun lien interne mort sur les quatorze pages, aucune ancre orpheline,
   aucun `href="#"`
-- Accueil en 4G lente simulée (1,6 Mb/s, 150 ms, processeur ×4) : LCP 2,2 s
-  (22,6 s avant), 175 Ko transférés au chargement (10 Mo avant), CLS 0
-- Contrastes AA sur tout le texte de l'accueil, de 360 à 2 560 px ; cibles
-  tactiles d'au moins 44 px ; aucun débordement horizontal
+- Accueil en 4G lente simulée (1,6 Mb/s, 150 ms, processeur ×4) : LCP 2,1 s
+  (22,6 s avant), 164 Ko transférés au chargement (10 Mo avant), CLS 0 ;
+  /contact et la fiche réalisation sous 1,5 s
+- Contrastes AA sur le texte des quatorze pages, de 360 à 2 560 px ; aucun
+  texte sous 12 px ; cibles tactiles d'au moins 44 px hors liens dans une
+  phrase ; aucun débordement horizontal (la barre de navigation débordait de
+  6 px à 360 px)
+- Tous les liens vers /contact et tous les liens tel: portent leur point de
+  mesure
 - Prix, tarif de lancement, délai et forfaits présents dans le HTML statique,
   tous lus depuis `offres.js`
 - JSON-LD valide : `ProfessionalService` (fondateur, logo, offre et
