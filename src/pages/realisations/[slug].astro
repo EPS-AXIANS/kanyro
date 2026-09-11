@@ -1,7 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { ExternalLink } from 'lucide-astro';
 import Base from '../../layouts/Base.astro';
 import Cta from '../../components/Cta.astro';
+import Visuel from '../../components/Visuel.astro';
 import { FONCTIONS } from '../../config/site.js';
 import { filAriane } from '../../config/schema.js';
 
@@ -42,11 +44,33 @@ const dateLisible = fiche.data.date.toLocaleDateString('fr-FR', {
 const livraison = fiche.data.enLigne
   ? `mis en ligne en ${dateLisible}`
   : `maquette livrée en ${dateLisible}`;
+
+/*
+ * Le lien de maquette s'efface dès que le site est en ligne : à ce moment-là,
+ * c'est le site qu'on veut montrer, pas son chantier.
+ */
+const lienTravail = fiche.data.enLigne
+  ? { href: fiche.data.enLigne, libelle: 'Voir le site' }
+  : fiche.data.maquette
+    ? { href: fiche.data.maquette, libelle: 'Voir la maquette' }
+    : null;
+
+const capturesOrdinateur = fiche.data.captures.filter((c) => c.appareil === 'ordinateur');
+const capturesTelephone = fiche.data.captures.filter((c) => c.appareil === 'telephone');
 ---
 
-<Base titre={fiche.data.titre} description={fiche.data.resume} jsonLd={jsonLd}>
+<Base
+  titre={fiche.data.titre}
+  description={fiche.data.description ?? fiche.data.resume}
+  jsonLd={jsonLd}
+>
+  {/*
+    Le fil d'Ariane est dans la même colonne que l'article (48 rem). Il était
+    posé sur la largeur du site (78 rem) et commençait donc environ 240 px à
+    gauche du titre, comme un reste d'une autre mise en page.
+  */}
   <nav
-    class="contenu sous-navbar font-texte pb-6 text-[10px] tracking-[0.2em] text-texte-faible uppercase"
+    class="contenu sous-navbar font-texte max-w-3xl pb-6 text-xs tracking-[0.15em] text-texte-faible uppercase"
     aria-label="Fil d'Ariane"
   >
     <a href="/realisations" class="hover:text-texte">Réalisations</a>
@@ -58,41 +82,65 @@ const livraison = fiche.data.enLigne
     <p class="surtitre reveal">{fiche.data.metier} · {fiche.data.commune}</p>
     <h1 class="titre-page reveal mt-6 [--retard:80ms]">{fiche.data.titre}</h1>
     <p
-      class="font-texte reveal mt-6 text-sm leading-relaxed text-texte-doux [--retard:160ms]"
+      class="font-texte reveal mt-6 text-base leading-relaxed text-texte-doux [--retard:160ms]"
     >
       {fiche.data.resume}
     </p>
 
-    <p class="font-texte reveal mt-5 text-xs text-texte-faible">
-      {fiche.data.client}, {livraison}
+    <div class="reveal mt-8 flex flex-wrap items-center gap-x-6 gap-y-4 [--retard:200ms]">
       {
-        fiche.data.enLigne && (
-          <>
-            {' · '}
-            <a class="text-signal-vif" href={fiche.data.enLigne} rel="noopener">
-              voir le site
-            </a>
-          </>
+        lienTravail && (
+          <a
+            class="bouton-secondaire inline-flex items-center gap-2.5"
+            href={lienTravail.href}
+            target="_blank"
+            rel="noopener"
+          >
+            {lienTravail.libelle}
+            <span class="sr-only"> (nouvel onglet)</span>
+            <ExternalLink class="h-4 w-4" stroke-width={1.5} aria-hidden="true" />
+          </a>
         )
       }
-      {
-        /* Le lien de maquette s'efface dès que le site est en ligne : à ce
-           moment-là, c'est le site qu'on veut montrer, pas son chantier. */
-        !fiche.data.enLigne && fiche.data.maquette && (
-          <>
-            {' · '}
-            <a
-              class="text-signal-vif"
-              href={fiche.data.maquette}
-              target="_blank"
-              rel="noopener"
-            >
-              voir la maquette
-            </a>
-          </>
-        )
-      }
-    </p>
+      <p class="font-texte text-sm text-texte-faible">
+        {fiche.data.client}, {livraison}
+      </p>
+    </div>
+
+    {
+      fiche.data.captures.length > 0 && (
+        <div class="reveal mt-12 grid items-end gap-6 sm:grid-cols-[1fr_auto]">
+          {capturesOrdinateur.map((c) => (
+            <figure>
+              <Visuel
+                src={c.src}
+                alt={c.alt}
+                sizes="(min-width: 768px) 560px, 100vw"
+                largeurs={[480, 960, 1440]}
+                class="w-full rounded-xl border border-trait"
+              />
+              {c.legende && (
+                <figcaption class="font-texte mt-3 text-sm text-texte-faible">{c.legende}</figcaption>
+              )}
+            </figure>
+          ))}
+          {capturesTelephone.map((c) => (
+            <figure class="mx-auto w-44 sm:w-40">
+              <Visuel
+                src={c.src}
+                alt={c.alt}
+                sizes="176px"
+                largeurs={[360, 720]}
+                class="w-full rounded-2xl border border-trait"
+              />
+              {c.legende && (
+                <figcaption class="font-texte mt-3 text-sm text-texte-faible">{c.legende}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      )
+    }
 
     {
       fiche.data.resultats.length > 0 && (
@@ -118,21 +166,30 @@ const livraison = fiche.data.enLigne
 </Base>
 
 <style>
-  /* Mise en forme du Markdown, sans plugin : le contenu reste simple. */
+  /*
+   * Mise en forme du Markdown, sans plugin : le contenu reste simple.
+   *
+   * `--font-titre` et pas `--font-serif` : cette dernière est la pile serif par
+   * défaut de Tailwind (Georgia), pas la fonte des titres du site. Les
+   * intertitres des fiches sortaient donc dans une troisième fonte.
+   *
+   * 1 rem pour le texte courant : une fiche se lit en entier, 14 px la
+   * rendait pénible sur un téléphone.
+   */
   .prose-kanyro :global(h2) {
     margin-top: 2.75rem;
-    font-family: var(--font-serif);
-    font-size: 1.75rem;
+    font-family: var(--font-titre);
+    font-size: 1.875rem;
     letter-spacing: 0.02em;
   }
   .prose-kanyro :global(h3) {
     margin-top: 2rem;
-    font-family: var(--font-serif);
-    font-size: 1.35rem;
+    font-family: var(--font-titre);
+    font-size: 1.4rem;
   }
   .prose-kanyro :global(p) {
     margin-top: 1rem;
-    font-size: 0.875rem;
+    font-size: 1rem;
     line-height: 1.75;
     color: var(--color-texte-doux);
   }
@@ -140,7 +197,7 @@ const livraison = fiche.data.enLigne
     margin-top: 1rem;
     list-style: disc;
     padding-left: 1.25rem;
-    font-size: 0.875rem;
+    font-size: 1rem;
     line-height: 1.75;
     color: var(--color-texte-doux);
   }

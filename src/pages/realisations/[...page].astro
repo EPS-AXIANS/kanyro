@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Cta from '../../components/Cta.astro';
+import Visuel from '../../components/Visuel.astro';
 import { FONCTIONS } from '../../config/site.js';
 import { filAriane } from '../../config/schema.js';
 
@@ -25,18 +26,28 @@ const jsonLd = filAriane([
 ]);
 ---
 
+{/*
+  Le titre disait « Les chantiers livrés » et le sous-titre « avec les chiffres
+  réels et la date à laquelle ils ont été mesurés », au-dessus d'une seule
+  maquette, pas encore en ligne, sans aucun chiffre. Les deux phrases disent
+  maintenant ce qu'il y a, et se mettent au pluriel d'elles-mêmes le jour où il
+  y aura plus d'une fiche.
+*/}
 <Base
-  titre="Réalisations"
-  description="Les chantiers livrés : point de départ, décisions prises, résultats mesurés."
+  titre="Réalisations, sites d'artisans"
+  description="Les sites livrés par Kanyro, tels qu'ils sont : captures, point de départ, choix faits. Les chiffres s'ajoutent quand ils sont mesurés."
   jsonLd={jsonLd}
 >
   <section class="contenu sous-navbar pb-16 text-center">
     <p class="surtitre reveal">Réalisations</p>
-    <h1 class="titre-page reveal mt-6 [--retard:80ms]">Les chantiers livrés</h1>
+    <h1 class="titre-page reveal mt-6 [--retard:80ms]">
+      {fiches.length > 1 ? 'Les sites livrés' : 'Le premier site livré'}
+    </h1>
     <p
-      class="font-texte reveal mx-auto mt-8 max-w-xl text-sm leading-relaxed text-texte-doux [--retard:160ms]"
+      class="font-texte reveal mx-auto mt-8 max-w-xl text-base leading-relaxed text-texte-doux [--retard:160ms]"
     >
-      Avec les chiffres réels et la date à laquelle ils ont été mesurés.
+      Montré tel qu'il est : captures, point de départ, choix faits. Les chiffres
+      s'ajoutent quand ils sont mesurés, jamais avant.
     </p>
   </section>
 
@@ -66,23 +77,44 @@ const jsonLd = filAriane([
         </div>
       </section>
     ) : (
+      /*
+       * Une seule colonne tant qu'il n'y a qu'une fiche : une carte seule dans
+       * une grille à deux colonnes laissait la moitié droite vide, et la page
+       * avait l'air inachevée. La vignette est la première capture
+       * « ordinateur » de la fiche.
+       */
       <section class="contenu pb-16">
-        <ul class="grid gap-6 md:grid-cols-2">
-          {fiches.map((f) => (
+        <ul class:list={['grid gap-6', fiches.length > 1 ? 'md:grid-cols-2' : 'mx-auto max-w-4xl']}>
+          {fiches.map((f) => {
+            const vignette = f.data.captures.find((c) => c.appareil === 'ordinateur');
+            return (
             <li class="reveal">
               <a
                 href={`/realisations/${f.id}`}
-                class="carte flex h-full flex-col p-8 no-underline transition-colors duration-500 hover:border-white/30 hover:bg-surface-haute"
+                class="carte flex h-full flex-col overflow-hidden no-underline transition-colors duration-500 hover:border-white/30 hover:bg-surface-haute"
               >
+                {vignette && (
+                  <Visuel
+                    src={vignette.src}
+                    alt={vignette.alt}
+                    sizes="(min-width: 896px) 896px, 100vw"
+                    largeurs={[480, 960, 1440]}
+                    class="w-full border-b border-trait"
+                  />
+                )}
+                <div class="flex flex-1 flex-col p-8">
                 <p class="surtitre">
                   {f.data.metier} · {f.data.commune}
                 </p>
-                <h2 class="font-titre mt-4 text-2xl tracking-wide">
+                <h2 class="font-titre mt-4 text-3xl tracking-wide">
                   {f.data.titre}
                 </h2>
-                <p class="font-texte mt-3 flex-1 text-sm leading-relaxed text-texte-doux">
+                <p class="font-texte mt-3 flex-1 text-base leading-relaxed text-texte-doux">
                   {f.data.resume}
                 </p>
+                <span class="font-texte mt-6 text-sm font-semibold tracking-[0.15em] text-texte uppercase">
+                  Lire la fiche <span aria-hidden="true">→</span>
+                </span>
 
                 {f.data.resultats.length > 0 && (
                   <dl class="mt-6 flex flex-wrap gap-8">
@@ -98,9 +130,11 @@ const jsonLd = filAriane([
                     ))}
                   </dl>
                 )}
+                </div>
               </a>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </section>
     )

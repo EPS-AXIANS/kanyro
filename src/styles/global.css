@@ -276,6 +276,45 @@
     line-height: 1.05;
   }
 
+  /*
+   * Le titre de section de l'accueil, et une seule échelle pour tous.
+   *
+   * Mesuré à 1 440 px avant : 60, 36, 60, 48 et 72 px pour cinq titres de même
+   * rang. Chaque section avait sa règle, et aucune hiérarchie ne se lisait.
+   * 36, 48 puis 56 px : le même pas partout, et le plus grand reste sous les
+   * titres de page (`titre-page`) et le display du premier écran.
+   */
+  .titre-section {
+    font-family: var(--font-titre);
+    font-weight: 400;
+    font-size: 2.25rem;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+  @media (min-width: 640px) {
+    .titre-section {
+      font-size: 3rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .titre-section {
+      font-size: 3.5rem;
+    }
+  }
+
+  /*
+   * Chiffres alignés sur la ligne de base.
+   *
+   * Cormorant compose par défaut des chiffres elzéviriens, ceux des textes
+   * anciens : les 3, 4, 5, 7 et 9 descendent sous la ligne, et 0, 1, 2 ont la
+   * hauteur d'une minuscule. Beau dans une date, illisible dans un prix :
+   * « 1 200 € » se lisait « 1 2oo », et le trait d'un prix barré passait
+   * au-dessus des chiffres. Tout prix passe par cette classe.
+   */
+  .chiffres {
+    font-variant-numeric: lining-nums;
+  }
+
   .surtitre {
     font-family: var(--font-texte);
     font-size: 0.625rem;

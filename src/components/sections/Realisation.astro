@@ -1,0 +1,149 @@
+---
+import { getCollection } from 'astro:content';
+import { ExternalLink } from 'lucide-astro';
+import Visuel from '../Visuel.astro';
+import { FONCTIONS, mentionTva } from '../../config/site.js';
+import { tarifReference } from '../../data/offres.js';
+
+/*
+ * La réalisation, et le tarif de lancement qui en découle.
+ *
+ * ---- Ce que cette section remplace ----
+ *
+ * Le bloc s'appelait « La preuve, parlons-en » et titrait « Je démarre, et ça
+ * se voit ». Le menu promettait une « Preuve » et le visiteur lisait un aveu,
+ * sans une image de ce qui avait été fait. L'honnêteté reste — la maquette est
+ * présentée comme une maquette, pas comme un site en ligne, et le métier n'est
+ * pas celui du bâtiment — mais elle se montre au lieu de s'excuser.
+ *
+ * ---- Les images ----
+ *
+ * La capture vient de la fiche (`captures` dans le Markdown) : une capture
+ * RÉELLE de la maquette livrée, jamais une illustration. Sans fiche publiée ou
+ * sans capture, la section se replie sur le seul tarif de lancement.
+ *
+ * ---- Le compteur de places ----
+ *
+ * « Il reste 3 places » sur 3 disait surtout qu'aucune n'avait été prise. Le
+ * compteur ne s'affiche qu'à partir de la première signature ; avant, la
+ * phrase dit seulement à qui l'offre est réservée.
+ */
+const fiches = FONCTIONS.realisations
+  ? (await getCollection('realisations', ({ data }) => !data.brouillon)).sort(
+      (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+    )
+  : [];
+const fiche = fiches[0];
+const capture = fiche?.data.captures.find((c) => c.appareil === 'ordinateur');
+const lancement = tarifReference.actif && tarifReference.restants > 0;
+const tva = mentionTva();
+---
+
+{
+  (fiche || lancement) && (
+    <section id="realisation" class="px-4 py-24 sm:px-8 md:px-16 lg:px-12 lg:py-32">
+      {/* Trois blocs, dans l'ordre de lecture d'un téléphone : ce qui a été fait,
+          la capture, puis les liens et le tarif. Sur grand écran, la capture
+          passe à gauche et occupe la hauteur des deux autres. */}
+      <div class="mx-auto grid max-w-6xl gap-x-16 gap-y-10 lg:grid-cols-[1.15fr_1fr]">
+        <div class="lg:col-start-2 lg:row-start-1">
+          <p class="surtitre reveal">Réalisation</p>
+          <h2 class="titre-section rideau mt-6">Mon premier site livré</h2>
+
+          {fiche && (
+            <>
+              <p class="font-texte reveal mt-6 text-base leading-relaxed text-texte-doux">
+                Un atelier de reliure installé depuis 1998, dans la Somme. Son site Wix
+                montrait le travail sans aider à le vendre : je l'ai refait, avec un espace
+                pour les devis et les factures. La maquette est terminée, la mise en ligne
+                attend les dernières informations de l'atelier.
+              </p>
+              <p class="font-texte reveal mt-4 text-base leading-relaxed text-texte-doux">
+                Ce n'est pas un chantier du bâtiment, et je préfère le dire. Ce qui se
+                transpose à votre métier : des pages légères et lisibles sur téléphone, le
+                travail montré en photos, et un bouton de contact toujours visible.
+              </p>
+            </>
+          )}
+        </div>
+
+        {fiche && capture && (
+          <figure class="reveal lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-center">
+            <a
+              href={`/realisations/${fiche.id}`}
+              class="block overflow-hidden rounded-xl border border-trait transition-colors duration-500 hover:border-white/40"
+            >
+              <Visuel
+                src={capture.src}
+                alt={capture.alt}
+                sizes="(min-width: 1024px) 600px, 100vw"
+                largeurs={[480, 960, 1440]}
+                class="w-full"
+              />
+            </a>
+            <figcaption class="font-texte mt-3 text-sm text-texte-faible">
+              Capture de la maquette livrée à l'atelier, en septembre 2026.
+            </figcaption>
+          </figure>
+        )}
+
+        <div class="lg:col-start-2">
+          {fiche && (
+            <>
+              <div class="reveal flex flex-wrap items-center gap-x-6 gap-y-4">
+                <a href={`/realisations/${fiche.id}`} class="bouton-secondaire">
+                  Voir la réalisation
+                </a>
+                {fiche.data.maquette && !fiche.data.enLigne && (
+                  <a
+                    href={fiche.data.maquette}
+                    target="_blank"
+                    rel="noopener"
+                    class="font-texte inline-flex min-h-11 items-center gap-2 text-sm font-medium text-texte underline decoration-white/40 underline-offset-4 hover:decoration-white"
+                  >
+                    Voir la maquette
+                    <span class="sr-only"> (nouvel onglet)</span>
+                    <ExternalLink class="h-4 w-4" stroke-width={1.5} aria-hidden="true" />
+                  </a>
+                )}
+              </div>
+            </>
+          )}
+
+          {lancement && (
+            <div id="lancement" class="carte reveal mt-10 p-6 sm:p-8">
+              <p class="surtitre">Tarif de lancement</p>
+              <p class="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span class="font-titre chiffres text-5xl font-light text-signal-vif">
+                  {tarifReference.prix}
+                </span>
+                <span class="font-texte text-sm text-texte-faible">
+                  au lieu de <s class="chiffres">{tarifReference.prixBarre}</s>
+                </span>
+              </p>
+              <p class="font-texte mt-4 text-[0.9375rem] leading-relaxed text-texte-doux">
+                Pour les {tarifReference.quota} premiers artisans. {tarifReference.contrepartie}
+              </p>
+              <p class="font-texte mt-3 text-[0.9375rem] leading-relaxed text-texte-doux">
+                Vous seriez parmi mes premiers clients : ça se paie dans le prix, pas dans
+                la qualité du travail.
+              </p>
+              {tarifReference.restants < tarifReference.quota && (
+                <p class="font-texte mt-3 text-[0.9375rem] text-texte">
+                  {tarifReference.restants > 1
+                    ? `Il reste ${tarifReference.restants} places.`
+                    : 'Il reste une place.'}{' '}
+                  Ensuite, le tarif revient à la fourchette normale.
+                </p>
+              )}
+              {tva && <p class="font-texte mt-3 text-sm text-texte-faible">{tva}.</p>}
+              <a href="/contact" data-bouton-anime data-mesure="devis" class="bouton-primaire mt-7">
+                Demander un devis
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}

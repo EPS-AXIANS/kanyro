@@ -15,13 +15,16 @@ import { glob } from 'astro/loaders';
  */
 const realisations = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/realisations' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     titre: z.string(),
     client: z.string(),
     metier: z.string(),
     commune: z.string(),
     date: z.coerce.date(),
     resume: z.string(),
+    /** La description des moteurs de recherche, 155 caractères au plus. Le
+     *  résumé sert de repli, mais il est souvent deux fois trop long. */
+    description: z.string().max(160).optional(),
     /** Chiffres vérifiables uniquement — pas d'estimation présentée comme un résultat. */
     resultats: z
       .array(
@@ -31,7 +34,26 @@ const realisations = defineCollection({
         })
       )
       .default([]),
-    image: z.string().optional(),
+    /**
+     * Captures d'écran du site livré. Des captures RÉELLES du travail : jamais
+     * une illustration, jamais un montage. `appareil` dit sur quel écran elle a
+     * été prise, et décide de sa mise en page (large pour l'ordinateur,
+     * étroite pour le téléphone). La première capture « ordinateur » sert de
+     * vignette sur la liste des réalisations et sur l'accueil.
+     *
+     * Le champ `image`, qui le précédait, était déclaré mais jamais affiché :
+     * une fiche avec image se serait publiée sans elle.
+     */
+    captures: z
+      .array(
+        z.object({
+          src: image(),
+          alt: z.string().min(10),
+          appareil: z.enum(['ordinateur', 'telephone']),
+          legende: z.string().optional(),
+        })
+      )
+      .default([]),
     /** Le site en production. Sa présence fait basculer la fiche de « maquette
      *  livrée » à « mis en ligne », et fait apparaître le lien « voir le site ». */
     enLigne: z.string().url().optional(),

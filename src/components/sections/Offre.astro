@@ -1,6 +1,5 @@
 ---
 import { offre, tarifReference, offreMensuelle } from '../../data/offres.js';
-import { FONCTIONS } from '../../config/site.js';
 import metiers from '../../data/metiers.json';
 import communes from '../../data/communes.json';
 
@@ -67,7 +66,7 @@ const secteurs = [
              marge de négociation. */
           tarifReference.actif && tarifReference.restants > 0 && (
             <p class="font-texte mt-3 text-xs text-signal-vif">
-              <a href="#preuve" class="underline underline-offset-4">
+              <a href="#lancement" class="underline underline-offset-4">
                 {tarifReference.prix} pour les {tarifReference.quota} premiers
               </a>
             </p>
@@ -223,63 +222,3 @@ const secteurs = [
   >
   </div>
 </section>
-
-{
-  tarifReference.actif && tarifReference.restants > 0 && (
-    <section id="preuve" class="px-4 py-24 sm:px-8 md:px-16 lg:px-28">
-      <div class="carte reveal mx-auto max-w-3xl p-10 text-center">
-        <p class="surtitre">La preuve, parlons-en</p>
-        <h2 class="font-titre mt-6 text-3xl tracking-wide sm:text-4xl">
-          Je démarre, et ça se voit
-        </h2>
-        <p class="font-texte mx-auto mt-6 max-w-xl text-sm leading-relaxed text-texte-doux">
-          Un seul chantier à vous montrer : le site et la facturation d'un atelier
-          de reliure. Il est livré, il n'est pas encore en ligne, et je préfère
-          l'écrire que de le faire passer pour dix ans de références.
-        </p>
-        <p class="font-texte mx-auto mt-4 max-w-xl text-sm leading-relaxed text-texte-doux">
-          Vous seriez donc parmi les premiers. Ça se paie dans le prix, pas dans la
-          qualité du travail.
-        </p>
-
-        <p class="font-texte mt-8 text-[10px] tracking-[0.25em] text-texte-faible uppercase">
-          Tarif de lancement pour les {tarifReference.quota} premières entreprises
-        </p>
-        <p class="font-texte mt-2 flex items-baseline justify-center gap-3">
-          <span class="font-titre text-5xl font-light tracking-[0.01em] text-signal-vif">
-            {tarifReference.prix}
-          </span>
-          <span class="font-titre text-2xl text-texte-faible line-through">
-            {tarifReference.prixBarre}
-          </span>
-        </p>
-        <p class="font-texte mx-auto mt-5 max-w-lg text-xs leading-relaxed text-texte-faible">
-          {tarifReference.contrepartie}
-        </p>
-        <p class="font-texte mx-auto mt-3 max-w-lg text-xs leading-relaxed text-texte-faible">
-          {
-            tarifReference.restants > 1
-              ? `Il reste ${tarifReference.restants} places. Ensuite, l'offre s'arrête et le tarif revient à la fourchette normale.`
-              : "Il reste une place. Ensuite, l'offre s'arrête et le tarif revient à la fourchette normale."
-          }
-        </p>
-
-        {/*
-          Deux chemins : le devis, et la seule référence existante. Le second
-          n'apparaît QUE si la section est allumée — sans quoi le bouton mènerait
-          à une page qui n'est pas générée. Voir `FONCTIONS.realisations`.
-        */}
-        <div class="mt-9 flex flex-wrap justify-center gap-4">
-          <a href="/contact" data-bouton-anime class="bouton-primaire">Demander un devis</a>
-          {
-            FONCTIONS.realisations && (
-              <a href="/realisations" class="bouton-secondaire">
-                Voir le chantier
-              </a>
-            )
-          }
-        </div>
-      </div>
-    </section>
-  )
-}

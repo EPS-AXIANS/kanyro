@@ -43,7 +43,14 @@
 # référence réelle, et elle montre plus de travail que n'importe quel chantier de
 # couvreur — mais elle décale le discours d'accueil.
 # ─────────────────────────────────────────────────────────────────────────────
-titre: "Un site refait, et la facturation de l'atelier avec"
+#
+# `captures:` sont des captures d'écran RÉELLES de la maquette servie sous
+# /demo/reliure-deranty/, prises le 11 septembre 2026 (1 440 × 900 et
+# 390 × 844). Elles montrent ce que le lien « voir la maquette » montre déjà.
+# Si l'accord de publication n'est pas donné, retirer ce bloc ET le lien
+# `maquette:`, les deux ensemble.
+# ─────────────────────────────────────────────────────────────────────────────
+titre: 'Un site refait, et un espace pour les devis et les factures'
 client: 'Atelier de reliure Frédérique Deranty'
 metier: 'relieur et restaurateur de livres anciens'
 commune: 'Chuignolles'
@@ -54,6 +61,18 @@ resume: >-
   jamais aider à le vendre. Tout est refait, et le suivi des devis et des
   factures est passé du papier à un espace qui tient les règles comptables à la
   place de l'artisane. Maquette livrée, mise en ligne à venir.
+description: >-
+  Atelier de reliure installé depuis 1998 : le site Wix refait, et un espace
+  qui gère devis et factures. Maquette livrée, mise en ligne à venir.
+captures:
+  - src: '../../assets/realisations/deranty-accueil-ordinateur.webp'
+    alt: "Page d'accueil de la maquette du site de l'atelier de reliure Frédérique Deranty, vue sur un ordinateur"
+    appareil: 'ordinateur'
+    legende: "L'accueil, sur un ordinateur. Capture de la maquette livrée."
+  - src: '../../assets/realisations/deranty-accueil-telephone.webp'
+    alt: "La même page d'accueil de la maquette, vue sur un téléphone"
+    appareil: 'telephone'
+    legende: 'Le même accueil, sur un téléphone.'
 resultats: []
 brouillon: false
 ---
@@ -63,6 +82,13 @@ brouillon: false
 > plan de redirections qui évitera de perdre dix ans de référencement. Cette
 > fiche décrit donc du travail livré, pas un site que vous pouvez visiter.
 > Aucun chiffre de résultat n'y figure, pour la même raison.
+
+## Pourquoi un atelier de reliure ?
+
+C'est mon premier site livré, et il n'est pas du bâtiment. Je préfère vous le
+montrer tel qu'il est plutôt que d'inventer un chantier. Le métier change, le
+problème reste le même : un artisan dont le travail se voit en photo, et un site
+qui doit transformer une visite en demande.
 
 ## Le point de départ
 
@@ -74,8 +100,8 @@ photographies de ce travail existaient déjà, sur un site construit avec Wix.
 Le problème n'était pas qu'il était laid. Il était lourd (sa seule page
 d'accueil pesait 386 Ko de HTML, avant la moindre image), et surtout il
 s'arrêtait à la vitrine. Une demande arrivait par courriel, le devis se
-fabriquait à la main, la facture aussi. Le travail d'atelier finissait par se
-faire le soir, après le travail d'atelier.
+fabriquait à la main, la facture aussi. La paperasse finissait par se faire le
+soir, après la journée à l'atelier.
 
 ## Ce qui a été fait
 

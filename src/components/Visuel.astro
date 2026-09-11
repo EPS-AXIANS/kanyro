@@ -1,0 +1,71 @@
+---
+import { getImage } from 'astro:assets';
+
+/*
+ * Une image servie comme il faut : AVIF et WebP, en plusieurs largeurs, avec
+ * ses dimensions réelles et un chargement différé par défaut.
+ *
+ * ---- Pourquoi pas le composant <Picture> d'Astro ----
+ *
+ * Il fait la même chose, mais sa sortie dépend de réglages de mise en page qui
+ * peuvent poser des attributs `style` dans le balisage. La CSP de Base.astro
+ * (`style-src 'self'`, sans `'unsafe-inline'`) les bloquerait sans bruit. Ici,
+ * `getImage` ne fait que produire des fichiers et des URL : le balisage reste
+ * entièrement sous la main de ce composant.
+ *
+ * ---- Les dimensions ----
+ *
+ * `width` et `height` sont ceux de l'image source : le navigateur en tire le
+ * rapport largeur/hauteur et réserve la place avant le chargement. Sans eux,
+ * chaque image différée faisait sauter la mise en page en arrivant.
+ *
+ * Props :
+ *   src        une image importée (ImageMetadata), jamais une chaîne
+ *   alt        texte alternatif ; chaîne vide pour une image décorative
+ *   sizes      l'attribut sizes, à régler selon la place réellement occupée
+ *   largeurs   les largeurs à produire, plafonnées à celle de la source
+ *   class      classes de l'<img>
+ *   loading    'lazy' par défaut ; 'eager' pour ce qui est au premier écran
+ *   priorite   vrai pour l'image principale du premier écran (fetchpriority)
+ *   decoratif  vrai pour une image purement décorative (aria-hidden)
+ */
+const {
+  src,
+  alt,
+  sizes = '100vw',
+  largeurs = [480, 960, 1440, 1920],
+  class: classe,
+  loading = 'lazy',
+  priorite = false,
+  decoratif = false,
+} = Astro.props;
+
+const utiles = [...new Set(largeurs.map((l) => Math.min(l, src.width)))].sort((a, b) => a - b);
+
+const jeu = async (format, qualite) => {
+  const images = await Promise.all(
+    utiles.map((width) => getImage({ src, width, format, quality: qualite }))
+  );
+  return images.map((im, i) => `${im.src} ${utiles[i]}w`).join(', ');
+};
+
+const avif = await jeu('avif', 55);
+const webp = await jeu('webp', 72);
+const repli = await getImage({ src, width: utiles[Math.min(1, utiles.length - 1)], format: 'webp', quality: 72 });
+---
+
+<picture>
+  <source type="image/avif" srcset={avif} sizes={sizes} />
+  <source type="image/webp" srcset={webp} sizes={sizes} />
+  <img
+    src={repli.src}
+    width={src.width}
+    height={src.height}
+    alt={alt}
+    class={classe}
+    loading={loading}
+    decoding={loading === 'lazy' ? 'async' : undefined}
+    fetchpriority={priorite ? 'high' : undefined}
+    aria-hidden={decoratif ? 'true' : undefined}
+  />
+</picture>
