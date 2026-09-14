@@ -94,10 +94,25 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
       lit comme un supplément caché (voir le README, forfait Suivi). Elle reste
       donc sous le prix, mais en une phrase et un lien, plus en troisième prix
       empilé dans la colonne.
+
+      ---- La largeur, et pourquoi elle compte ----
+
+      Ce bloc était centré sur 48 rem à l'intérieur d'une section de 64 :
+      128 px de retrait de chaque côté par rapport au prix au-dessus et aux
+      cartes en dessous. Rien ne l'alignait sur rien, et quatre paragraphes
+      serrés dans un rectangle flottant se lisaient comme un pavé posé au
+      milieu de la page.
+
+      Il occupe maintenant toute la largeur de la section : ses deux colonnes
+      tombent sur celles des cartes, ses lignes passent de ~45 à ~70 caractères
+      (moins de lignes, donc un creux plus court entre les deux colonnes), et
+      un filet le sépare du prix au lieu d'une marge.
     */}
-    <dl class="reveal mx-auto mt-12 grid max-w-3xl gap-x-10 gap-y-6 text-left sm:grid-cols-2">
+    <dl
+      class="reveal mt-12 grid gap-x-10 gap-y-8 border-t border-white/10 pt-10 text-left sm:mt-14 sm:grid-cols-2 sm:gap-x-16 sm:pt-12"
+    >
       <div>
-        <dt class="font-texte text-sm font-semibold text-white">Ce qui fait varier le prix</dt>
+        <dt class="font-texte text-[0.9375rem] font-semibold text-white">Ce qui fait varier le prix</dt>
         <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
           Ce que vous avez déjà : des textes et des photos exploitables, ou tout à faire. Le
           reportage photo, si vous n'en avez aucune, est en supplément. Le devis est ferme :
@@ -105,7 +120,7 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
         </dd>
       </div>
       <div>
-        <dt class="font-texte text-sm font-semibold text-white">Le paiement</dt>
+        <dt class="font-texte text-[0.9375rem] font-semibold text-white">Le paiement</dt>
         <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
           30 % à la signature du devis, le solde à la mise en ligne.
           {tva && <span class="block text-sm text-white/70">{tva}.</span>}
@@ -114,7 +129,7 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
       {
         offreMensuelle.actif && (
           <div>
-            <dt class="font-texte text-sm font-semibold text-white">Après la première année</dt>
+            <dt class="font-texte text-[0.9375rem] font-semibold text-white">Après la première année</dt>
             <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
               Vous reprenez l'hébergement à votre nom, pour {offreMensuelle.alternative}, ou
               je continue à m'en occuper, dès{' '}
@@ -130,7 +145,7 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
       {
         lancement && (
           <div>
-            <dt class="font-texte text-sm font-semibold text-signal-vif">Tarif de lancement</dt>
+            <dt class="font-texte text-[0.9375rem] font-semibold text-signal-vif">Tarif de lancement</dt>
             <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
               <span class="chiffres whitespace-nowrap">{tarifReference.prix}</span> pour les{' '}
               {tarifReference.quota} premiers artisans, en échange de l'utilisation de leur
