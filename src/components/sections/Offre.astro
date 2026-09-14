@@ -116,20 +116,45 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
 
       Sous 640 px, l'intitulé repasse au-dessus de son texte : deux colonnes sur
       un téléphone laisseraient 12 caractères par ligne.
+
+      ---- Le survol ----
+
+      Chaque rangée prend le survol directionnel du site (`initSurvolDirectionnel`
+      dans effets.js, `.survol-tuile` dans global.css, déjà en place sur le
+      tableau du Suivi) : la tuile entre par le bord que franchit le curseur et
+      ressort par celui où il s'en va. `data-survol-directionnel="y"` la limite
+      au haut et au bas, les seuls bords qu'on franchit sur des rangées larges.
+
+      Le fond de la tuile est celui par défaut, `--color-brique-haute` : un cran
+      au-dessus de la brique de la section. Le blanc du texte y reste à 10,7:1.
+
+      ⚠ `relative` sur les `<dt>` et les `<dd>` : sans lui, la tuile, seule
+      positionnée de la rangée, passerait devant le texte.
+
+      Le script ne s'arme ni en mouvement réduit ni sans souris : sur un
+      téléphone, où la rangée n'est pas cliquable, aucune tuile ne clignote.
     */}
-    <dl class="reveal mt-12 border-t border-white/10 text-left sm:mt-14">
-      <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
-        <dt class="font-texte text-[0.9375rem] font-semibold text-white">Ce qui fait varier le prix</dt>
-        <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
+    <dl data-survol-directionnel="y" class="reveal mt-12 border-t border-white/10 text-left sm:mt-14">
+      <div
+        data-survol-item
+        class="relative grid gap-x-10 overflow-hidden border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7"
+      >
+        <div data-survol-tuile class="survol-tuile pointer-events-none absolute -inset-px" aria-hidden="true" />
+        <dt class="font-texte relative text-[0.9375rem] font-semibold text-white">Ce qui fait varier le prix</dt>
+        <dd class="font-texte relative mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
           Ce que vous avez déjà : des textes et des photos exploitables, ou tout à faire. Le
           reportage photo, si vous n'en avez aucune, est en supplément. Le devis est ferme :
           une fois signé, le prix ne bouge plus.
         </dd>
       </div>
 
-      <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
-        <dt class="font-texte text-[0.9375rem] font-semibold text-white">Le paiement</dt>
-        <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
+      <div
+        data-survol-item
+        class="relative grid gap-x-10 overflow-hidden border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7"
+      >
+        <div data-survol-tuile class="survol-tuile pointer-events-none absolute -inset-px" aria-hidden="true" />
+        <dt class="font-texte relative text-[0.9375rem] font-semibold text-white">Le paiement</dt>
+        <dd class="font-texte relative mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
           30 % à la signature du devis, le solde à la mise en ligne.
           {tva && <span class="block text-sm text-white/70">{tva}.</span>}
         </dd>
@@ -137,9 +162,13 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
 
       {
         offreMensuelle.actif && (
-          <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
-            <dt class="font-texte text-[0.9375rem] font-semibold text-white">Après la première année</dt>
-            <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
+          <div
+        data-survol-item
+        class="relative grid gap-x-10 overflow-hidden border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7"
+      >
+        <div data-survol-tuile class="survol-tuile pointer-events-none absolute -inset-px" aria-hidden="true" />
+            <dt class="font-texte relative text-[0.9375rem] font-semibold text-white">Après la première année</dt>
+            <dd class="font-texte relative mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
               Vous reprenez l'hébergement à votre nom, pour {offreMensuelle.alternative}, ou
               je continue à m'en occuper, dès{' '}
               <span class="chiffres whitespace-nowrap">{offreMensuelle.formules[0].prix}</span>.
@@ -154,9 +183,13 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
 
       {
         lancement && (
-          <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
-            <dt class="font-texte text-[0.9375rem] font-semibold text-signal-vif">Tarif de lancement</dt>
-            <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
+          <div
+        data-survol-item
+        class="relative grid gap-x-10 overflow-hidden border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7"
+      >
+        <div data-survol-tuile class="survol-tuile pointer-events-none absolute -inset-px" aria-hidden="true" />
+            <dt class="font-texte relative text-[0.9375rem] font-semibold text-signal-vif">Tarif de lancement</dt>
+            <dd class="font-texte relative mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
               <span class="chiffres whitespace-nowrap">{tarifReference.prix}</span> pour les{' '}
               {tarifReference.quota} premiers artisans, en échange de l'utilisation de leur
               chantier comme référence.
