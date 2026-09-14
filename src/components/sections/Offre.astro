@@ -95,42 +95,51 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
       donc sous le prix, mais en une phrase et un lien, plus en troisième prix
       empilé dans la colonne.
 
-      ---- La largeur, et pourquoi elle compte ----
+      ---- Des lignes, et plus une grille ----
 
-      Ce bloc était centré sur 48 rem à l'intérieur d'une section de 64 :
-      128 px de retrait de chaque côté par rapport au prix au-dessus et aux
-      cartes en dessous. Rien ne l'alignait sur rien, et quatre paragraphes
-      serrés dans un rectangle flottant se lisaient comme un pavé posé au
-      milieu de la page.
+      Ce bloc était d'abord centré sur 48 rem à l'intérieur d'une section de
+      64 : 128 px de retrait de chaque côté, rien qui l'aligne sur le prix
+      au-dessus ni sur les cartes en dessous. Élargi à toute la section, il
+      gardait un défaut de grille : deux colonnes de deux cellules, dont les
+      hauteurs ne tombent jamais juste. « Le paiement » tient en deux lignes,
+      « ce qui fait varier le prix » en trois, et la seconde rangée attend la
+      plus haute — d'où un trou au milieu de la colonne de droite.
 
-      Il occupe maintenant toute la largeur de la section : ses deux colonnes
-      tombent sur celles des cartes, ses lignes passent de ~45 à ~70 caractères
-      (moins de lignes, donc un creux plus court entre les deux colonnes), et
-      un filet le sépare du prix au lieu d'une marge.
+      Une rangée par sujet, intitulé à gauche et texte à droite : il n'y a plus
+      qu'une colonne de texte, donc plus de hauteurs à accorder et plus de trou
+      possible. Deux repères verticaux (14 rem, puis le texte) au lieu de quatre
+      blocs posés, et des filets qui séparent les sujets sans les encadrer.
+
+      La colonne de texte est bornée à 35 rem : sur la largeur de la section,
+      une ligne pleine ferait 110 caractères, presque le double de ce qui se lit
+      confortablement.
+
+      Sous 640 px, l'intitulé repasse au-dessus de son texte : deux colonnes sur
+      un téléphone laisseraient 12 caractères par ligne.
     */}
-    <dl
-      class="reveal mt-12 grid gap-x-10 gap-y-8 border-t border-white/10 pt-10 text-left sm:mt-14 sm:grid-cols-2 sm:gap-x-16 sm:pt-12"
-    >
-      <div>
+    <dl class="reveal mt-12 border-t border-white/10 text-left sm:mt-14">
+      <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
         <dt class="font-texte text-[0.9375rem] font-semibold text-white">Ce qui fait varier le prix</dt>
-        <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+        <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
           Ce que vous avez déjà : des textes et des photos exploitables, ou tout à faire. Le
           reportage photo, si vous n'en avez aucune, est en supplément. Le devis est ferme :
           une fois signé, le prix ne bouge plus.
         </dd>
       </div>
-      <div>
+
+      <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
         <dt class="font-texte text-[0.9375rem] font-semibold text-white">Le paiement</dt>
-        <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+        <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
           30 % à la signature du devis, le solde à la mise en ligne.
           {tva && <span class="block text-sm text-white/70">{tva}.</span>}
         </dd>
       </div>
+
       {
         offreMensuelle.actif && (
-          <div>
+          <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
             <dt class="font-texte text-[0.9375rem] font-semibold text-white">Après la première année</dt>
-            <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+            <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
               Vous reprenez l'hébergement à votre nom, pour {offreMensuelle.alternative}, ou
               je continue à m'en occuper, dès{' '}
               <span class="chiffres whitespace-nowrap">{offreMensuelle.formules[0].prix}</span>.
@@ -142,11 +151,12 @@ const lancement = tarifReference.actif && tarifReference.restants > 0;
           </div>
         )
       }
+
       {
         lancement && (
-          <div>
+          <div class="grid gap-x-10 border-b border-white/10 py-6 sm:grid-cols-[14rem_1fr] sm:py-7">
             <dt class="font-texte text-[0.9375rem] font-semibold text-signal-vif">Tarif de lancement</dt>
-            <dd class="font-texte mt-1.5 text-[0.9375rem] leading-relaxed text-white/80">
+            <dd class="font-texte mt-1.5 max-w-[35rem] text-[0.9375rem] leading-relaxed text-white/80 sm:mt-0">
               <span class="chiffres whitespace-nowrap">{tarifReference.prix}</span> pour les{' '}
               {tarifReference.quota} premiers artisans, en échange de l'utilisation de leur
               chantier comme référence.
