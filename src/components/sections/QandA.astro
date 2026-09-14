@@ -1,6 +1,7 @@
 ---
 import { Plus } from 'lucide-astro';
 import { offreMensuelle } from '../../data/offres.js';
+import { FONCTIONS } from '../../config/site.js';
 import { questions } from '../../data/questions.js';
 
 /*
@@ -72,6 +73,23 @@ const colonnes = [questions.slice(0, moitie), questions.slice(moitie)];
         ))
       }
     </div>
+    {/*
+      Les guides répondent aux mêmes questions en plus long, et sans parler de
+      Kanyro. Le renvoi est ici plutôt que dans le seul pied de page : c'est le
+      moment où le visiteur cherche des réponses.
+    */}
+    {FONCTIONS.guides && (
+      <p class="font-texte reveal mt-12 text-center text-[0.9375rem] text-white/75">
+        Il y a aussi des réponses plus longues, sur les prix pratiqués, la reprise
+        d'un site et la fiche Google :{' '}
+        <a
+          href="/guides"
+          class="text-white underline underline-offset-4 hover:text-signal-vif"
+        >
+          les guides
+        </a>.
+      </p>
+    )}
   </div>
 
   {/*

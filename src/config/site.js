@@ -205,6 +205,8 @@ export const FONCTIONS = {
   pagesCommunes: false,
   /** Galerie de réalisations — à rallumer dès qu'un chantier est livré. */
   realisations: true,
+  /** Les guides, et leur index /guides. */
+  guides: true,
 };
 
 /**

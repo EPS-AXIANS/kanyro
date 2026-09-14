@@ -116,6 +116,40 @@ export function filAriane(elements) {
   };
 }
 
+/**
+ * Un guide : `Article`, avec son auteur et ses dates.
+ *
+ * `author` est une personne, pas l'agence : c'est un nom qui signe un texte, et
+ * c'est ce que Google lit pour rattacher un contenu à quelqu'un. L'éditeur, lui,
+ * pointe sur la fiche de l'agence déjà déclarée sur l'accueil (`@id`), plutôt
+ * que de la redécrire.
+ *
+ * `dateModified` n'est posée que si la date de mise à jour existe : annoncer une
+ * révision qui n'a pas eu lieu, c'est exactement le genre de signal que Google
+ * apprend à ignorer.
+ */
+export function guideJsonLd({ titre, description, chemin, date, miseAJour }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: titre,
+    description,
+    url: urlAbsolue(chemin),
+    mainEntityOfPage: urlAbsolue(chemin),
+    inLanguage: 'fr-FR',
+    datePublished: date.toISOString().slice(0, 10),
+    ...(miseAJour ? { dateModified: miseAJour.toISOString().slice(0, 10) } : {}),
+    author: {
+      '@type': 'Person',
+      name: SITE.legal.directeurPublication,
+      ...(reseauxActifs().some((r) => r.nom === 'linkedin')
+        ? { sameAs: SITE.reseaux.linkedin }
+        : {}),
+    },
+    publisher: { '@id': urlAbsolue('/#agence') },
+  };
+}
+
 /** Page de service : un métier couvert sur une commune donnée. */
 export function serviceJsonLd({ metier, commune, chemin, description }) {
   return {

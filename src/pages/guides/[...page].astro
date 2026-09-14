@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Cta from '../../components/Cta.astro';
+import { FONCTIONS } from '../../config/site.js';
+import { filAriane } from '../../config/schema.js';
+
+/*
+ * La liste des guides.
+ *
+ * Route attrape-tout plutôt qu'`index.astro`, comme pour les réalisations : une
+ * page statique est générée quoi qu'il arrive, alors qu'une route dynamique peut
+ * ne rien produire. C'est ce qui permet à cette page d'obéir au même
+ * interrupteur que les guides qu'elle liste — sinon elle survivrait seule, en
+ * annonçant une rubrique vide.
+ */
+export async function getStaticPaths() {
+  if (!FONCTIONS.guides) return [];
+  return [{ params: { page: undefined } }];
+}
+
+const guides = (await getCollection('guides', ({ data }) => !data.brouillon)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const jsonLd = filAriane([
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Guides', chemin: '/guides' },
+]);
+
+const mois = (date) =>
+  date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+---
+
+<Base
+  titre="Guides pour artisans : prix, site, fiche Google"
+  description="Ce qu'un artisan du bâtiment a besoin de savoir avant de faire son site : les prix pratiqués, refaire un site existant, la fiche Google Business."
+  jsonLd={jsonLd}
+>
+  <section class="contenu sous-navbar pb-16 text-center">
+    <p class="surtitre reveal">Guides</p>
+    <h1 class="titre-page reveal mx-auto mt-6 max-w-4xl [--retard:80ms]">
+      Les questions qu'on me pose avant de signer
+    </h1>
+    <p
+      class="font-texte reveal mx-auto mt-8 max-w-2xl text-base leading-relaxed text-texte-doux [--retard:160ms]"
+    >
+      Ce que je réponds en rendez-vous, écrit une fois pour toutes. Aucune de ces
+      pages ne vend quoi que ce soit : si vous repartez avec la réponse et sans
+      me contacter, elles ont fait leur travail.
+    </p>
+  </section>
+
+  <section class="contenu pb-8">
+    <ul class="mx-auto grid max-w-3xl gap-px overflow-hidden rounded-2xl bg-trait">
+      {
+        guides.map((guide) => (
+          <li class="reveal bg-fond">
+            <a
+              href={`/guides/${guide.id}`}
+              class="group block px-6 py-8 no-underline transition-colors duration-300 hover:bg-surface sm:px-8 sm:py-10"
+            >
+              <p class="font-texte text-xs tracking-[0.2em] text-texte-faible uppercase">
+                {mois(guide.data.miseAJour ?? guide.data.date)}
+              </p>
+              <h2 class="font-titre mt-3 text-2xl leading-snug tracking-wide sm:text-3xl">
+                {guide.data.titre}
+              </h2>
+              <p class="font-texte mt-3 text-[0.9375rem] leading-relaxed text-texte-doux">
+                {guide.data.chapeau}
+              </p>
+              <p class="font-texte mt-5 text-sm text-signal-vif">Lire le guide →</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <Cta />
+</Base>

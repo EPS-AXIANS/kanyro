@@ -1,0 +1,151 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Cta from '../../components/Cta.astro';
+import { FONCTIONS } from '../../config/site.js';
+import { filAriane, guideJsonLd } from '../../config/schema.js';
+
+export async function getStaticPaths() {
+  if (!FONCTIONS.guides) return [];
+
+  const guides = await getCollection('guides', ({ data }) => !data.brouillon);
+
+  return guides.map((guide) => ({
+    params: { slug: guide.id },
+    props: { guide, autres: guides.filter((g) => g.id !== guide.id) },
+  }));
+}
+
+const { guide, autres } = Astro.props;
+const { Content } = await render(guide);
+const chemin = `/guides/${guide.id}`;
+
+const jsonLd = [
+  filAriane([
+    { nom: 'Accueil', chemin: '/' },
+    { nom: 'Guides', chemin: '/guides' },
+    { nom: guide.data.titre, chemin },
+  ]),
+  guideJsonLd({
+    titre: guide.data.titre,
+    description: guide.data.description,
+    chemin,
+    date: guide.data.date,
+    miseAJour: guide.data.miseAJour,
+  }),
+];
+
+const enFrancais = (date) =>
+  date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' });
+
+/*
+ * Le temps de lecture est calculé, pas estimé : le nombre de mots du fichier,
+ * divisé par 200 mots à la minute, arrondi à la minute supérieure. C'est une
+ * mesure du texte, pas une promesse.
+ */
+const mots = guide.body.split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(mots / 200));
+---
+
+<Base titre={guide.data.titre} description={guide.data.description} jsonLd={jsonLd}>
+  <nav
+    class="contenu sous-navbar font-texte max-w-3xl pb-6 text-xs tracking-[0.2em] text-texte-faible uppercase"
+    aria-label="Fil d'Ariane"
+  >
+    <a href="/guides" class="-my-3.5 inline-block py-3.5 hover:text-texte">Guides</a>
+  </nav>
+
+  <article class="contenu max-w-3xl pb-20">
+    <h1 class="titre-page reveal">{guide.data.titre}</h1>
+
+    <p class="font-texte reveal mt-6 text-base leading-relaxed text-texte-doux [--retard:120ms]">
+      {guide.data.chapeau}
+    </p>
+
+    <p class="font-texte reveal mt-6 text-sm text-texte-faible [--retard:160ms]">
+      {guide.data.miseAJour ? 'Mis à jour en' : 'Écrit en'}{' '}
+      {enFrancais(guide.data.miseAJour ?? guide.data.date)} · {minutes} minutes de lecture
+    </p>
+
+    <div class="prose-kanyro reveal mt-12">
+      <Content />
+    </div>
+
+    {
+      autres.length > 0 && (
+        <aside class="reveal mt-16 border-t border-trait pt-10">
+          <p class="surtitre">À lire aussi</p>
+          <ul class="mt-5 space-y-3">
+            {autres.map((g) => (
+              <li>
+                <a
+                  href={`/guides/${g.id}`}
+                  class="font-titre inline-flex min-h-11 items-center text-xl tracking-wide text-texte no-underline transition-colors hover:text-signal-vif sm:text-2xl"
+                >
+                  {g.data.titre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+  </article>
+
+  <Cta />
+</Base>
+
+<style>
+  /*
+   * Même mise en forme que les fiches de réalisation, et pour les mêmes raisons
+   * (voir realisations/[slug].astro) : `--font-titre` pour les intertitres, du
+   * texte à 1 rem parce qu'un guide se lit en entier, souvent sur un téléphone.
+   *
+   * Deux ajouts propres aux guides : les liens du corps de texte, qui doivent se
+   * voir sans être criards, et les listes numérotées, que les fiches n'utilisent
+   * pas.
+   */
+  .prose-kanyro :global(h2) {
+    margin-top: 2.75rem;
+    font-family: var(--font-titre);
+    font-size: 1.875rem;
+    letter-spacing: 0.02em;
+  }
+  .prose-kanyro :global(h3) {
+    margin-top: 2rem;
+    font-family: var(--font-titre);
+    font-size: 1.4rem;
+  }
+  .prose-kanyro :global(p) {
+    margin-top: 1rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-texte-doux);
+  }
+  .prose-kanyro :global(ul),
+  .prose-kanyro :global(ol) {
+    margin-top: 1rem;
+    list-style: disc;
+    padding-left: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-texte-doux);
+  }
+  .prose-kanyro :global(ol) {
+    list-style: decimal;
+  }
+  .prose-kanyro :global(li) {
+    margin-top: 0.5rem;
+  }
+  .prose-kanyro :global(strong) {
+    color: var(--color-texte);
+  }
+  .prose-kanyro :global(a) {
+    color: var(--color-texte);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .prose-kanyro :global(a:hover) {
+    color: var(--color-signal-vif);
+  }
+</style>

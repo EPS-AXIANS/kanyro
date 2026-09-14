@@ -70,4 +70,33 @@ const realisations = defineCollection({
   }),
 });
 
-export const collections = { realisations };
+/**
+ * Guides — un fichier Markdown par question que les artisans posent avant
+ * d'acheter.
+ *
+ * Ce sont les seules pages du site qui ne parlent pas de Kanyro. Elles existent
+ * pour deux raisons : répondre à ce qui se tape vraiment dans un moteur de
+ * recherche (« combien coûte un site internet pour un artisan »), et montrer en
+ * le faisant ce que le site vend. Un prestataire de référencement dont le
+ * propre site n'a que onze adresses se juge tout seul.
+ *
+ * Règle de fond, la même qu'ailleurs : aucun chiffre inventé. Les montants
+ * cités sont ceux du site (src/data/offres.js) ou des ordres de grandeur
+ * annoncés comme tels. Ce qui n'est pas vérifiable ne s'écrit pas.
+ */
+const guides = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
+  schema: z.object({
+    titre: z.string(),
+    /** La description des moteurs de recherche, 160 caractères au plus. */
+    description: z.string().max(160),
+    /** Le chapeau, sous le titre : ce que le lecteur saura en repartant. */
+    chapeau: z.string(),
+    date: z.coerce.date(),
+    /** À renseigner quand le fond change, pas pour une virgule. */
+    miseAJour: z.coerce.date().optional(),
+    brouillon: z.boolean().default(true),
+  }),
+});
+
+export const collections = { realisations, guides };
