@@ -340,10 +340,11 @@ moment de vendre.
 | `/contact` | Téléphone et email d'abord, puis le formulaire de demande de devis |
 | `/realisations`, `/realisations/atelier-reliure-deranty` | La réalisation livrée, avec ses captures |
 | `/metiers` et six pages métier | Une page par métier du bâtiment couvert |
+| `/guides`, trois guides | Les questions que les artisans tapent avant d'acheter : les prix, refaire un site, la fiche Google |
 | `/mentions-legales` | Obligations légales et données personnelles |
 | `/merci`, `/404` | Techniques, `noindex` |
 
-Le sitemap compte onze adresses. **Ce qui est écrit mais éteint** : les
+Le sitemap compte quinze adresses. **Ce qui est écrit mais éteint** : les
 36 pages « métier × commune » (`FONCTIONS.pagesCommunes` dans
 `src/config/site.js`, voir plus bas pourquoi). Les rallumer est une ligne à
 changer, pas un chantier à refaire.
@@ -588,6 +589,7 @@ donne un bouton invisible. Le rôle survit au changement de thème.
 | Communes couvertes | `src/data/communes.json` |
 | JSON-LD | `src/config/schema.js` |
 | Sections de l'accueil | `src/components/sections/` |
+| Les guides | `src/content/guides/*.md` |
 | Tous les liens d'appel | `src/components/LienTelephone.astro` |
 | Typographie française automatique | `src/middleware.js` |
 | En-têtes HTTP, CSP, redirections, cache | `deploy/caddy/kanyro.caddy`, copié dans `/etc/caddy/` |
@@ -617,6 +619,25 @@ quelque chose de propre à dire (un chantier réel dans la commune, par exemple)
 
 > **Règle à tenir :** ne jamais ajouter une commune sans lui écrire un contexte
 > propre et véridique. Six bonnes pages valent mieux que soixante vides.
+
+---
+
+## Guides
+
+`src/content/guides/*.md`, une collection comme les réalisations, avec le même
+interrupteur (`FONCTIONS.guides`) et le même `brouillon: true` par défaut.
+
+Ce sont les seules pages qui ne parlent pas de Kanyro : elles répondent à ce qui
+se tape vraiment dans un moteur de recherche, et c'est aussi la seule
+démonstration honnête qu'on sait référencer un site. La règle d'écriture tient
+en une ligne : **aucun chiffre inventé**. Les montants cités sont ceux de
+`src/data/offres.js` (et changent avec eux), le reste est donné comme ordre de
+grandeur et annoncé comme tel. Aucun concurrent n'est nommé, aucun de leurs
+prix n'est recopié : ils changent sans prévenir, et une comparaison fausse se
+retourne contre le site.
+
+Chaque guide porte un JSON-LD `Article` (`guideJsonLd` dans `schema.js`), un
+temps de lecture calculé sur le nombre de mots, et un renvoi vers les autres.
 
 ---
 
